@@ -36,6 +36,7 @@ Patch17: shadow-4.0.3-pl-n_useradd.8.patch
 Patch20: shadow-4.0.3-selinux_context.patch
 Patch21: shadow-4.0.3-lastlog.patch
 Patch22: shadow-4.0.3-maxmem.patch
+Patch23: shadow-4.0.7-gcc4.patch
 License: BSD
 Group: System Environment/Base
 BuildRequires: autoconf, automake, libtool, gettext-devel
@@ -80,6 +81,7 @@ are used for managing group accounts.
 %patch20 -p1 -b .selinux_context
 %patch21 -p1 -b .lastlog
 %patch22 -p1 -b .maxmem
+%patch23 -p1 -b .gcc4
 
 rm po/*.gmo
 rm po/stamp-po
