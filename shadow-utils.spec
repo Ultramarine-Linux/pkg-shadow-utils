@@ -7,7 +7,7 @@
 Summary: Utilities for managing accounts and shadow password files.
 Name: shadow-utils
 Version: 4.0.3
-Release: 30
+Release: 31
 Epoch: 2
 URL: http://shadow.pld.org.pl/
 Source0: ftp://ftp.pld.org.pl/software/shadow/shadow-%{version}.tar.bz2
@@ -259,6 +259,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/man8/faillog.8*
 
 %changelog
+* Tue Oct 12 2004 Adrian Havill <havill@redhat.com> 2:4.0.3-31
+- check for non-standard legacy place for ncsd HUP (/var/run/nscd.pid) and
+  then the std FHS place (/var/run/nscd.pid) (#125421)
+
 * Fri Oct 1 2004 Dan Walsh <dwalsh@redhat.com> 2:4.0.3-30
 - Add checkPasswdAccess for chage in SELinux
 
