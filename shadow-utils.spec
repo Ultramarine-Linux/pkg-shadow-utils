@@ -7,7 +7,7 @@
 Summary: Utilities for managing accounts and shadow password files.
 Name: shadow-utils
 Version: 4.0.3
-Release: 19
+Release: 23
 Epoch: 2
 URL: http://shadow.pld.org.pl/
 Source0: ftp://ftp.pld.org.pl/software/shadow/shadow-%{version}.tar.bz2
@@ -30,6 +30,7 @@ Patch9: shadow-4.0.3-lastlog-size.patch
 Patch10: shadow-4.0.3-largefile.patch
 Patch11: shadow-4.0.3-fixref.patch
 Patch12: shadow-4.0.3-uninitialized.patch
+Patch13: shadow-4.0.3-removemalloc.patch
 License: BSD
 Group: System Environment/Base
 BuildPrereq: autoconf, automake, libtool
@@ -58,14 +59,12 @@ are used for managing group accounts.
 %patch5 -p1 -b .mailspool
 %patch6 -p1 -b .usg
 %patch7 -p1 -b .shadow-man
-%if %{WITH_SELINUX}
-#SELinux
 %patch8 -p1 -b .selinux
-%endif
 %patch9 -p1 -b .lastlog-size
 %patch10 -p1 -b .largefile
 %patch11 -p1 -b .fixref
 %patch12 -p1 -b .uninitialized
+%patch13 -p1 -b .removemalloc
 rm po/*.gmo
 
 # Recode man pages from euc-jp to UTF-8.
@@ -100,6 +99,9 @@ autoconf
 	--enable-shadowgrp \
 	--without-libcrack \
 	--with-libcrypt \
+%if %{WITH_SELINUX}
+	--with-selinux \
+%endif
 	--without-libpam \
 	--disable-shared
 make 
@@ -107,7 +109,7 @@ make
 %install
 rm -rf $RPM_BUILD_ROOT
 make install DESTDIR=$RPM_BUILD_ROOT gnulocaledir=$RPM_BUILD_ROOT/%{_datadir}/locale MKINSTALLDIRS=`pwd`/mkinstalldirs
-install -d -m 750 $RPM_BUILD_ROOT/etc/default
+install -d -m 755 $RPM_BUILD_ROOT/etc/default
 install -c -m 0644 %{SOURCE1} $RPM_BUILD_ROOT/etc/login.defs
 install -c -m 0600 %{SOURCE2} $RPM_BUILD_ROOT/etc/default/useradd
 
@@ -251,6 +253,20 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/man8/faillog.8*
 
 %changelog
+* Thu Jun 17 2004 Dan Walsh <dwalsh@redhat.com> 4.0.3-23
+- Add get_enforce checks
+- Clean up patch for potential upstream submission
+- Add removemalloc patch to get it to build on 3.4
+
+* Tue Jun 15 2004 Elliot Lee <sopwith@redhat.com>
+- rebuilt
+
+* Tue Mar 30 2004 Nalin Dahyabhai <nalin@redhat.com> 4.0.3-21
+- rebuild
+
+* Tue Mar 30 2004 Nalin Dahyabhai <nalin@redhat.com> 4.0.3-20
+- make /etc/default world-readable, needed for #118338
+
 * Fri Feb 13 2004 Elliot Lee <sopwith@redhat.com>
 - rebuilt
 
