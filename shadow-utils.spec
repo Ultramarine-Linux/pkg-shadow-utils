@@ -7,7 +7,7 @@
 Summary: Utilities for managing accounts and shadow password files.
 Name: shadow-utils
 Version: 4.0.3
-Release: 31
+Release: 32
 Epoch: 2
 URL: http://shadow.pld.org.pl/
 Source0: ftp://ftp.pld.org.pl/software/shadow/shadow-%{version}.tar.bz2
@@ -33,6 +33,7 @@ Patch12: shadow-4.0.3-uninitialized.patch
 Patch13: shadow-4.0.3-removemalloc.patch
 Patch14: shadow-4.0.3-useradd-unlock.patch
 Patch15: shadow-4.0.3-chage-selinux.patch
+Patch16: shadow-4.0.3-goodname.patch
 License: BSD
 Group: System Environment/Base
 BuildRequires: autoconf, automake, libtool, gettext-devel
@@ -70,6 +71,7 @@ are used for managing group accounts.
 %patch13 -p1 -b .removemalloc
 %patch14 -p1 -b .useradd-unlock
 %patch15 -p1 -b .chage-selinux
+%patch16 -p1 -b .goodname
 rm po/*.gmo
 
 # Recode man pages from euc-jp to UTF-8.
@@ -259,6 +261,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/man8/faillog.8*
 
 %changelog
+* Wed Oct 13 2004 Adrian Havill <havill@redhat.com> 2:4.0.3-32
+- allow for mixed case and dots in usernames
+
 * Tue Oct 12 2004 Adrian Havill <havill@redhat.com> 2:4.0.3-31
 - check for non-standard legacy place for ncsd HUP (/var/run/nscd.pid) and
   then the std FHS place (/var/run/nscd.pid) (#125421)
