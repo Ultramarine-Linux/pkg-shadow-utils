@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files.
 Name: shadow-utils
 Version: 20000902
-Release: 7
+Release: 9
 Epoch: 1
 Source0: ftp://ftp.ists.pwr.wroc.pl/pub/linux/shadow/shadow-%{version}.tar.bz2
 Source1: shadow-970616.login.defs
@@ -22,7 +22,7 @@ Patch8: shadow-20000902-man.patch
 Patch9: shadow-20000902-64.patch
 License: BSD
 Group: System Environment/Base
-BuildPrereq: autoconf, automake, libtool
+BuildPrereq: autoconf213, automake15, libtool
 Buildroot: %{_tmppath}/%{name}-%{version}-root
 Obsoletes: adduser
 
@@ -51,10 +51,10 @@ are used for managing group accounts.
 %patch8 -p1 -b .man
 %patch9 -p1 -b .64
 libtoolize -f
-aclocal
-autoheader
-automake -a
-autoconf
+aclocal-1.5
+autoheader-2.13
+automake-1.5 -a
+autoconf-2.13
 
 %build
 CFLAGS="$RPM_OPT_FLAGS -D_BSD_SOURCE=1 -D_FILE_OFFSET_BITS=64" ; export CFLAGS
@@ -120,6 +120,12 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/faillog.8*
 
 %changelog
+* Sun May 26 2002 Tim Powers <timp@redhat.com>
+- automated rebuild
+
+* Fri May 17 2002 Nalin Dahyabhai <nalin@redhat.com> 20000902-8
+- rebuild in new environment
+
 * Wed Mar 27 2002 Nalin Dahyabhai <nalin@redhat.com> 20000902-7
 - rebuild with proper defines to get support for large lastlog files (#61983)
 
