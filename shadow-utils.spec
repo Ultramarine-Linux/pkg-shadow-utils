@@ -1,7 +1,7 @@
 Summary: Utilities for managing shadow password files and user/group accounts.
 Name: shadow-utils
-Version: 19990827
-Release: 18
+Version: 20000826
+Release: 4
 Serial: 1
 Source0: ftp://ftp.ists.pwr.wroc.pl/pub/linux/shadow/shadow-%{version}.tar.gz
 Source1: shadow-970616.login.defs
@@ -10,18 +10,18 @@ Source3: adduser.8
 Source4: pwunconv.8
 Source5: grpconv.8
 Source6: grpunconv.8
-Patch0: shadow-19990827-redhat.patch
+Patch0: shadow-20000826-redhat.patch
 Patch1: shadow-19990827-nscd.patch
 Patch2: shadow-19990827-pwlock.patch
 Patch3: shadow-19990827-group.patch
-Patch4: shadow-19990827-links.patch
-Patch5: shadow-19990827-destdir.patch
-Patch6: shadow-19990827-hugegroups.patch
-Patch7: shadow-19990827-console.patch
-Patch8: shadow-utils-19990827-vipw.patch
+Patch4: shadow-19990827-console.patch
+Patch5: shadow-utils-19990827-vipw.patch
+Patch6: shadow-20000826-hugegroups.patch
+Patch7: shadow-20000826-chage.patch
+Patch8: shadow-20000826-preserve.patch
 Copyright: BSD
 Group: System Environment/Base
-Buildroot: %{_tmppath}/shadow-root
+Buildroot: %{_tmppath}/%{name}-%{version}-root
 Obsoletes: adduser
 
 %description
@@ -42,11 +42,11 @@ groupmod commands are used for managing group accounts.
 %patch1 -p1 -b .nscd
 %patch2 -p1 -b .pwlock
 %patch3 -p1 -b .group
-%patch4 -p1 -b .links
-%patch5 -p1 -b .destdir
+%patch4 -p1 -b .console
+%patch5 -p1 -b .vipw
 %patch6 -p1 -b .hugegrp
-%patch7 -p1 -b .console
-%patch8 -p1 -b .vipw
+%patch7 -p1 -b .chage
+%patch8 -p1 -b .preserve
 
 %build
 unset LINGUAS || :
@@ -56,14 +56,14 @@ automake
 autoheader
 autoconf
 rm -rf build-$RPM_ARCH ; mkdir build-$RPM_ARCH ; cd build-$RPM_ARCH
-CFLAGS="$RPM_OPT_FLAGS" ../configure --prefix=/usr \
+CFLAGS="$RPM_OPT_FLAGS" ../configure --prefix=%{_prefix} \
 	--disable-desrpc --with-libcrypt --disable-shared \
         --mandir=%{_mandir}
 make 
 
 %install
 rm -rf $RPM_BUILD_ROOT
-cd build-$RPM_ARCH
+pushd build-$RPM_ARCH
 make install DESTDIR=$RPM_BUILD_ROOT gnulocaledir=$RPM_BUILD_ROOT/%{_datadir}/locale
 install -d -m 750 $RPM_BUILD_ROOT/etc/default
 install -c -m 0644 %{SOURCE1} $RPM_BUILD_ROOT/etc/login.defs
@@ -75,12 +75,14 @@ install -m644 $RPM_SOURCE_DIR/pwunconv.8  $RPM_BUILD_ROOT%{_mandir}/man8/
 install -m644 $RPM_SOURCE_DIR/grpconv.8   $RPM_BUILD_ROOT%{_mandir}/man8/
 install -m644 $RPM_SOURCE_DIR/grpunconv.8 $RPM_BUILD_ROOT%{_mandir}/man8/
 perl -pi -e "s/encrpted/encrypted/g" $RPM_BUILD_ROOT%{_mandir}/man8/newusers.8
+popd
+%find_lang shadow
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 rm -rf build-$RPM_ARCH
 
-%files
+%files -f shadow.lang
 %defattr(-,root,root)
 %doc doc/ANNOUNCE doc/CHANGES doc/HOWTO doc/LICENSE doc/README doc/README.linux
 %dir /etc/default
@@ -116,9 +118,24 @@ rm -rf build-$RPM_ARCH
 %{_mandir}/man8/*conv.8*
 %{_mandir}/man8/lastlog.8*
 %{_mandir}/man8/faillog.8*
-%{_datadir}/locale/*/*/shadow.mo
 
 %changelog
+* Fri Mar  9 2001 Nalin Dahyabhai <nalin@redhat.com>
+- don't overwrite user dot files in useradd (#19982)
+- truncate new files when moving overwriting files with the contents of other
+  files while moving directories (keeps files from looking weird later on)
+- configure using %%{_prefix} as the prefix
+
+* Fri Feb 23 2001 Trond Eivind Glomsrød <teg@redhat.com>
+- langify
+
+* Wed Aug 30 2000 Bernhard Rosenkraenzer <bero@redhat.com>
+- Fix up chage behavior (Bug #15883)
+
+* Wed Aug 30 2000 Bernhard Rosenkraenzer <bero@redhat.com>
+- 20000826
+- Fix up useradd man page (Bug #17036)
+
 * Tue Aug  8 2000 Bernhard Rosenkraenzer <bero@redhat.com>
 - check for vipw lock before adding or deleting users (Bug #6489)
 
