@@ -1,0 +1,24 @@
+These libraries aren't meant to be installed.
+
+--- shadow-4.0.3/libmisc/Makefile.am	2002-11-21 23:19:50.000000000 -0500
++++ shadow-4.0.3/libmisc/Makefile.am	2002-11-21 23:19:45.000000000 -0500
+@@ -5,7 +5,7 @@
+ 
+ INCLUDES = -I$(top_srcdir) -I$(top_srcdir)/lib
+ 
+-lib_LTLIBRARIES = libmisc.la
++noinst_LTLIBRARIES = libmisc.la
+ 
+ libmisc_la_SOURCES = \
+ 	addgrps.c \
+--- shadow-4.0.3/lib/Makefile.am	2002-11-21 23:19:37.000000000 -0500
++++ shadow-4.0.3/lib/Makefile.am	2002-11-21 23:19:32.000000000 -0500
+@@ -4,7 +4,7 @@
+ DEFS = 
+ INCLUDES = -I$(top_srcdir)
+ 
+-lib_LTLIBRARIES = libshadow.la
++noinst_LTLIBRARIES = libshadow.la
+ 
+ libshadow_la_LDFLAGS = -version-info 0:0:0
+ libshadow_la_LIBADD = $(INTLLIBS) $(LIBCRYPT) $(LIBTCFS) $(LIBSKEY) $(LIBMD) \

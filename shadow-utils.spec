@@ -1,29 +1,27 @@
 Summary: Utilities for managing accounts and shadow password files.
 Name: shadow-utils
-Version: 20000902
-Release: 12.8
-Epoch: 1
-Source0: ftp://ftp.ists.pwr.wroc.pl/pub/linux/shadow/shadow-%{version}.tar.bz2
+Version: 4.0.3
+Release: 6
+Epoch: 2
+URL: http://shadow.pld.org.pl/
+Source0: ftp://ftp.pld.org.pl/software/shadow/shadow-%{version}.tar.bz2
 Source1: shadow-970616.login.defs
 Source2: shadow-970616.useradd
 Source3: adduser.8
 Source4: pwunconv.8
 Source5: grpconv.8
 Source6: grpunconv.8
-Patch0: shadow-20000902-redhat.patch
-Patch1: shadow-20000902-nscd.patch
-Patch2: shadow-19990827-group.patch
-Patch3: shadow-20000902-vipw.patch
-Patch4: shadow-20000826-preserve.patch
-Patch5: shadow-20000902-mailspool.patch
+Patch0: shadow-4.0.3-redhat.patch
+Patch1: shadow-4.0.3-noinst.patch
+Patch2: shadow-4.0.3-nscd.patch
+Patch3: shadow-19990827-group.patch
+Patch4: shadow-4.0.3-vipw.patch
+Patch5: shadow-4.0.3-mailspool.patch
 Patch6: shadow-20000902-usg.patch
-Patch7: shadow-20000902-old.patch
-Patch8: shadow-20000902-man.patch
-Patch9: shadow-20000902-64.patch
-Patch10: shadow-20000902-poheader.patch
+Patch7: shadow-4.0.3-shadow-man.patch
 License: BSD
 Group: System Environment/Base
-BuildPrereq: autoconf213, automake15, libtool
+BuildPrereq: autoconf, automake, libtool
 Buildroot: %{_tmppath}/%{name}-%{version}-root
 Obsoletes: adduser
 
@@ -42,29 +40,25 @@ are used for managing group accounts.
 %prep
 %setup -q -n shadow-%{version}
 %patch0 -p1 -b .redhat
-%patch1 -p1 -b .nscd
-%patch2 -p1 -b .group
-%patch3 -p1 -b .vipw
-%patch4 -p1 -b .preserve
+%patch1 -p1 -b .noinst
+%patch2 -p1 -b .nscd
+%patch3 -p1 -b .group
+%patch4 -p1 -b .vipw
 %patch5 -p1 -b .mailspool
 %patch6 -p1 -b .usg
-%patch7 -p1 -b .old
-%patch8 -p1 -b .man
-%patch9 -p1 -b .64
-%patch10 -p1 -b .poheader
-libtoolize -f
-aclocal-1.5
-autoheader-2.13
-automake-1.5 -a
-autoconf-2.13
+%patch7 -p1 -b .shadow-man
 rm po/*.gmo
+aclocal
+automake -a
 
 %build
-CFLAGS="$RPM_OPT_FLAGS -D_BSD_SOURCE=1 -D_FILE_OFFSET_BITS=64" ; export CFLAGS
-%ifarch ia64
-CFLAGS="$CFLAGS -O0"
-%endif
-%configure --disable-desrpc --with-libcrypt --disable-shared
+%configure \
+	--disable-desrpc \
+	--enable-shadowgrp \
+	--without-libcrack \
+	--with-libcrypt \
+	--without-libpam \
+	--disable-shared
 make 
 
 %install
@@ -79,7 +73,58 @@ install -m644 $RPM_SOURCE_DIR/adduser.8   $RPM_BUILD_ROOT%{_mandir}/man8/
 install -m644 $RPM_SOURCE_DIR/pwunconv.8  $RPM_BUILD_ROOT%{_mandir}/man8/
 install -m644 $RPM_SOURCE_DIR/grpconv.8   $RPM_BUILD_ROOT%{_mandir}/man8/
 install -m644 $RPM_SOURCE_DIR/grpunconv.8 $RPM_BUILD_ROOT%{_mandir}/man8/
-perl -pi -e "s/encrpted/encrypted/g" $RPM_BUILD_ROOT%{_mandir}/man8/newusers.8
+
+# Remove binaries we don't use.
+rm $RPM_BUILD_ROOT/%{_bindir}/chfn
+rm $RPM_BUILD_ROOT/%{_bindir}/chsh
+rm $RPM_BUILD_ROOT/%{_bindir}/expiry
+rm $RPM_BUILD_ROOT/%{_bindir}/groups
+rm $RPM_BUILD_ROOT/%{_bindir}/login
+rm $RPM_BUILD_ROOT/%{_bindir}/newgrp
+rm $RPM_BUILD_ROOT/%{_bindir}/passwd
+rm $RPM_BUILD_ROOT/%{_bindir}/su
+rm $RPM_BUILD_ROOT/%{_sbindir}/dpasswd
+rm $RPM_BUILD_ROOT/%{_sbindir}/logoutd
+rm $RPM_BUILD_ROOT/%{_sbindir}/mkpasswd
+rm $RPM_BUILD_ROOT/%{_sbindir}/vipw
+
+rm $RPM_BUILD_ROOT/%{_mandir}/man1/chfn.*
+rm $RPM_BUILD_ROOT/%{_mandir}/*/man1/chfn.*
+rm $RPM_BUILD_ROOT/%{_mandir}/man1/chsh.*
+rm $RPM_BUILD_ROOT/%{_mandir}/*/man1/chsh.*
+rm $RPM_BUILD_ROOT/%{_mandir}/man1/expiry.*
+rm $RPM_BUILD_ROOT/%{_mandir}/*/man1/expiry.*
+rm $RPM_BUILD_ROOT/%{_mandir}/*/man1/groups.*
+rm $RPM_BUILD_ROOT/%{_mandir}/man1/login.*
+rm $RPM_BUILD_ROOT/%{_mandir}/*/man1/login.*
+rm $RPM_BUILD_ROOT/%{_mandir}/man1/newgrp.*
+rm $RPM_BUILD_ROOT/%{_mandir}/*/man1/newgrp.*
+rm $RPM_BUILD_ROOT/%{_mandir}/man1/passwd.*
+rm $RPM_BUILD_ROOT/%{_mandir}/*/man1/passwd.*
+rm $RPM_BUILD_ROOT/%{_mandir}/man1/su.*
+rm $RPM_BUILD_ROOT/%{_mandir}/*/man1/su.*
+rm $RPM_BUILD_ROOT/%{_mandir}/*/man5/d_passwd.*
+rm $RPM_BUILD_ROOT/%{_mandir}/man5/limits.*
+rm $RPM_BUILD_ROOT/%{_mandir}/*/man5/limits.*
+rm $RPM_BUILD_ROOT/%{_mandir}/man5/login.access.*
+rm $RPM_BUILD_ROOT/%{_mandir}/*/man5/login.access.*
+rm $RPM_BUILD_ROOT/%{_mandir}/man5/login.defs.*
+rm $RPM_BUILD_ROOT/%{_mandir}/*/man5/login.defs.*
+rm $RPM_BUILD_ROOT/%{_mandir}/man5/passwd.*
+rm $RPM_BUILD_ROOT/%{_mandir}/*/man5/passwd.*
+rm $RPM_BUILD_ROOT/%{_mandir}/man5/porttime.*
+rm $RPM_BUILD_ROOT/%{_mandir}/*/man5/porttime.*
+rm $RPM_BUILD_ROOT/%{_mandir}/man5/suauth.*
+rm $RPM_BUILD_ROOT/%{_mandir}/*/man5/suauth.*
+rm $RPM_BUILD_ROOT/%{_mandir}/man8/logoutd.*
+rm $RPM_BUILD_ROOT/%{_mandir}/*/man8/logoutd.*
+rm $RPM_BUILD_ROOT/%{_mandir}/man8/mkpasswd.*
+rm $RPM_BUILD_ROOT/%{_mandir}/*/man8/mkpasswd.*
+rm $RPM_BUILD_ROOT/%{_mandir}/man8/vipw.*
+rm $RPM_BUILD_ROOT/%{_mandir}/*/man8/vipw.*
+rm $RPM_BUILD_ROOT/%{_mandir}/man8/vigr.*
+rm $RPM_BUILD_ROOT/%{_mandir}/*/man8/vigr.*
+
 %find_lang shadow
 
 %clean
@@ -87,7 +132,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files -f shadow.lang
 %defattr(-,root,root)
-%doc doc/ANNOUNCE doc/CHANGES doc/HOWTO doc/LICENSE doc/README doc/README.linux
+%doc NEWS doc/ANNOUNCE doc/HOWTO doc/LICENSE README doc/README.linux
 %dir /etc/default
 %attr(0644,root,root)	%config /etc/login.defs
 %attr(0600,root,root)	%config /etc/default/useradd
@@ -106,26 +151,67 @@ rm -rf $RPM_BUILD_ROOT
 %{_sbindir}/newusers
 #%{_sbindir}/mkpasswd
 %{_mandir}/man1/chage.1*
+%{_mandir}/*/man1/chage.1*
 %{_mandir}/man1/gpasswd.1*
+%{_mandir}/*/man1/gpasswd.1*
+%{_mandir}/man1/sg.1*
+%{_mandir}/*/man1/sg.1*
+%{_mandir}/man3/getspnam.3*
 %{_mandir}/man3/shadow.3*
 %{_mandir}/man5/shadow.5*
+%{_mandir}/*/man5/shadow.5*
 %{_mandir}/man5/faillog.5*
+%{_mandir}/*/man5/faillog.5*
 %{_mandir}/man8/adduser.8*
+%{_mandir}/*/man8/adduser.8*
 %{_mandir}/man8/group*.8*
+%{_mandir}/*/man8/group*.8*
 %{_mandir}/man8/user*.8*
+%{_mandir}/*/man8/user*.8*
 %{_mandir}/man8/pwck.8*
+%{_mandir}/*/man8/pwck.8*
 %{_mandir}/man8/grpck.8*
+%{_mandir}/*/man8/grpck.8*
 %{_mandir}/man8/chpasswd.8*
+%{_mandir}/*/man8/chpasswd.8*
 %{_mandir}/man8/newusers.8*
-#%{_mandir}/man8/mkpasswd.8*
+%{_mandir}/*/man8/newusers.8*
 %{_mandir}/man8/*conv.8*
+%{_mandir}/*/man8/*conv.8*
 %{_mandir}/man8/lastlog.8*
+%{_mandir}/*/man8/lastlog.8*
 %{_mandir}/man8/faillog.8*
+%{_mandir}/*/man8/faillog.8*
 
 %changelog
-* Tue Feb 11 2003 Nalin Dahyabhai <nalin@redhat.com> 20000902-12.8
+* Wed Feb 12 2003 Nalin Dahyabhai <nalin@redhat.com> 4.0.3-6
+- adjust mailspool patch to complain if no group named "mail" exists, even
+  though that should never happen
+
+* Tue Feb 11 2003 Nalin Dahyabhai <nalin@redhat.com> 4.0.3-5
 - fix perms on mailspools created by useradd to be owned by the "mail"
   group (#59810)
+
+* Wed Jan 22 2003 Tim Powers <timp@redhat.com>
+- rebuilt
+
+* Mon Dec  9 2002 Nalin Dahyabhai <nalin@redhat.com> 4.0.3-3
+- install the shadow.3 man page
+
+* Mon Nov 25 2002 Nalin Dahyabhai <nalin@redhat.com> 4.0.3-2
+- disable use of cracklib at build-time
+- fixup reserved-account changes for useradd
+
+* Thu Nov 21 2002 Nalin Dahyabhai <nalin@redhat.com> 4.0.3-1
+- update to 4.0.3, bumping epoch
+
+* Mon Nov 18 2002 Nalin Dahyabhai <nalin@redhat.com> 20000902-14
+- remove man pages which conflict with the man-pages package(s)
+
+* Fri Nov 15 2002 Nalin Dahyabhai <nalin@redhat.com> 20000902-13
+- prevent libshadow from being built more than once, to keep automake happy
+- change how md5 and md5crypt are enabled, to keep autoconf happy
+- remove unpackaged files after %%install
 
 * Thu Aug 29 2002 Nalin Dahyabhai <nalin@redhat.com> 20000902-12
 - force .mo files to be regenerated with current gettext to flush out possible
