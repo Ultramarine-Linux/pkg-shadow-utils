@@ -7,7 +7,7 @@
 Summary: Utilities for managing accounts and shadow password files.
 Name: shadow-utils
 Version: 4.0.3
-Release: 36
+Release: 37
 Epoch: 2
 URL: http://shadow.pld.org.pl/
 Source0: ftp://ftp.pld.org.pl/software/shadow/shadow-%{version}.tar.bz2
@@ -36,6 +36,7 @@ Patch15: shadow-4.0.3-chage-selinux.patch
 Patch16: shadow-4.0.3-goodname.patch
 Patch17: shadow-4.0.3-pl-n_useradd.8.patch
 Patch18: shadow-4.0.3-skellink.patch
+Patch19: shadow-4.0.3-matchpathcon.patch
 License: BSD
 Group: System Environment/Base
 BuildRequires: autoconf, automake, libtool, gettext-devel
@@ -76,6 +77,7 @@ are used for managing group accounts.
 %patch16 -p1 -b .goodname
 %patch17 -p1
 %patch18 -p1 -b .skellink
+%patch19 -p1 -b .matchpathcon
 rm po/*.gmo
 
 # Recode man pages from euc-jp to UTF-8.
@@ -271,6 +273,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/man8/faillog.8*
 
 %changelog
+* Thu Oct 21 2004 Dan Walsh <dwalsh@redhat.com> 2:4.0.3-37
+- Add matchpathcon to create the files correctly when they do not exist.
+
 * Mon Oct 18 2004 Miloslav Trmac <mitr@redhat.com> - 2:4.0.3-36
 - Change symlink ownership when copying from /etc/skel (#66819, patch by
   Michael Weiser)
