@@ -7,7 +7,7 @@
 Summary: Utilities for managing accounts and shadow password files.
 Name: shadow-utils
 Version: 4.0.7
-Release: 2
+Release: 3
 Epoch: 2
 URL: http://shadow.pld.org.pl/
 Source0: ftp://ftp.pld.org.pl/software/shadow/shadow-%{version}.tar.bz2
@@ -261,6 +261,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/man8/faillog.8*
 
 %changelog
+* Mon Mar 14 2005 Peter Vrabec <pvrabec@redhat.com>
+- gcc4 fix (#150994) 2:4.0.7-3
+
 * Mon Mar 07 2005 Peter Vrabec <pvrabec@redhat.com>
 - man pages cs,es,ko,ru,zh_CN,zh_TW to UTF-8
 
