@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files.
 Name: shadow-utils
 Version: 20000902
-Release: 5.5
+Release: 6
 Epoch: 1
 Source0: ftp://ftp.ists.pwr.wroc.pl/pub/linux/shadow/shadow-%{version}.tar.bz2
 Source1: shadow-970616.login.defs
@@ -16,8 +16,12 @@ Patch2: shadow-19990827-group.patch
 Patch3: shadow-20000902-vipw.patch
 Patch4: shadow-20000826-preserve.patch
 Patch5: shadow-20000902-mailspool.patch
+Patch6: shadow-20000902-usg.patch
+Patch7: shadow-20000902-old.patch
+Patch8: shadow-20000902-man.patch
 License: BSD
 Group: System Environment/Base
+BuildPrereq: autoconf, automake, libtool
 Buildroot: %{_tmppath}/%{name}-%{version}-root
 Obsoletes: adduser
 
@@ -41,13 +45,16 @@ are used for managing group accounts.
 %patch3 -p1 -b .vipw
 %patch4 -p1 -b .preserve
 %patch5 -p1 -b .mailspool
-
-%build
+%patch6 -p1 -b .usg
+%patch7 -p1 -b .old
+%patch8 -p1 -b .man
 libtoolize -f
 aclocal
-automake
 autoheader
+automake -a
 autoconf
+
+%build
 %ifarch ia64
 CFLAGS="$RPM_OPT_FLAGS -O0 -D_BSD_SOURCE" ; export CFLAGS
 %endif
@@ -110,11 +117,11 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/faillog.8*
 
 %changelog
-* Fri May 03 2002 Philip Copeland <bryce@redhat.com>
-- rebuild for alpha
+* Fri Feb 22 2002 Nalin Dahyabhai <nalin@redhat.com> 20000902-6
+- rebuild
 
-* Tue Mar 26 2002 Tim Powers <timp@redhat.com>
-- libtoolize
+* Fri Jan 25 2002 Nalin Dahyabhai <nalin@redhat.com> 20000902-5
+- fix autoheader breakage and random other things autotools complain about
 
 * Mon Aug 27 2001 Nalin Dahyabhai <nalin@redhat.com> 20000902-4
 - use -O0 instead of -O on ia64
