@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files.
 Name: shadow-utils
 Version: 20000902
-Release: 11
+Release: 12
 Epoch: 1
 Source0: ftp://ftp.ists.pwr.wroc.pl/pub/linux/shadow/shadow-%{version}.tar.bz2
 Source1: shadow-970616.login.defs
@@ -20,6 +20,7 @@ Patch6: shadow-20000902-usg.patch
 Patch7: shadow-20000902-old.patch
 Patch8: shadow-20000902-man.patch
 Patch9: shadow-20000902-64.patch
+Patch10: shadow-20000902-poheader.patch
 License: BSD
 Group: System Environment/Base
 BuildPrereq: autoconf213, automake15, libtool
@@ -50,11 +51,13 @@ are used for managing group accounts.
 %patch7 -p1 -b .old
 %patch8 -p1 -b .man
 %patch9 -p1 -b .64
+%patch10 -p1 -b .poheader
 libtoolize -f
 aclocal-1.5
 autoheader-2.13
 automake-1.5 -a
 autoconf-2.13
+rm po/*.gmo
 
 %build
 CFLAGS="$RPM_OPT_FLAGS -D_BSD_SOURCE=1 -D_FILE_OFFSET_BITS=64" ; export CFLAGS
@@ -120,7 +123,13 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/faillog.8*
 
 %changelog
-* Fri Aug 24 2002 Nalin Dahyabhai <nalin@redhat.com> 20000902-11
+* Thu Aug 29 2002 Nalin Dahyabhai <nalin@redhat.com> 20000902-12
+- force .mo files to be regenerated with current gettext to flush out possible
+  problems
+- fixup non-portable encodings in translations
+- make sv translation header non-fuzzy so that it will be included (#71281)
+
+* Fri Aug 23 2002 Nalin Dahyabhai <nalin@redhat.com> 20000902-11
 - don't apply aging parameters when creating system accounts (#67408)
 
 * Fri Jun 21 2002 Tim Powers <timp@redhat.com>
