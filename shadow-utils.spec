@@ -1,7 +1,7 @@
-Summary: Utilities for managing shadow password files and user/group accounts.
+Summary: Utilities for managing accounts and shadow password files.
 Name: shadow-utils
 Version: 20000902
-Release: 2
+Release: 3
 Epoch: 1
 Source0: ftp://ftp.ists.pwr.wroc.pl/pub/linux/shadow/shadow-%{version}.tar.bz2
 Source1: shadow-970616.login.defs
@@ -25,12 +25,12 @@ Obsoletes: adduser
 The shadow-utils package includes the necessary programs for
 converting UNIX password files to the shadow password format, plus
 programs for managing user and group accounts.  The pwconv command
-converts passwords to the shadow password format.  The pwunconv command
-unconverts shadow passwords and generates an npasswd file (a standard
-UNIX password file).  The pwck command checks the integrity of
-password and shadow files.  The lastlog command prints out the last
-login times for all users.  The useradd, userdel and usermod commands
-are used for managing user accounts.  The groupadd, groupdel and
+converts passwords to the shadow password format.  The pwunconv
+command unconverts shadow passwords and generates an npasswd file (a
+standard UNIX password file).  The pwck command checks the integrity
+of password and shadow files.  The lastlog command prints out the last
+login times for all users.  The useradd, userdel, and usermod commands
+are used for managing user accounts.  The groupadd, groupdel, and
 groupmod commands are used for managing group accounts.
 
 %prep
@@ -55,7 +55,7 @@ CFLAGS="$RPM_OPT_FLAGS" ../configure --prefix=%{_prefix} \
 	--disable-desrpc --with-libcrypt --disable-shared \
         --mandir=%{_mandir}
 %else
-CFLAGS="$RPM_OPT_FLAGS -D_BSD_SOURCE" ../configure --prefix=%{_prefix} \
+CFLAGS="-O -D_BSD_SOURCE" ../configure --prefix=%{_prefix} \
 	--disable-desrpc --with-libcrypt --disable-shared \
         --mandir=%{_mandir}
 %endif
@@ -120,6 +120,9 @@ rm -rf build-$RPM_ARCH
 %{_mandir}/man8/faillog.8*
 
 %changelog
+* Thu Jul 26 2001 Bill Nottingham <notting@redhat.com>
+- build with -O on ia64
+
 * Fri Jun 08 2001 Than Ngo <than@redhat.com>
 - fixup broken specfile
 
