@@ -7,7 +7,7 @@
 Summary: Utilities for managing accounts and shadow password files.
 Name: shadow-utils
 Version: 4.0.3
-Release: 40
+Release: 57
 Epoch: 2
 URL: http://shadow.pld.org.pl/
 Source0: ftp://ftp.pld.org.pl/software/shadow/shadow-%{version}.tar.bz2
