@@ -7,7 +7,7 @@
 Summary: Utilities for managing accounts and shadow password files.
 Name: shadow-utils
 Version: 4.0.3
-Release: 26
+Release: 27
 Epoch: 2
 URL: http://shadow.pld.org.pl/
 Source0: ftp://ftp.pld.org.pl/software/shadow/shadow-%{version}.tar.bz2
@@ -31,6 +31,7 @@ Patch10: shadow-4.0.3-largefile.patch
 Patch11: shadow-4.0.3-fixref.patch
 Patch12: shadow-4.0.3-uninitialized.patch
 Patch13: shadow-4.0.3-removemalloc.patch
+Patch14: shadow-4.0.3-useradd-unlock.patch
 License: BSD
 Group: System Environment/Base
 BuildRequires: autoconf, automake, libtool, gettext-devel
@@ -66,6 +67,7 @@ are used for managing group accounts.
 %patch11 -p1 -b .fixref
 %patch12 -p1 -b .uninitialized
 %patch13 -p1 -b .removemalloc
+%patch14 -p1 -b .useradd-unlock
 rm po/*.gmo
 
 # Recode man pages from euc-jp to UTF-8.
@@ -255,6 +257,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/man8/faillog.8*
 
 %changelog
+* Sun Sep 26 2004 Rik van Riel <riel@redhat.com> 2:4.0.3-27
+- fix unlocking of passwd.lock and group.lock (fix from bz #126709)
+
 * Tue Aug 24 2004 Warren Togami <wtogami@redhat.com> 2:4.0.3-26
 - #126596 fix Req and BuildReqs
 
