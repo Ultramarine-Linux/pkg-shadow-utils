@@ -7,7 +7,7 @@
 Summary: Utilities for managing accounts and shadow password files.
 Name: shadow-utils
 Version: 4.0.3
-Release: 24
+Release: 25
 Epoch: 2
 URL: http://shadow.pld.org.pl/
 Source0: ftp://ftp.pld.org.pl/software/shadow/shadow-%{version}.tar.bz2
@@ -33,7 +33,9 @@ Patch12: shadow-4.0.3-uninitialized.patch
 Patch13: shadow-4.0.3-removemalloc.patch
 License: BSD
 Group: System Environment/Base
-BuildPrereq: autoconf, automake, libtool
+BuildPrereq: autoconf, automake, libtool, gettext
+BuildRequires: libselinux-devel
+Requires: libselinux
 Buildroot: %{_tmppath}/%{name}-%{version}-root
 Obsoletes: adduser
 
@@ -89,6 +91,7 @@ set -"$flags"
 manconv euc-jp utf-8 man/ja/*.*
 %endif
 
+libtoolize --force
 aclocal
 automake -a
 autoconf
@@ -253,6 +256,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/man8/faillog.8*
 
 %changelog
+* Sun Aug  1 2004 Alan Cox <alan@redhat.com> 4.0.3-25
+- Fix build deps etc, move to current auto* (Steve Grubb)
+
 * Sat Jul 10 2004 Alan Cox <alan@redhat.com> 4.0.3-24
 - Fix nscd path. This fixes various stale data caching bugs (#125421)
 
