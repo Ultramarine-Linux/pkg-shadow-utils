@@ -7,7 +7,7 @@
 Summary: Utilities for managing accounts and shadow password files.
 Name: shadow-utils
 Version: 4.0.3
-Release: 38
+Release: 37
 Epoch: 2
 URL: http://shadow.pld.org.pl/
 Source0: ftp://ftp.pld.org.pl/software/shadow/shadow-%{version}.tar.bz2
@@ -104,7 +104,6 @@ manconv iso-8859-1 utf-8 man/de/*
 manconv iso-8859-1 utf-8 man/fr/*
 manconv iso-8859-1 utf-8 man/it/*
 manconv iso-8859-1 utf-8 man/pt_BR/*
-manconv iso-8859-2 utf-8 man/cs/*
 manconv iso-8859-2 utf-8 man/hu/*
 manconv iso-8859-2 utf-8 man/pl/*
 %endif
@@ -274,9 +273,6 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/man8/faillog.8*
 
 %changelog
-* Sat Nov 20 2004 Miloslav Trmac <mitr@redhat.com> - 2:4.0.3-38
-- Convert Czech man pages to UTF-8
-
 * Thu Oct 21 2004 Dan Walsh <dwalsh@redhat.com> 2:4.0.3-37
 - Add matchpathcon to create the files correctly when they do not exist.
 
