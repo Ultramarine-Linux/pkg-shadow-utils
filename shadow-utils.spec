@@ -1,11 +1,13 @@
 %if %{?WITH_SELINUX:0}%{!?WITH_SELINUX:1}
-%define WITH_SELINUX 0
+%define WITH_SELINUX 1
 %endif
+
+%define utf8_man_pages 1
 
 Summary: Utilities for managing accounts and shadow password files.
 Name: shadow-utils
 Version: 4.0.3
-Release: 12
+Release: 18
 Epoch: 2
 URL: http://shadow.pld.org.pl/
 Source0: ftp://ftp.pld.org.pl/software/shadow/shadow-%{version}.tar.bz2
@@ -24,6 +26,10 @@ Patch5: shadow-4.0.3-mailspool.patch
 Patch6: shadow-20000902-usg.patch
 Patch7: shadow-4.0.3-shadow-man.patch
 Patch8: shadow-utils-selinux.patch
+Patch9: shadow-4.0.3-lastlog-size.patch
+Patch10: shadow-4.0.3-largefile.patch
+Patch11: shadow-4.0.3-fixref.patch
+Patch12: shadow-4.0.3-uninitialized.patch
 License: BSD
 Group: System Environment/Base
 BuildPrereq: autoconf, automake, libtool
@@ -56,6 +62,10 @@ are used for managing group accounts.
 #SELinux
 %patch8 -p1 -b .selinux
 %endif
+%patch9 -p1 -b .lastlog-size
+%patch10 -p1 -b .largefile
+%patch11 -p1 -b .fixref
+%patch12 -p1 -b .uninitialized
 rm po/*.gmo
 
 # Recode man pages from euc-jp to UTF-8.
@@ -76,7 +86,9 @@ for page in $* ; do
 done
 set -"$flags"
 }
+%if %{utf8_man_pages}
 manconv euc-jp utf-8 man/ja/*.*
+%endif
 
 aclocal
 automake -a
@@ -104,6 +116,30 @@ install -m644 $RPM_SOURCE_DIR/adduser.8   $RPM_BUILD_ROOT%{_mandir}/man8/
 install -m644 $RPM_SOURCE_DIR/pwunconv.8  $RPM_BUILD_ROOT%{_mandir}/man8/
 install -m644 $RPM_SOURCE_DIR/grpconv.8   $RPM_BUILD_ROOT%{_mandir}/man8/
 install -m644 $RPM_SOURCE_DIR/grpunconv.8 $RPM_BUILD_ROOT%{_mandir}/man8/
+
+# Convert man pages from references to hard links, so that if a referred-to
+# page is removed, we don't break things.  Not a good idea for the general
+# case, because when the policy script compresses them, we probably lose.
+linkman() {
+	flags="$-"
+	#set +x
+	for manpage in $1/man*/* ; do
+		pushd $1 > /dev/null
+		if grep -q '^\.so' $manpage && \
+		   test `grep -v '^\.so' $manpage | wc -l` -eq 0 ; then
+			target=`awk '/^\.so/ { print $NF }' $manpage`
+			if test -n "$target" ; then
+				rm "$manpage"
+				ln -v "$target" "$manpage"
+			fi
+		fi
+		popd > /dev/null
+	done
+	set -"$flags"
+}
+for subdir in $RPM_BUILD_ROOT/%{_mandir}/{??,??_??,??_??.*} ; do
+	test -d $subdir && linkman $subdir
+done
 
 # Remove binaries we don't use.
 rm $RPM_BUILD_ROOT/%{_bindir}/chfn
@@ -134,6 +170,7 @@ rm $RPM_BUILD_ROOT/%{_mandir}/man1/passwd.*
 rm $RPM_BUILD_ROOT/%{_mandir}/*/man1/passwd.*
 rm $RPM_BUILD_ROOT/%{_mandir}/man1/su.*
 rm $RPM_BUILD_ROOT/%{_mandir}/*/man1/su.*
+rm $RPM_BUILD_ROOT/%{_mandir}/man3/getspnam.*
 rm $RPM_BUILD_ROOT/%{_mandir}/*/man5/d_passwd.*
 rm $RPM_BUILD_ROOT/%{_mandir}/man5/limits.*
 rm $RPM_BUILD_ROOT/%{_mandir}/*/man5/limits.*
@@ -187,7 +224,6 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/man1/gpasswd.1*
 %{_mandir}/man1/sg.1*
 %{_mandir}/*/man1/sg.1*
-%{_mandir}/man3/getspnam.3*
 %{_mandir}/man3/shadow.3*
 %{_mandir}/man5/shadow.5*
 %{_mandir}/*/man5/shadow.5*
@@ -215,6 +251,27 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/man8/faillog.8*
 
 %changelog
+* Wed Jan 21 2004 Dan Walsh <dwalsh@redhat.com> 4.0.3-18
+- Fix selinux relabel of /etc/passwd file
+
+* Wed Jan  7 2004 Nalin Dahyabhai <nalin@redhat.com> 4.0.3-17
+- fix use of uninitialized memory in useradd (#89145)
+
+* Tue Dec 16 2003 Nalin Dahyabhai <nalin@redhat.com> 4.0.3-16
+- back to UTF-8 again
+- remove getspnam(3) man page, now conflicts with man-pages 1.64
+
+* Thu Nov 13 2003 Nalin Dahyabhai <nalin@redhat.com> 4.0.3-15
+- don't convert man pages to UTF-8 for RHEL 3, conditionalized using macro
+- fixup dangling man page references
+
+* Mon Nov 10 2003 Nalin Dahyabhai <nalin@redhat.com> 4.0.3-14
+- lastlog: don't pass a possibly-smaller field to localtime (#109648)
+- configure: call AC_SYS_LARGEFILE to get large file support
+
+* Fri Nov 7 2003 Dan Walsh <dwalsh@redhat.com> 4.0.3-13.sel
+- turn on SELinux support
+
 * Wed Oct 22 2003 Nalin Dahyabhai <nalin@redhat.com> 4.0.3-12
 - convert ja man pages to UTF-8 (#106051)
 - override MKINSTALLDIRS at install-time (#107476)

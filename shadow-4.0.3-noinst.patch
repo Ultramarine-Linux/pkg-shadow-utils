@@ -1,4 +1,4 @@
-These libraries aren't meant to be installed.
+These libraries aren't meant to be installed.  Not without headers, at least.
 
 --- shadow-4.0.3/libmisc/Makefile.am	2002-11-21 23:19:50.000000000 -0500
 +++ shadow-4.0.3/libmisc/Makefile.am	2002-11-21 23:19:45.000000000 -0500
