@@ -7,7 +7,7 @@
 Summary: Utilities for managing accounts and shadow password files.
 Name: shadow-utils
 Version: 4.0.3
-Release: 32
+Release: 33
 Epoch: 2
 URL: http://shadow.pld.org.pl/
 Source0: ftp://ftp.pld.org.pl/software/shadow/shadow-%{version}.tar.bz2
@@ -34,6 +34,7 @@ Patch13: shadow-4.0.3-removemalloc.patch
 Patch14: shadow-4.0.3-useradd-unlock.patch
 Patch15: shadow-4.0.3-chage-selinux.patch
 Patch16: shadow-4.0.3-goodname.patch
+Patch17: shadow-4.0.3-pl-n_useradd.8.patch
 License: BSD
 Group: System Environment/Base
 BuildRequires: autoconf, automake, libtool, gettext-devel
@@ -72,6 +73,7 @@ are used for managing group accounts.
 %patch14 -p1 -b .useradd-unlock
 %patch15 -p1 -b .chage-selinux
 %patch16 -p1 -b .goodname
+%patch17 -p1
 rm po/*.gmo
 
 # Recode man pages from euc-jp to UTF-8.
@@ -94,6 +96,12 @@ set -"$flags"
 }
 %if %{utf8_man_pages}
 manconv euc-jp utf-8 man/ja/*.*
+manconv iso-8859-1 utf-8 man/de/*
+manconv iso-8859-1 utf-8 man/fr/*
+manconv iso-8859-1 utf-8 man/it/*
+manconv iso-8859-1 utf-8 man/pt_BR/*
+manconv iso-8859-2 utf-8 man/hu/*
+manconv iso-8859-2 utf-8 man/pl/*
 %endif
 
 libtoolize --force
@@ -261,8 +269,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/man8/faillog.8*
 
 %changelog
-* Wed Oct 13 2004 Adrian Havill <havill@redhat.com> 2:4.0.3-32
-- allow for mixed case and dots in usernames
+* Wed Oct 13 2004 Adrian Havill <havill@redhat.com> 2:4.0.3-33
+- allow for mixed case and dots in usernames (#135401)
+- all man pages to UTF-8, not just Japanese (#133883)
+- add Polish blurb for useradd -n man page option (#82177)
 
 * Tue Oct 12 2004 Adrian Havill <havill@redhat.com> 2:4.0.3-31
 - check for non-standard legacy place for ncsd HUP (/var/run/nscd.pid) and
