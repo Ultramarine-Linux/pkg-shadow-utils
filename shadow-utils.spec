@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files.
 Name: shadow-utils
 Version: 20000902
-Release: 6
+Release: 7
 Epoch: 1
 Source0: ftp://ftp.ists.pwr.wroc.pl/pub/linux/shadow/shadow-%{version}.tar.bz2
 Source1: shadow-970616.login.defs
@@ -19,6 +19,7 @@ Patch5: shadow-20000902-mailspool.patch
 Patch6: shadow-20000902-usg.patch
 Patch7: shadow-20000902-old.patch
 Patch8: shadow-20000902-man.patch
+Patch9: shadow-20000902-64.patch
 License: BSD
 Group: System Environment/Base
 BuildPrereq: autoconf, automake, libtool
@@ -48,6 +49,7 @@ are used for managing group accounts.
 %patch6 -p1 -b .usg
 %patch7 -p1 -b .old
 %patch8 -p1 -b .man
+%patch9 -p1 -b .64
 libtoolize -f
 aclocal
 autoheader
@@ -55,8 +57,9 @@ automake -a
 autoconf
 
 %build
+CFLAGS="$RPM_OPT_FLAGS -D_BSD_SOURCE=1 -D_FILE_OFFSET_BITS=64" ; export CFLAGS
 %ifarch ia64
-CFLAGS="$RPM_OPT_FLAGS -O0 -D_BSD_SOURCE" ; export CFLAGS
+CFLAGS="$CFLAGS -O0"
 %endif
 %configure --disable-desrpc --with-libcrypt --disable-shared
 make 
@@ -117,6 +120,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/faillog.8*
 
 %changelog
+* Wed Mar 27 2002 Nalin Dahyabhai <nalin@redhat.com> 20000902-7
+- rebuild with proper defines to get support for large lastlog files (#61983)
+
 * Fri Feb 22 2002 Nalin Dahyabhai <nalin@redhat.com> 20000902-6
 - rebuild
 
@@ -148,7 +154,7 @@ rm -rf $RPM_BUILD_ROOT
   files while moving directories (keeps files from looking weird later on)
 - configure using %%{_prefix} as the prefix
 
-* Fri Feb 23 2001 Trond Eivind Glomsrød <teg@redhat.com>
+* Fri Feb 23 2001 Trond Eivind Glomsr)Bød <teg@redhat.com>
 - langify
 
 * Wed Aug 30 2000 Bernhard Rosenkraenzer <bero@redhat.com>
