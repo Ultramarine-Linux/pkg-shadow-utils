@@ -7,7 +7,7 @@
 Summary: Utilities for managing accounts and shadow password files.
 Name: shadow-utils
 Version: 4.0.3
-Release: 58
+Release: 59
 Epoch: 2
 URL: http://shadow.pld.org.pl/
 Source0: ftp://ftp.pld.org.pl/software/shadow/shadow-%{version}.tar.bz2
@@ -39,6 +39,7 @@ Patch18: shadow-4.0.3-skellink.patch
 Patch19: shadow-4.0.3-matchpathcon.patch
 Patch20: shadow-4.0.3-selinux_context.patch
 Patch21: shadow-4.0.3-lastlog.patch
+Patch22: shadow-4.0.3-maxmem.patch
 License: BSD
 Group: System Environment/Base
 BuildRequires: autoconf, automake, libtool, gettext-devel
@@ -82,6 +83,7 @@ are used for managing group accounts.
 %patch19 -p1 -b .matchpathcon
 %patch20 -p1 -b .selinux_context
 %patch21 -p1 -b .lastlog
+%patch22 -p1 -b .maxmem
 
 rm po/*.gmo
 
@@ -278,7 +280,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/man8/faillog.8*
 
 %changelog
-* Mon Feb 21 2005 Peter Vrabec <pvrabec@redhat.com>
+* Fri Feb 25 2005 Peter Vrabec <pvrabec@redhat.com> 2:4.0.3-59
+- static limit on group count to dynamic (#125510, #148994, #147742)
+
+* Mon Feb 21 2005 Peter Vrabec <pvrabec@redhat.com> 2:4.0.3-58
 - add "-l" option #146214
 
 * Mon Feb 14 2005 Adrian Havill <havill@redhat.com>
