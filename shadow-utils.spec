@@ -7,7 +7,7 @@
 Summary: Utilities for managing accounts and shadow password files.
 Name: shadow-utils
 Version: 4.0.7
-Release: 3
+Release: 4
 Epoch: 2
 URL: http://shadow.pld.org.pl/
 Source0: ftp://ftp.pld.org.pl/software/shadow/shadow-%{version}.tar.bz2
@@ -37,6 +37,7 @@ Patch20: shadow-4.0.3-selinux_context.patch
 Patch21: shadow-4.0.3-lastlog.patch
 Patch22: shadow-4.0.3-maxmem.patch
 Patch23: shadow-4.0.7-gcc4.patch
+Patch24: shadow-4.0.7-newgrp-pwd.patch
 License: BSD
 Group: System Environment/Base
 BuildRequires: autoconf, automake, libtool, gettext-devel
@@ -82,6 +83,7 @@ are used for managing group accounts.
 %patch21 -p1 -b .lastlog
 %patch22 -p1 -b .maxmem
 %patch23 -p1 -b .gcc4
+%patch24 -p1 -b .newgrp-pwd
 
 rm po/*.gmo
 rm po/stamp-po
@@ -158,7 +160,6 @@ rm $RPM_BUILD_ROOT/%{_bindir}/chsh
 rm $RPM_BUILD_ROOT/%{_bindir}/expiry
 rm $RPM_BUILD_ROOT/%{_bindir}/groups
 rm $RPM_BUILD_ROOT/%{_bindir}/login
-rm $RPM_BUILD_ROOT/%{_bindir}/newgrp
 rm $RPM_BUILD_ROOT/%{_bindir}/passwd
 rm $RPM_BUILD_ROOT/%{_bindir}/su
 rm $RPM_BUILD_ROOT/%{_sbindir}/logoutd
@@ -176,8 +177,6 @@ rm $RPM_BUILD_ROOT/%{_mandir}/man1/groups.*
 rm $RPM_BUILD_ROOT/%{_mandir}/*/man1/groups.*
 rm $RPM_BUILD_ROOT/%{_mandir}/man1/login.*
 rm $RPM_BUILD_ROOT/%{_mandir}/*/man1/login.*
-rm $RPM_BUILD_ROOT/%{_mandir}/man1/newgrp.*
-rm $RPM_BUILD_ROOT/%{_mandir}/*/man1/newgrp.*
 rm $RPM_BUILD_ROOT/%{_mandir}/man1/passwd.*
 rm $RPM_BUILD_ROOT/%{_mandir}/*/man1/passwd.*
 rm $RPM_BUILD_ROOT/%{_mandir}/man1/su.*
@@ -220,6 +219,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/faillog
 %{_bindir}/gpasswd
 %{_bindir}/lastlog
+%{_bindir}/newgrp
 %{_sbindir}/adduser
 %{_sbindir}/user*
 %{_sbindir}/group*
@@ -234,6 +234,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/man1/gpasswd.1*
 %{_mandir}/man1/sg.1*
 %{_mandir}/*/man1/sg.1*
+%{_mandir}/man1/newgrp.1*
+%{_mandir}/*/man1/newgrp.1*
 %{_mandir}/man3/shadow.3*
 %{_mandir}/man5/shadow.5*
 %{_mandir}/*/man5/shadow.5*
@@ -261,6 +263,12 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/man8/faillog.8*
 
 %changelog
+* Mon Mar 29 2005 Peter Vrabec <pvrabec@redhat.com>  2:4.0.7-4
+- use newgrp binary
+- newgrp don't ask for password if user's default GID = group ID,
+  ask for password if there is some in /etc/gshadow 
+  and in /etc/group is 'x' (#149997)
+
 * Mon Mar 14 2005 Peter Vrabec <pvrabec@redhat.com>
 - gcc4 fix (#150994) 2:4.0.7-3
 
