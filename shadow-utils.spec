@@ -6,37 +6,33 @@
 
 Summary: Utilities for managing accounts and shadow password files.
 Name: shadow-utils
-Version: 4.0.3
-Release: 59
+Version: 4.0.7
+Release: 1
 Epoch: 2
 URL: http://shadow.pld.org.pl/
 Source0: ftp://ftp.pld.org.pl/software/shadow/shadow-%{version}.tar.bz2
 Source1: shadow-970616.login.defs
 Source2: shadow-970616.useradd
-Source3: adduser.8
-Source4: pwunconv.8
-Source5: grpconv.8
-Source6: grpunconv.8
-Patch0: shadow-4.0.3-redhat.patch
+Patch0: shadow-4.0.7-redhat.patch
 Patch1: shadow-4.0.3-noinst.patch
-Patch2: shadow-4.0.3-nscd.patch
-Patch3: shadow-19990827-group.patch
+#Patch2: shadow-4.0.3-nscd.patch
+#Patch3: shadow-19990827-group.patch
 Patch4: shadow-4.0.3-vipw.patch
-Patch5: shadow-4.0.3-mailspool.patch
-Patch6: shadow-20000902-usg.patch
-Patch7: shadow-4.0.3-shadow-man.patch
-Patch8: shadow-utils-selinux.patch
-Patch9: shadow-4.0.3-lastlog-size.patch
-Patch10: shadow-4.0.3-largefile.patch
-Patch11: shadow-4.0.3-fixref.patch
-Patch12: shadow-4.0.3-uninitialized.patch
-Patch13: shadow-4.0.3-removemalloc.patch
+#Patch5: shadow-4.0.3-mailspool.patch
+#Patch6: shadow-20000902-usg.patch
+#Patch7: shadow-4.0.3-shadow-man.patch
+#Patch8: shadow-utils-selinux.patch
+#Patch9: shadow-4.0.3-lastlog-size.patch
+#Patch10: shadow-4.0.3-largefile.patch
+#Patch11: shadow-4.0.3-fixref.patch
+#Patch12: shadow-4.0.3-uninitialized.patch
+#Patch13: shadow-4.0.3-removemalloc.patch
 Patch14: shadow-4.0.3-useradd-unlock.patch
 Patch15: shadow-4.0.3-chage-selinux.patch
 Patch16: shadow-4.0.3-goodname.patch
 Patch17: shadow-4.0.3-pl-n_useradd.8.patch
-Patch18: shadow-4.0.3-skellink.patch
-Patch19: shadow-4.0.3-matchpathcon.patch
+#Patch18: shadow-4.0.3-skellink.patch
+#Patch19: shadow-4.0.3-matchpathcon.patch
 Patch20: shadow-4.0.3-selinux_context.patch
 Patch21: shadow-4.0.3-lastlog.patch
 Patch22: shadow-4.0.3-maxmem.patch
@@ -63,29 +59,30 @@ are used for managing group accounts.
 %setup -q -n shadow-%{version}
 %patch0 -p1 -b .redhat
 %patch1 -p1 -b .noinst
-%patch2 -p1 -b .nscd
-%patch3 -p1 -b .group
+#%patch2 -p1 -b .nscd
+#%patch3 -p1 -b .group
 %patch4 -p1 -b .vipw
-%patch5 -p1 -b .mailspool
-%patch6 -p1 -b .usg
-%patch7 -p1 -b .shadow-man
-%patch8 -p1 -b .selinux
-%patch9 -p1 -b .lastlog-size
-%patch10 -p1 -b .largefile
-%patch11 -p1 -b .fixref
-%patch12 -p1 -b .uninitialized
-%patch13 -p1 -b .removemalloc
+#%patch5 -p1 -b .mailspool
+#%patch6 -p1 -b .usg
+#%patch7 -p1 -b .shadow-man
+#%patch8 -p1 -b .selinux
+#%patch9 -p1 -b .lastlog-size
+#%patch10 -p1 -b .largefile
+#%patch11 -p1 -b .fixref
+#%patch12 -p1 -b .uninitialized
+#%patch13 -p1 -b .removemalloc
 %patch14 -p1 -b .useradd-unlock
 %patch15 -p1 -b .chage-selinux
 %patch16 -p1 -b .goodname
-%patch17 -p1
-%patch18 -p1 -b .skellink
-%patch19 -p1 -b .matchpathcon
+%patch17 -p1 -b .pl-n
+#%patch18 -p1 -b .skellink
+#%patch19 -p1 -b .matchpathcon
 %patch20 -p1 -b .selinux_context
 %patch21 -p1 -b .lastlog
 %patch22 -p1 -b .maxmem
 
 rm po/*.gmo
+rm po/stamp-po
 
 # Recode man pages from euc-jp to UTF-8.
 manconv() {
@@ -140,34 +137,11 @@ install -d -m 755 $RPM_BUILD_ROOT/etc/default
 install -c -m 0644 %{SOURCE1} $RPM_BUILD_ROOT/etc/login.defs
 install -c -m 0600 %{SOURCE2} $RPM_BUILD_ROOT/etc/default/useradd
 
-ln -s useradd $RPM_BUILD_ROOT%{_sbindir}/adduser
-install -m644 $RPM_SOURCE_DIR/adduser.8   $RPM_BUILD_ROOT%{_mandir}/man8/
-install -m644 $RPM_SOURCE_DIR/pwunconv.8  $RPM_BUILD_ROOT%{_mandir}/man8/
-install -m644 $RPM_SOURCE_DIR/grpconv.8   $RPM_BUILD_ROOT%{_mandir}/man8/
-install -m644 $RPM_SOURCE_DIR/grpunconv.8 $RPM_BUILD_ROOT%{_mandir}/man8/
 
-# Convert man pages from references to hard links, so that if a referred-to
-# page is removed, we don't break things.  Not a good idea for the general
-# case, because when the policy script compresses them, we probably lose.
-linkman() {
-	flags="$-"
-	#set +x
-	for manpage in $1/man*/* ; do
-		pushd $1 > /dev/null
-		if grep -q '^\.so' $manpage && \
-		   test `grep -v '^\.so' $manpage | wc -l` -eq 0 ; then
-			target=`awk '/^\.so/ { print $NF }' $manpage`
-			if test -n "$target" ; then
-				rm "$manpage"
-				ln -v "$target" "$manpage"
-			fi
-		fi
-		popd > /dev/null
-	done
-	set -"$flags"
-}
-for subdir in $RPM_BUILD_ROOT/%{_mandir}/{??,??_??,??_??.*} ; do
-	test -d $subdir && linkman $subdir
+ln -s useradd $RPM_BUILD_ROOT%{_sbindir}/adduser
+ln -s %{_mandir}/man8/useradd.8 $RPM_BUILD_ROOT/%{_mandir}/man8/adduser.8
+for subdir in $RPM_BUILD_ROOT/%{_mandir}/{??,??_??,??_??.*}/man* ; do
+	test -d $subdir && test -e $subdir/useradd.8 && echo ".so man8/useradd.8" > $subdir/adduser.8
 done
 
 # Remove binaries we don't use.
@@ -179,17 +153,18 @@ rm $RPM_BUILD_ROOT/%{_bindir}/login
 rm $RPM_BUILD_ROOT/%{_bindir}/newgrp
 rm $RPM_BUILD_ROOT/%{_bindir}/passwd
 rm $RPM_BUILD_ROOT/%{_bindir}/su
-rm $RPM_BUILD_ROOT/%{_sbindir}/dpasswd
 rm $RPM_BUILD_ROOT/%{_sbindir}/logoutd
 rm $RPM_BUILD_ROOT/%{_sbindir}/mkpasswd
 rm $RPM_BUILD_ROOT/%{_sbindir}/vipw
 
+rm $RPM_BUILD_ROOT/%{_mandir}/*/man1/id.*
 rm $RPM_BUILD_ROOT/%{_mandir}/man1/chfn.*
 rm $RPM_BUILD_ROOT/%{_mandir}/*/man1/chfn.*
 rm $RPM_BUILD_ROOT/%{_mandir}/man1/chsh.*
 rm $RPM_BUILD_ROOT/%{_mandir}/*/man1/chsh.*
 rm $RPM_BUILD_ROOT/%{_mandir}/man1/expiry.*
 rm $RPM_BUILD_ROOT/%{_mandir}/*/man1/expiry.*
+rm $RPM_BUILD_ROOT/%{_mandir}/man1/groups.*
 rm $RPM_BUILD_ROOT/%{_mandir}/*/man1/groups.*
 rm $RPM_BUILD_ROOT/%{_mandir}/man1/login.*
 rm $RPM_BUILD_ROOT/%{_mandir}/*/man1/login.*
@@ -200,7 +175,6 @@ rm $RPM_BUILD_ROOT/%{_mandir}/*/man1/passwd.*
 rm $RPM_BUILD_ROOT/%{_mandir}/man1/su.*
 rm $RPM_BUILD_ROOT/%{_mandir}/*/man1/su.*
 rm $RPM_BUILD_ROOT/%{_mandir}/man3/getspnam.*
-rm $RPM_BUILD_ROOT/%{_mandir}/*/man5/d_passwd.*
 rm $RPM_BUILD_ROOT/%{_mandir}/man5/limits.*
 rm $RPM_BUILD_ROOT/%{_mandir}/*/man5/limits.*
 rm $RPM_BUILD_ROOT/%{_mandir}/man5/login.access.*
@@ -229,7 +203,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files -f shadow.lang
 %defattr(-,root,root)
-%doc NEWS doc/ANNOUNCE doc/HOWTO doc/LICENSE README doc/README.linux
+%doc NEWS doc/HOWTO doc/LICENSE README doc/README.linux
 %dir /etc/default
 %attr(0644,root,root)	%config /etc/login.defs
 %attr(0600,root,root)	%config /etc/default/useradd
@@ -246,7 +220,6 @@ rm -rf $RPM_BUILD_ROOT
 %{_sbindir}/*conv
 %{_sbindir}/chpasswd
 %{_sbindir}/newusers
-#%{_sbindir}/mkpasswd
 %{_mandir}/man1/chage.1*
 %{_mandir}/*/man1/chage.1*
 %{_mandir}/man1/gpasswd.1*
@@ -280,6 +253,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/man8/faillog.8*
 
 %changelog
+* Wed Mar 02 2005 Peter Vrabec <pvrabec@redhat.com>
+- upgrade 2:4.0.7-1
+
 * Fri Feb 25 2005 Peter Vrabec <pvrabec@redhat.com> 2:4.0.3-59
 - static limit on group count to dynamic (#125510, #148994, #147742)
 
