@@ -7,7 +7,7 @@
 Summary: Utilities for managing accounts and shadow password files.
 Name: shadow-utils
 Version: 4.0.3
-Release: 28
+Release: 29
 Epoch: 2
 URL: http://shadow.pld.org.pl/
 Source0: ftp://ftp.pld.org.pl/software/shadow/shadow-%{version}.tar.bz2
@@ -257,7 +257,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/man8/faillog.8*
 
 %changelog
-* Sun Sep 26 2004 Adrian Havill <riel@redhat.com> 2:4.0.3-28
+* Sun Sep 26 2004 Adrian Havill <riel@redhat.com> 2:4.0.3-29
 - always unlock all files on any exit (#126709)
 
 * Tue Aug 24 2004 Warren Togami <wtogami@redhat.com> 2:4.0.3-26
