@@ -1,9 +1,9 @@
 Summary: Utilities for managing shadow password files and user/group accounts.
 Name: shadow-utils
-Version: 20000826
-Release: 4
-Serial: 1
-Source0: ftp://ftp.ists.pwr.wroc.pl/pub/linux/shadow/shadow-%{version}.tar.gz
+Version: 20000902
+Release: 2
+Epoch: 1
+Source0: ftp://ftp.ists.pwr.wroc.pl/pub/linux/shadow/shadow-%{version}.tar.bz2
 Source1: shadow-970616.login.defs
 Source2: shadow-970616.useradd
 Source3: adduser.8
@@ -11,15 +11,12 @@ Source4: pwunconv.8
 Source5: grpconv.8
 Source6: grpunconv.8
 Patch0: shadow-20000826-redhat.patch
-Patch1: shadow-19990827-nscd.patch
-Patch2: shadow-19990827-pwlock.patch
+Patch1: shadow-20000902-nscd.patch
 Patch3: shadow-19990827-group.patch
-Patch4: shadow-19990827-console.patch
-Patch5: shadow-utils-19990827-vipw.patch
-Patch6: shadow-20000826-hugegroups.patch
-Patch7: shadow-20000826-chage.patch
+Patch5: shadow-20000902-vipw.patch
 Patch8: shadow-20000826-preserve.patch
-Copyright: BSD
+Patch9: shadow-20000902-mailspool.patch
+License: BSD
 Group: System Environment/Base
 Buildroot: %{_tmppath}/%{name}-%{version}-root
 Obsoletes: adduser
@@ -40,13 +37,10 @@ groupmod commands are used for managing group accounts.
 %setup -q -n shadow-%{version}
 %patch0 -p1 -b .redhat
 %patch1 -p1 -b .nscd
-%patch2 -p1 -b .pwlock
 %patch3 -p1 -b .group
-%patch4 -p1 -b .console
 %patch5 -p1 -b .vipw
-%patch6 -p1 -b .hugegrp
-%patch7 -p1 -b .chage
 %patch8 -p1 -b .preserve
+%patch9 -p1 -b .mailspool
 
 %build
 unset LINGUAS || :
@@ -56,9 +50,15 @@ automake
 autoheader
 autoconf
 rm -rf build-$RPM_ARCH ; mkdir build-$RPM_ARCH ; cd build-$RPM_ARCH
+%ifnarch ia64
 CFLAGS="$RPM_OPT_FLAGS" ../configure --prefix=%{_prefix} \
 	--disable-desrpc --with-libcrypt --disable-shared \
         --mandir=%{_mandir}
+%else
+CFLAGS="$RPM_OPT_FLAGS -D_BSD_SOURCE" ../configure --prefix=%{_prefix} \
+	--disable-desrpc --with-libcrypt --disable-shared \
+        --mandir=%{_mandir}
+%endif
 make 
 
 %install
@@ -120,6 +120,15 @@ rm -rf build-$RPM_ARCH
 %{_mandir}/man8/faillog.8*
 
 %changelog
+* Fri Jun 08 2001 Than Ngo <than@redhat.com>
+- fixup broken specfile
+
+* Tue May 22 2001 Bernhard Rosenkraenzer <bero@redhat.com> 20000902-1
+- Create an empty mailspool when creating a user so non-setuid/non-setgid
+  MDAs (postfix+procmail) can deliver mail (#41811)
+- 20000902
+- adapt patches
+
 * Fri Mar  9 2001 Nalin Dahyabhai <nalin@redhat.com>
 - don't overwrite user dot files in useradd (#19982)
 - truncate new files when moving overwriting files with the contents of other
