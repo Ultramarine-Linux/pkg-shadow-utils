@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files.
 Name: shadow-utils
 Version: 20000902
-Release: 12
+Release: 12.8
 Epoch: 1
 Source0: ftp://ftp.ists.pwr.wroc.pl/pub/linux/shadow/shadow-%{version}.tar.bz2
 Source1: shadow-970616.login.defs
@@ -123,6 +123,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/faillog.8*
 
 %changelog
+* Tue Feb 11 2003 Nalin Dahyabhai <nalin@redhat.com> 20000902-12.8
+- fix perms on mailspools created by useradd to be owned by the "mail"
+  group (#59810)
+
 * Thu Aug 29 2002 Nalin Dahyabhai <nalin@redhat.com> 20000902-12
 - force .mo files to be regenerated with current gettext to flush out possible
   problems
