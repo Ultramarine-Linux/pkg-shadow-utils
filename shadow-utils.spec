@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files.
 Name: shadow-utils
 Version: 20000902
-Release: 3
+Release: 4
 Epoch: 1
 Source0: ftp://ftp.ists.pwr.wroc.pl/pub/linux/shadow/shadow-%{version}.tar.bz2
 Source1: shadow-970616.login.defs
@@ -10,12 +10,12 @@ Source3: adduser.8
 Source4: pwunconv.8
 Source5: grpconv.8
 Source6: grpunconv.8
-Patch0: shadow-20000826-redhat.patch
+Patch0: shadow-20000902-redhat.patch
 Patch1: shadow-20000902-nscd.patch
-Patch3: shadow-19990827-group.patch
-Patch5: shadow-20000902-vipw.patch
-Patch8: shadow-20000826-preserve.patch
-Patch9: shadow-20000902-mailspool.patch
+Patch2: shadow-19990827-group.patch
+Patch3: shadow-20000902-vipw.patch
+Patch4: shadow-20000826-preserve.patch
+Patch5: shadow-20000902-mailspool.patch
 License: BSD
 Group: System Environment/Base
 Buildroot: %{_tmppath}/%{name}-%{version}-root
@@ -24,63 +24,52 @@ Obsoletes: adduser
 %description
 The shadow-utils package includes the necessary programs for
 converting UNIX password files to the shadow password format, plus
-programs for managing user and group accounts.  The pwconv command
-converts passwords to the shadow password format.  The pwunconv
-command unconverts shadow passwords and generates an npasswd file (a
-standard UNIX password file).  The pwck command checks the integrity
-of password and shadow files.  The lastlog command prints out the last
-login times for all users.  The useradd, userdel, and usermod commands
-are used for managing user accounts.  The groupadd, groupdel, and
-groupmod commands are used for managing group accounts.
+programs for managing user and group accounts. The pwconv command
+converts passwords to the shadow password format. The pwunconv command
+unconverts shadow passwords and generates an npasswd file (a standard
+UNIX password file). The pwck command checks the integrity of password
+and shadow files. The lastlog command prints out the last login times
+for all users. The useradd, userdel, and usermod commands are used for
+managing user accounts. The groupadd, groupdel, and groupmod commands
+are used for managing group accounts.
 
 %prep
 %setup -q -n shadow-%{version}
 %patch0 -p1 -b .redhat
 %patch1 -p1 -b .nscd
-%patch3 -p1 -b .group
-%patch5 -p1 -b .vipw
-%patch8 -p1 -b .preserve
-%patch9 -p1 -b .mailspool
+%patch2 -p1 -b .group
+%patch3 -p1 -b .vipw
+%patch4 -p1 -b .preserve
+%patch5 -p1 -b .mailspool
 
 %build
-unset LINGUAS || :
-libtoolize --copy --force
 aclocal
 automake
 autoheader
 autoconf
-rm -rf build-$RPM_ARCH ; mkdir build-$RPM_ARCH ; cd build-$RPM_ARCH
-%ifnarch ia64
-CFLAGS="$RPM_OPT_FLAGS" ../configure --prefix=%{_prefix} \
-	--disable-desrpc --with-libcrypt --disable-shared \
-        --mandir=%{_mandir}
-%else
-CFLAGS="-O -D_BSD_SOURCE" ../configure --prefix=%{_prefix} \
-	--disable-desrpc --with-libcrypt --disable-shared \
-        --mandir=%{_mandir}
+%ifarch ia64
+CFLAGS="$RPM_OPT_FLAGS -O0 -D_BSD_SOURCE" ; export CFLAGS
 %endif
+%configure --disable-desrpc --with-libcrypt --disable-shared
 make 
 
 %install
 rm -rf $RPM_BUILD_ROOT
-pushd build-$RPM_ARCH
 make install DESTDIR=$RPM_BUILD_ROOT gnulocaledir=$RPM_BUILD_ROOT/%{_datadir}/locale
 install -d -m 750 $RPM_BUILD_ROOT/etc/default
 install -c -m 0644 %{SOURCE1} $RPM_BUILD_ROOT/etc/login.defs
 install -c -m 0600 %{SOURCE2} $RPM_BUILD_ROOT/etc/default/useradd
 
-ln -s useradd $RPM_BUILD_ROOT/usr/sbin/adduser
+ln -s useradd $RPM_BUILD_ROOT%{_sbindir}/adduser
 install -m644 $RPM_SOURCE_DIR/adduser.8   $RPM_BUILD_ROOT%{_mandir}/man8/
 install -m644 $RPM_SOURCE_DIR/pwunconv.8  $RPM_BUILD_ROOT%{_mandir}/man8/
 install -m644 $RPM_SOURCE_DIR/grpconv.8   $RPM_BUILD_ROOT%{_mandir}/man8/
 install -m644 $RPM_SOURCE_DIR/grpunconv.8 $RPM_BUILD_ROOT%{_mandir}/man8/
 perl -pi -e "s/encrpted/encrypted/g" $RPM_BUILD_ROOT%{_mandir}/man8/newusers.8
-popd
 %find_lang shadow
 
 %clean
 rm -rf $RPM_BUILD_ROOT
-rm -rf build-$RPM_ARCH
 
 %files -f shadow.lang
 %defattr(-,root,root)
@@ -120,10 +109,17 @@ rm -rf build-$RPM_ARCH
 %{_mandir}/man8/faillog.8*
 
 %changelog
-* Thu Jul 26 2001 Bill Nottingham <notting@redhat.com>
+* Mon Aug 27 2001 Nalin Dahyabhai <nalin@redhat.com> 20000902-4
+- use -O0 instead of -O on ia64
+- build in source directory
+- don't leave lock files on the filesystem when useradd creates a group for
+  the user (#50269)
+- fix the -o option to check for duplicate UIDs instead of login names (#52187)
+
+* Thu Jul 26 2001 Bill Nottingham <notting@redhat.com> 20000902-3
 - build with -O on ia64
 
-* Fri Jun 08 2001 Than Ngo <than@redhat.com>
+* Fri Jun 08 2001 Than Ngo <than@redhat.com> 20000902-2
 - fixup broken specfile
 
 * Tue May 22 2001 Bernhard Rosenkraenzer <bero@redhat.com> 20000902-1
