@@ -7,7 +7,7 @@
 Summary: Utilities for managing accounts and shadow password files.
 Name: shadow-utils
 Version: 4.0.3
-Release: 23
+Release: 24
 Epoch: 2
 URL: http://shadow.pld.org.pl/
 Source0: ftp://ftp.pld.org.pl/software/shadow/shadow-%{version}.tar.bz2
@@ -253,6 +253,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/man8/faillog.8*
 
 %changelog
+* Sat Jul 10 2004 Alan Cox <alan@redhat.com> 4.0.3-24
+- Fix nscd path. This fixes various stale data caching bugs (#125421)
+
 * Thu Jun 17 2004 Dan Walsh <dwalsh@redhat.com> 4.0.3-23
 - Add get_enforce checks
 - Clean up patch for potential upstream submission
