@@ -1,7 +1,11 @@
+%if %{?WITH_SELINUX:0}%{!?WITH_SELINUX:1}
+%define WITH_SELINUX 0
+%endif
+
 Summary: Utilities for managing accounts and shadow password files.
 Name: shadow-utils
 Version: 4.0.3
-Release: 6
+Release: 12
 Epoch: 2
 URL: http://shadow.pld.org.pl/
 Source0: ftp://ftp.pld.org.pl/software/shadow/shadow-%{version}.tar.bz2
@@ -19,6 +23,7 @@ Patch4: shadow-4.0.3-vipw.patch
 Patch5: shadow-4.0.3-mailspool.patch
 Patch6: shadow-20000902-usg.patch
 Patch7: shadow-4.0.3-shadow-man.patch
+Patch8: shadow-utils-selinux.patch
 License: BSD
 Group: System Environment/Base
 BuildPrereq: autoconf, automake, libtool
@@ -47,9 +52,35 @@ are used for managing group accounts.
 %patch5 -p1 -b .mailspool
 %patch6 -p1 -b .usg
 %patch7 -p1 -b .shadow-man
+%if %{WITH_SELINUX}
+#SELinux
+%patch8 -p1 -b .selinux
+%endif
 rm po/*.gmo
+
+# Recode man pages from euc-jp to UTF-8.
+manconv() {
+flags="$-"
+set +x
+incode=$1
+outcode=$2
+shift 2
+for page in $* ; do
+	if ! iconv -f ${outcode} -t ${outcode} ${page} > /dev/null 2> /dev/null ; then
+		if iconv -f ${incode} -t ${outcode} ${page} > /dev/null 2> /dev/null ; then
+			iconv -f ${incode} -t ${outcode} ${page} > ${page}.tmp && \
+			cat ${page}.tmp > ${page} && \
+			rm ${page}.tmp
+		fi
+	fi
+done
+set -"$flags"
+}
+manconv euc-jp utf-8 man/ja/*.*
+
 aclocal
 automake -a
+autoconf
 
 %build
 %configure \
@@ -63,7 +94,7 @@ make
 
 %install
 rm -rf $RPM_BUILD_ROOT
-make install DESTDIR=$RPM_BUILD_ROOT gnulocaledir=$RPM_BUILD_ROOT/%{_datadir}/locale
+make install DESTDIR=$RPM_BUILD_ROOT gnulocaledir=$RPM_BUILD_ROOT/%{_datadir}/locale MKINSTALLDIRS=`pwd`/mkinstalldirs
 install -d -m 750 $RPM_BUILD_ROOT/etc/default
 install -c -m 0644 %{SOURCE1} $RPM_BUILD_ROOT/etc/login.defs
 install -c -m 0600 %{SOURCE2} $RPM_BUILD_ROOT/etc/default/useradd
@@ -184,6 +215,28 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/man8/faillog.8*
 
 %changelog
+* Wed Oct 22 2003 Nalin Dahyabhai <nalin@redhat.com> 4.0.3-12
+- convert ja man pages to UTF-8 (#106051)
+- override MKINSTALLDIRS at install-time (#107476)
+
+* Mon Sep 8 2003 Dan Walsh <dwalsh@redhat.com>
+- turn off SELinux support
+
+* Thu Sep 4 2003 Dan Walsh <dwalsh@redhat.com> 4.0.3-11.sel
+- build with SELinux support
+
+* Fri Jul 28 2003 Dan Walsh <dwalsh@redhat.com> 4.0.3-10
+- Add SELinux support
+
+* Wed Jun 04 2003 Elliot Lee <sopwith@redhat.com>
+- rebuilt
+
+* Wed Jun  4 2003 Nalin Dahyabhai <nalin@redhat.com> 4.0.3-8
+- rebuild
+
+* Tue Jun  3 2003 Nalin Dahyabhai <nalin@redhat.com> 4.0.3-7
+- run autoconf to generate updated configure at compile-time
+
 * Wed Feb 12 2003 Nalin Dahyabhai <nalin@redhat.com> 4.0.3-6
 - adjust mailspool patch to complain if no group named "mail" exists, even
   though that should never happen
@@ -265,7 +318,7 @@ rm -rf $RPM_BUILD_ROOT
   files while moving directories (keeps files from looking weird later on)
 - configure using %%{_prefix} as the prefix
 
-* Fri Feb 23 2001 Trond Eivind Glomsr)Bød <teg@redhat.com>
+* Fri Feb 23 2001 Trond Eivind Glomsrxd <teg@redhat.com>
 - langify
 
 * Wed Aug 30 2000 Bernhard Rosenkraenzer <bero@redhat.com>
