@@ -7,7 +7,7 @@
 Summary: Utilities for managing accounts and shadow password files.
 Name: shadow-utils
 Version: 4.0.3
-Release: 38
+Release: 39
 Epoch: 2
 URL: http://shadow.pld.org.pl/
 Source0: ftp://ftp.pld.org.pl/software/shadow/shadow-%{version}.tar.bz2
@@ -275,7 +275,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/man8/faillog.8*
 
 %changelog
-* Wed Feb 9 2005 Dan Walsh <dwalsh@redhat.com> 2:4.0.3-38
+* Wed Feb 9 2005 Dan Walsh <dwalsh@redhat.com> 2:4.0.3-39
 - Change useradd to use matchpathcon
 
 * Thu Oct 21 2004 Dan Walsh <dwalsh@redhat.com> 2:4.0.3-37
