@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files.
 Name: shadow-utils
 Version: 20000902
-Release: 4
+Release: 5
 Epoch: 1
 Source0: ftp://ftp.ists.pwr.wroc.pl/pub/linux/shadow/shadow-%{version}.tar.bz2
 Source1: shadow-970616.login.defs
@@ -43,6 +43,7 @@ are used for managing group accounts.
 %patch5 -p1 -b .mailspool
 
 %build
+libtoolize -f
 aclocal
 automake
 autoheader
@@ -109,6 +110,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/faillog.8*
 
 %changelog
+* Tue Mar 26 2002 Tim Powers <timp@redhat.com>
+- libtoolize
+
 * Mon Aug 27 2001 Nalin Dahyabhai <nalin@redhat.com> 20000902-4
 - use -O0 instead of -O on ia64
 - build in source directory
