@@ -7,7 +7,7 @@
 Summary: Utilities for managing accounts and shadow password files.
 Name: shadow-utils
 Version: 4.0.3
-Release: 33
+Release: 35
 Epoch: 2
 URL: http://shadow.pld.org.pl/
 Source0: ftp://ftp.pld.org.pl/software/shadow/shadow-%{version}.tar.bz2
@@ -269,6 +269,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/man8/faillog.8*
 
 %changelog
+* Fri Oct 15 2004 Adrian Havill <havill@redhat.com> 2:4.0.3-35
+- make the limit for the group name the same as the username (determined
+  by the header files, rather than a constant) (#56850)
+
 * Wed Oct 13 2004 Adrian Havill <havill@redhat.com> 2:4.0.3-33
 - allow for mixed case and dots in usernames (#135401)
 - all man pages to UTF-8, not just Japanese (#133883)
