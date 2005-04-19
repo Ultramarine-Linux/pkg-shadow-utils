@@ -7,7 +7,7 @@
 Summary: Utilities for managing accounts and shadow password files.
 Name: shadow-utils
 Version: 4.0.7
-Release: 5
+Release: 6
 Epoch: 2
 URL: http://shadow.pld.org.pl/
 Source0: ftp://ftp.pld.org.pl/software/shadow/shadow-%{version}.tar.bz2
@@ -39,6 +39,8 @@ Patch22: shadow-4.0.3-maxmem.patch
 Patch23: shadow-4.0.7-gcc4.patch
 Patch24: shadow-4.0.7-newgrp-pwd.patch
 Patch25: shadow-4.0.7-uniqueGroup.patch
+Patch26: shadow-4.0.7-chageList.patch
+
 License: BSD
 Group: System Environment/Base
 BuildRequires: autoconf, automake, libtool, gettext-devel
@@ -86,6 +88,7 @@ are used for managing group accounts.
 %patch23 -p1 -b .gcc4
 %patch24 -p1 -b .newgrp-pwd
 %patch25 -p1 -b .uniqueGroup
+%patch26 -p1 -b .chageList
 
 rm po/*.gmo
 rm po/stamp-po
@@ -265,6 +268,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/man8/faillog.8*
 
 %changelog
+* Mon Apr 18 2005 Peter Vrabec <pvrabec@redhat.com> 2:4.0.7-6
+- fix chage -l option (#109499, #137498)
+
 * Mon Apr 04 2005 Peter Vrabec <pvrabec@redhat.com> 2:4.0.7-5
 - fix memory leak, and CPU spinning when grp_update() and 
   duplicate group entries in /etc/group (#151484)
