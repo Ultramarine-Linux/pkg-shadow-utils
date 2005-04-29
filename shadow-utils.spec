@@ -7,7 +7,7 @@
 Summary: Utilities for managing accounts and shadow password files.
 Name: shadow-utils
 Version: 4.0.7
-Release: 6
+Release: 7
 Epoch: 2
 URL: http://shadow.pld.org.pl/
 Source0: ftp://ftp.pld.org.pl/software/shadow/shadow-%{version}.tar.bz2
@@ -40,6 +40,7 @@ Patch23: shadow-4.0.7-gcc4.patch
 Patch24: shadow-4.0.7-newgrp-pwd.patch
 Patch25: shadow-4.0.7-uniqueGroup.patch
 Patch26: shadow-4.0.7-chageList.patch
+Patch27: shadow-utils-4.0.7-selinuxenabled.patch
 
 License: BSD
 Group: System Environment/Base
@@ -89,6 +90,7 @@ are used for managing group accounts.
 %patch24 -p1 -b .newgrp-pwd
 %patch25 -p1 -b .uniqueGroup
 %patch26 -p1 -b .chageList
+%patch27 -p1 -b .selenabled
 
 rm po/*.gmo
 rm po/stamp-po
@@ -268,6 +270,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/man8/faillog.8*
 
 %changelog
+* Fri Apr 29 2005 Jeremy Katz <katzj@redhat.com> - 2:4.0.7-7
+- don't assume selinux is enabled if is_selinux_enabled() returns -1
+
 * Mon Apr 18 2005 Peter Vrabec <pvrabec@redhat.com> 2:4.0.7-6
 - fix chage -l option (#109499, #137498)
 
