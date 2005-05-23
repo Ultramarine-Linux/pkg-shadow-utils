@@ -7,7 +7,7 @@
 Summary: Utilities for managing accounts and shadow password files.
 Name: shadow-utils
 Version: 4.0.7
-Release: 7
+Release: 8
 Epoch: 2
 URL: http://shadow.pld.org.pl/
 Source0: ftp://ftp.pld.org.pl/software/shadow/shadow-%{version}.tar.bz2
@@ -41,6 +41,7 @@ Patch24: shadow-4.0.7-newgrp-pwd.patch
 Patch25: shadow-4.0.7-uniqueGroup.patch
 Patch26: shadow-4.0.7-chageList.patch
 Patch27: shadow-utils-4.0.7-selinuxenabled.patch
+Patch28: shadow-4.0.7-nscd-socket-path.patch
 
 License: BSD
 Group: System Environment/Base
@@ -91,6 +92,7 @@ are used for managing group accounts.
 %patch25 -p1 -b .uniqueGroup
 %patch26 -p1 -b .chageList
 %patch27 -p1 -b .selenabled
+%patch28 -p1 -b .nscdSocketPath
 
 rm po/*.gmo
 rm po/stamp-po
@@ -270,6 +272,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/man8/faillog.8*
 
 %changelog
+* Mon May 23 2005 Peter Vrabec <pvrabec@redhat.com> 2:4.0.7-8
+- fix nscd socket path
+
 * Fri Apr 29 2005 Jeremy Katz <katzj@redhat.com> - 2:4.0.7-7
 - don't assume selinux is enabled if is_selinux_enabled() returns -1
 
