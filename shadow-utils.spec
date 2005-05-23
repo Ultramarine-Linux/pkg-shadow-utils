@@ -7,7 +7,7 @@
 Summary: Utilities for managing accounts and shadow password files.
 Name: shadow-utils
 Version: 4.0.7
-Release: 8
+Release: 9
 Epoch: 2
 URL: http://shadow.pld.org.pl/
 Source0: ftp://ftp.pld.org.pl/software/shadow/shadow-%{version}.tar.bz2
@@ -174,6 +174,7 @@ rm $RPM_BUILD_ROOT/%{_bindir}/su
 rm $RPM_BUILD_ROOT/%{_sbindir}/logoutd
 rm $RPM_BUILD_ROOT/%{_sbindir}/mkpasswd
 rm $RPM_BUILD_ROOT/%{_sbindir}/vipw
+rm $RPM_BUILD_ROOT/%{_sbindir}/vigr
 
 rm $RPM_BUILD_ROOT/%{_mandir}/*/man1/id.*
 rm $RPM_BUILD_ROOT/%{_mandir}/man1/chfn.*
@@ -272,6 +273,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/man8/faillog.8*
 
 %changelog
+* Mon May 23 2005 Peter Vrabec <pvrabec@redhat.com> 2:4.0.7-9
+- remove vigr binary
+
 * Mon May 23 2005 Peter Vrabec <pvrabec@redhat.com> 2:4.0.7-8
 - fix nscd socket path
 
