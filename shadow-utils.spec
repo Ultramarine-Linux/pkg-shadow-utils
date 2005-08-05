@@ -6,42 +6,22 @@
 
 Summary: Utilities for managing accounts and shadow password files.
 Name: shadow-utils
-Version: 4.0.7
-Release: 9
+Version: 4.0.11.1
+Release: 1
 Epoch: 2
 URL: http://shadow.pld.org.pl/
 Source0: ftp://ftp.pld.org.pl/software/shadow/shadow-%{version}.tar.bz2
 Source1: shadow-970616.login.defs
 Source2: shadow-970616.useradd
-Patch0: shadow-4.0.7-redhat.patch
+Patch0: shadow-4.0.11.1-redhat.patch
 Patch1: shadow-4.0.3-noinst.patch
-#Patch2: shadow-4.0.3-nscd.patch
-#Patch3: shadow-19990827-group.patch
-Patch4: shadow-4.0.3-vipw.patch
-#Patch5: shadow-4.0.3-mailspool.patch
-#Patch6: shadow-20000902-usg.patch
-#Patch7: shadow-4.0.3-shadow-man.patch
-#Patch8: shadow-utils-selinux.patch
-#Patch9: shadow-4.0.3-lastlog-size.patch
-#Patch10: shadow-4.0.3-largefile.patch
-#Patch11: shadow-4.0.3-fixref.patch
-#Patch12: shadow-4.0.3-uninitialized.patch
-#Patch13: shadow-4.0.3-removemalloc.patch
-Patch14: shadow-4.0.3-useradd-unlock.patch
-Patch15: shadow-4.0.3-chage-selinux.patch
-Patch16: shadow-4.0.3-goodname.patch
-Patch17: shadow-4.0.3-pl-n_useradd.8.patch
-#Patch18: shadow-4.0.3-skellink.patch
-#Patch19: shadow-4.0.3-matchpathcon.patch
-Patch20: shadow-4.0.3-selinux_context.patch
-Patch21: shadow-4.0.3-lastlog.patch
-Patch22: shadow-4.0.3-maxmem.patch
-Patch23: shadow-4.0.7-gcc4.patch
-Patch24: shadow-4.0.7-newgrp-pwd.patch
-Patch25: shadow-4.0.7-uniqueGroup.patch
-Patch26: shadow-4.0.7-chageList.patch
-Patch27: shadow-utils-4.0.7-selinuxenabled.patch
-Patch28: shadow-4.0.7-nscd-socket-path.patch
+Patch2: shadow-4.0.11.1-vipw.patch
+Patch3: shadow-4.0.3-goodname.patch
+Patch4: shadow-4.0.11.1-lOption.patch
+Patch5: shadow-4.0.11.1-newgrpPwd.patch
+Patch6: shadow-4.0.11.1-uniqueGroup.patch
+Patch7: shadow-4.0.11.1-chageList.patch
+Patch8: shadow-4.0.11.1-isSelinuxEnabled.patch
 
 License: BSD
 Group: System Environment/Base
@@ -66,33 +46,13 @@ are used for managing group accounts.
 %setup -q -n shadow-%{version}
 %patch0 -p1 -b .redhat
 %patch1 -p1 -b .noinst
-#%patch2 -p1 -b .nscd
-#%patch3 -p1 -b .group
-%patch4 -p1 -b .vipw
-#%patch5 -p1 -b .mailspool
-#%patch6 -p1 -b .usg
-#%patch7 -p1 -b .shadow-man
-#%patch8 -p1 -b .selinux
-#%patch9 -p1 -b .lastlog-size
-#%patch10 -p1 -b .largefile
-#%patch11 -p1 -b .fixref
-#%patch12 -p1 -b .uninitialized
-#%patch13 -p1 -b .removemalloc
-%patch14 -p1 -b .useradd-unlock
-%patch15 -p1 -b .chage-selinux
-%patch16 -p1 -b .goodname
-%patch17 -p1 -b .pl-n
-#%patch18 -p1 -b .skellink
-#%patch19 -p1 -b .matchpathcon
-%patch20 -p1 -b .selinux_context
-%patch21 -p1 -b .lastlog
-%patch22 -p1 -b .maxmem
-%patch23 -p1 -b .gcc4
-%patch24 -p1 -b .newgrp-pwd
-%patch25 -p1 -b .uniqueGroup
-%patch26 -p1 -b .chageList
-%patch27 -p1 -b .selenabled
-%patch28 -p1 -b .nscdSocketPath
+%patch2 -p1 -b .vipw
+%patch3 -p1 -b .goodname
+%patch4 -p1 -b .lOption
+%patch5 -p1 -b .newgrpPwd
+%patch6 -p1 -b .uniqueGroup
+%patch7 -p1 -b .chageList
+%patch8 -p1 -b .isSelinuxEnabled
 
 rm po/*.gmo
 rm po/stamp-po
@@ -172,7 +132,6 @@ rm $RPM_BUILD_ROOT/%{_bindir}/login
 rm $RPM_BUILD_ROOT/%{_bindir}/passwd
 rm $RPM_BUILD_ROOT/%{_bindir}/su
 rm $RPM_BUILD_ROOT/%{_sbindir}/logoutd
-rm $RPM_BUILD_ROOT/%{_sbindir}/mkpasswd
 rm $RPM_BUILD_ROOT/%{_sbindir}/vipw
 rm $RPM_BUILD_ROOT/%{_sbindir}/vigr
 
@@ -206,8 +165,6 @@ rm $RPM_BUILD_ROOT/%{_mandir}/man5/suauth.*
 rm $RPM_BUILD_ROOT/%{_mandir}/*/man5/suauth.*
 rm $RPM_BUILD_ROOT/%{_mandir}/man8/logoutd.*
 rm $RPM_BUILD_ROOT/%{_mandir}/*/man8/logoutd.*
-rm $RPM_BUILD_ROOT/%{_mandir}/man8/mkpasswd.*
-rm $RPM_BUILD_ROOT/%{_mandir}/*/man8/mkpasswd.*
 rm $RPM_BUILD_ROOT/%{_mandir}/man8/vipw.*
 rm $RPM_BUILD_ROOT/%{_mandir}/*/man8/vipw.*
 rm $RPM_BUILD_ROOT/%{_mandir}/man8/vigr.*
@@ -248,6 +205,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/man1/newgrp.1*
 %{_mandir}/man3/shadow.3*
 %{_mandir}/man5/shadow.5*
+%{_mandir}/man5/gshadow.5*
 %{_mandir}/*/man5/shadow.5*
 %{_mandir}/man5/faillog.5*
 %{_mandir}/*/man5/faillog.5*
@@ -273,6 +231,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/man8/faillog.8*
 
 %changelog
+* Fri Aug 05 2005 Peter Vrabec <pvrabec@redhat.com> 2:4.0.11.1-1
+- upgrade 
+
 * Mon May 23 2005 Peter Vrabec <pvrabec@redhat.com> 2:4.0.7-9
 - remove vigr binary
 
