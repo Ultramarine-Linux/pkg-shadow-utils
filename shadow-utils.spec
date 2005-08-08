@@ -7,7 +7,7 @@
 Summary: Utilities for managing accounts and shadow password files.
 Name: shadow-utils
 Version: 4.0.11.1
-Release: 1
+Release: 2
 Epoch: 2
 URL: http://shadow.pld.org.pl/
 Source0: ftp://ftp.pld.org.pl/software/shadow/shadow-%{version}.tar.bz2
@@ -22,6 +22,7 @@ Patch5: shadow-4.0.11.1-newgrpPwd.patch
 Patch6: shadow-4.0.11.1-uniqueGroup.patch
 Patch7: shadow-4.0.11.1-chageList.patch
 Patch8: shadow-4.0.11.1-isSelinuxEnabled.patch
+Patch9: shadow-4.0.11.1-notOverwriteHome.patch
 
 License: BSD
 Group: System Environment/Base
@@ -53,6 +54,7 @@ are used for managing group accounts.
 %patch6 -p1 -b .uniqueGroup
 %patch7 -p1 -b .chageList
 %patch8 -p1 -b .isSelinuxEnabled
+%patch9 -p1 -b .notOverwriteHome
 
 rm po/*.gmo
 rm po/stamp-po
@@ -231,6 +233,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/man8/faillog.8*
 
 %changelog
+* Mon Aug 08 2005 Peter Vrabec <pvrabec@redhat.com> 2:4.0.11.1-2
+- do not copy files from skel directory if home directory 
+  already exist (#89591,#80242)
+
 * Fri Aug 05 2005 Peter Vrabec <pvrabec@redhat.com> 2:4.0.11.1-1
 - upgrade 
 
