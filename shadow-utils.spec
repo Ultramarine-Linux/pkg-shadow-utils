@@ -7,7 +7,7 @@
 Summary: Utilities for managing accounts and shadow password files.
 Name: shadow-utils
 Version: 4.0.11.1
-Release: 2
+Release: 3
 Epoch: 2
 URL: http://shadow.pld.org.pl/
 Source0: ftp://ftp.pld.org.pl/software/shadow/shadow-%{version}.tar.bz2
@@ -152,7 +152,6 @@ rm $RPM_BUILD_ROOT/%{_mandir}/man1/passwd.*
 rm $RPM_BUILD_ROOT/%{_mandir}/*/man1/passwd.*
 rm $RPM_BUILD_ROOT/%{_mandir}/man1/su.*
 rm $RPM_BUILD_ROOT/%{_mandir}/*/man1/su.*
-rm $RPM_BUILD_ROOT/%{_mandir}/man3/getspnam.*
 rm $RPM_BUILD_ROOT/%{_mandir}/man5/limits.*
 rm $RPM_BUILD_ROOT/%{_mandir}/*/man5/limits.*
 rm $RPM_BUILD_ROOT/%{_mandir}/man5/login.access.*
@@ -206,6 +205,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man1/newgrp.1*
 %{_mandir}/*/man1/newgrp.1*
 %{_mandir}/man3/shadow.3*
+%{_mandir}/man3/getspnam.3*
 %{_mandir}/man5/shadow.5*
 %{_mandir}/man5/gshadow.5*
 %{_mandir}/*/man5/shadow.5*
@@ -233,6 +233,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/man8/faillog.8*
 
 %changelog
+* Mon Aug 08 2005 Peter Vrabec <pvrabec@redhat.com> 2:4.0.11.1-3
+- provide getspnam.3 man page(#162476)
+- fix useradd man page(#97131)
+
 * Mon Aug 08 2005 Peter Vrabec <pvrabec@redhat.com> 2:4.0.11.1-2
 - do not copy files from skel directory if home directory 
   already exist (#89591,#80242)
