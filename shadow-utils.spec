@@ -7,7 +7,7 @@
 Summary: Utilities for managing accounts and shadow password files.
 Name: shadow-utils
 Version: 4.0.11.1
-Release: 3
+Release: 4
 Epoch: 2
 URL: http://shadow.pld.org.pl/
 Source0: ftp://ftp.pld.org.pl/software/shadow/shadow-%{version}.tar.bz2
@@ -23,7 +23,7 @@ Patch6: shadow-4.0.11.1-uniqueGroup.patch
 Patch7: shadow-4.0.11.1-chageList.patch
 Patch8: shadow-4.0.11.1-isSelinuxEnabled.patch
 Patch9: shadow-4.0.11.1-notOverwriteHome.patch
-
+Patch10: shadow-4.0.11.1-lstchg.patch
 License: BSD
 Group: System Environment/Base
 BuildRequires: autoconf, automake, libtool, gettext-devel
@@ -55,6 +55,7 @@ are used for managing group accounts.
 %patch7 -p1 -b .chageList
 %patch8 -p1 -b .isSelinuxEnabled
 %patch9 -p1 -b .notOverwriteHome
+%patch10 -p1 -b .lstchg
 
 rm po/*.gmo
 rm po/stamp-po
@@ -233,6 +234,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/man8/faillog.8*
 
 %changelog
+* Tue Aug 09 2005 Peter Vrabec <pvrabec@redhat.com> 2:4.0.11.1-4
+- change the password last changed field in the shadow file
+  when "usermod -p" is used (#164943)
+
 * Mon Aug 08 2005 Peter Vrabec <pvrabec@redhat.com> 2:4.0.11.1-3
 - provide getspnam.3 man page(#162476)
 - fix useradd man page(#97131)
