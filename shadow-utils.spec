@@ -7,7 +7,7 @@
 Summary: Utilities for managing accounts and shadow password files.
 Name: shadow-utils
 Version: 4.0.11.1
-Release: 4
+Release: 5
 Epoch: 2
 URL: http://shadow.pld.org.pl/
 Source0: ftp://ftp.pld.org.pl/software/shadow/shadow-%{version}.tar.bz2
@@ -24,11 +24,13 @@ Patch7: shadow-4.0.11.1-chageList.patch
 Patch8: shadow-4.0.11.1-isSelinuxEnabled.patch
 Patch9: shadow-4.0.11.1-notOverwriteHome.patch
 Patch10: shadow-4.0.11.1-lstchg.patch
+Patch11: shadow-4.0.11.1-selinux.patch
 License: BSD
 Group: System Environment/Base
 BuildRequires: autoconf, automake, libtool, gettext-devel
-BuildRequires: libselinux-devel
+BuildRequires: libselinux-devel >= 1.25.2-1
 Buildroot: %{_tmppath}/%{name}-%{version}-root
+Requires: libselinux >= 1.25.2-1
 Obsoletes: adduser
 
 %description
@@ -56,6 +58,7 @@ are used for managing group accounts.
 %patch8 -p1 -b .isSelinuxEnabled
 %patch9 -p1 -b .notOverwriteHome
 %patch10 -p1 -b .lstchg
+%patch11 -p1 -b .selinux
 
 rm po/*.gmo
 rm po/stamp-po
@@ -234,6 +237,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/man8/faillog.8*
 
 %changelog
+* Sat Aug 13 2005 Dan Walsh <dwalsh@redhat.com> 2:4.0.11.1-5
+- Change to use new selinux api for selinux_check_passwd_access
+
 * Tue Aug 09 2005 Peter Vrabec <pvrabec@redhat.com> 2:4.0.11.1-4
 - change the password last changed field in the shadow file
   when "usermod -p" is used (#164943)
