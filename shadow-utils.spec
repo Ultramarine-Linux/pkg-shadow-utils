@@ -6,25 +6,20 @@
 
 Summary: Utilities for managing accounts and shadow password files.
 Name: shadow-utils
-Version: 4.0.11.1
-Release: 5
+Version: 4.0.12
+Release: 1
 Epoch: 2
 URL: http://shadow.pld.org.pl/
 Source0: ftp://ftp.pld.org.pl/software/shadow/shadow-%{version}.tar.bz2
 Source1: shadow-970616.login.defs
 Source2: shadow-970616.useradd
-Patch0: shadow-4.0.11.1-redhat.patch
+Patch0: shadow-4.0.12-redhat.patch
 Patch1: shadow-4.0.3-noinst.patch
 Patch2: shadow-4.0.11.1-vipw.patch
 Patch3: shadow-4.0.3-goodname.patch
-Patch4: shadow-4.0.11.1-lOption.patch
-Patch5: shadow-4.0.11.1-newgrpPwd.patch
-Patch6: shadow-4.0.11.1-uniqueGroup.patch
-Patch7: shadow-4.0.11.1-chageList.patch
-Patch8: shadow-4.0.11.1-isSelinuxEnabled.patch
-Patch9: shadow-4.0.11.1-notOverwriteHome.patch
-Patch10: shadow-4.0.11.1-lstchg.patch
-Patch11: shadow-4.0.11.1-selinux.patch
+Patch4: shadow-4.0.11.1-newgrpPwd.patch
+Patch5: shadow-4.0.11.1-isSelinuxEnabled.patch
+Patch6: shadow-4.0.11.1-selinux.patch
 License: BSD
 Group: System Environment/Base
 BuildRequires: autoconf, automake, libtool, gettext-devel
@@ -51,14 +46,9 @@ are used for managing group accounts.
 %patch1 -p1 -b .noinst
 %patch2 -p1 -b .vipw
 %patch3 -p1 -b .goodname
-%patch4 -p1 -b .lOption
-%patch5 -p1 -b .newgrpPwd
-%patch6 -p1 -b .uniqueGroup
-%patch7 -p1 -b .chageList
-%patch8 -p1 -b .isSelinuxEnabled
-%patch9 -p1 -b .notOverwriteHome
-%patch10 -p1 -b .lstchg
-%patch11 -p1 -b .selinux
+%patch4 -p1 -b .newgrpPwd
+%patch5 -p1 -b .isSelinuxEnabled
+%patch6 -p1 -b .selinux
 
 rm po/*.gmo
 rm po/stamp-po
@@ -209,10 +199,12 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man1/newgrp.1*
 %{_mandir}/*/man1/newgrp.1*
 %{_mandir}/man3/shadow.3*
+%{_mandir}/*/man3/shadow.3*
 %{_mandir}/man3/getspnam.3*
+%{_mandir}/*/man3/getspnam.3*
 %{_mandir}/man5/shadow.5*
-%{_mandir}/man5/gshadow.5*
 %{_mandir}/*/man5/shadow.5*
+%{_mandir}/man5/gshadow.5*
 %{_mandir}/man5/faillog.5*
 %{_mandir}/*/man5/faillog.5*
 %{_mandir}/man8/adduser.8*
@@ -237,6 +229,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/man8/faillog.8*
 
 %changelog
+* Sat Aug 27 2005 Peter Vrabec <pvrabec@redhat.com> 2:4.0.12-1
+- upgrade 
+
 * Sat Aug 13 2005 Dan Walsh <dwalsh@redhat.com> 2:4.0.11.1-5
 - Change to use new selinux api for selinux_check_passwd_access
 
