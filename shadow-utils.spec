@@ -7,7 +7,7 @@
 Summary: Utilities for managing accounts and shadow password files.
 Name: shadow-utils
 Version: 4.0.12
-Release: 1
+Release: 2
 Epoch: 2
 URL: http://shadow.pld.org.pl/
 Source0: ftp://ftp.pld.org.pl/software/shadow/shadow-%{version}.tar.bz2
@@ -20,12 +20,15 @@ Patch3: shadow-4.0.3-goodname.patch
 Patch4: shadow-4.0.11.1-newgrpPwd.patch
 Patch5: shadow-4.0.11.1-isSelinuxEnabled.patch
 Patch6: shadow-4.0.11.1-selinux.patch
+Patch7: shadow-4.0.12-audit.patch
 License: BSD
 Group: System Environment/Base
 BuildRequires: autoconf, automake, libtool, gettext-devel
 BuildRequires: libselinux-devel >= 1.25.2-1
+BuildRequires: audit-libs-devel >= 0.9.8
 Buildroot: %{_tmppath}/%{name}-%{version}-root
 Requires: libselinux >= 1.25.2-1
+Requires: audit-libs >= 0.9.8
 Obsoletes: adduser
 
 %description
@@ -49,6 +52,7 @@ are used for managing group accounts.
 %patch4 -p1 -b .newgrpPwd
 %patch5 -p1 -b .isSelinuxEnabled
 %patch6 -p1 -b .selinux
+%patch7 -p1 -b .audit
 
 rm po/*.gmo
 rm po/stamp-po
@@ -229,6 +233,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/man8/faillog.8*
 
 %changelog
+* Tue Aug 30 2005 Peter Vrabec <pvrabec@redhat.com> 2:4.0.12-2
+- audit support
+
 * Sat Aug 27 2005 Peter Vrabec <pvrabec@redhat.com> 2:4.0.12-1
 - upgrade 
 
