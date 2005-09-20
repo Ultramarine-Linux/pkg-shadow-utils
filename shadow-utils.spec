@@ -7,7 +7,7 @@
 Summary: Utilities for managing accounts and shadow password files.
 Name: shadow-utils
 Version: 4.0.12
-Release: 2
+Release: 3
 Epoch: 2
 URL: http://shadow.pld.org.pl/
 Source0: ftp://ftp.pld.org.pl/software/shadow/shadow-%{version}.tar.bz2
@@ -154,8 +154,6 @@ rm $RPM_BUILD_ROOT/%{_mandir}/man5/limits.*
 rm $RPM_BUILD_ROOT/%{_mandir}/*/man5/limits.*
 rm $RPM_BUILD_ROOT/%{_mandir}/man5/login.access.*
 rm $RPM_BUILD_ROOT/%{_mandir}/*/man5/login.access.*
-rm $RPM_BUILD_ROOT/%{_mandir}/man5/login.defs.*
-rm $RPM_BUILD_ROOT/%{_mandir}/*/man5/login.defs.*
 rm $RPM_BUILD_ROOT/%{_mandir}/man5/passwd.*
 rm $RPM_BUILD_ROOT/%{_mandir}/*/man5/passwd.*
 rm $RPM_BUILD_ROOT/%{_mandir}/man5/porttime.*
@@ -208,6 +206,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/man3/getspnam.3*
 %{_mandir}/man5/shadow.5*
 %{_mandir}/*/man5/shadow.5*
+%{_mandir}/man5/login.defs.5*
+%{_mandir}/*/man5/login.defs.5*
 %{_mandir}/man5/gshadow.5*
 %{_mandir}/man5/faillog.5*
 %{_mandir}/*/man5/faillog.5*
@@ -233,6 +233,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/man8/faillog.8*
 
 %changelog
+* Tue Sep 20 2005 Peter Vrabec <pvrabec@redhat.com> 2:4.0.12-3
+- provide login.defs man page
+- adjust audit patch
+
 * Tue Aug 30 2005 Peter Vrabec <pvrabec@redhat.com> 2:4.0.12-2
 - audit support
 
