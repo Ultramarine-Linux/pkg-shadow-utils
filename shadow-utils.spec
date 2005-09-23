@@ -7,7 +7,7 @@
 Summary: Utilities for managing accounts and shadow password files.
 Name: shadow-utils
 Version: 4.0.12
-Release: 3
+Release: 4
 Epoch: 2
 URL: http://shadow.pld.org.pl/
 Source0: ftp://ftp.pld.org.pl/software/shadow/shadow-%{version}.tar.bz2
@@ -21,6 +21,7 @@ Patch4: shadow-4.0.11.1-newgrpPwd.patch
 Patch5: shadow-4.0.11.1-isSelinuxEnabled.patch
 Patch6: shadow-4.0.11.1-selinux.patch
 Patch7: shadow-4.0.12-audit.patch
+Patch8: shadow-4.0.12-lOption.patch
 License: BSD
 Group: System Environment/Base
 BuildRequires: autoconf, automake, libtool, gettext-devel
@@ -53,6 +54,7 @@ are used for managing group accounts.
 %patch5 -p1 -b .isSelinuxEnabled
 %patch6 -p1 -b .selinux
 %patch7 -p1 -b .audit
+%patch8 -p1 -b .lOption
 
 rm po/*.gmo
 rm po/stamp-po
@@ -233,6 +235,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/man8/faillog.8*
 
 %changelog
+* Fri Sep 23 2005 Peter Vrabec <pvrabec@redhat.com> 2:4.0.12-4
+- add useradd -l option back, it was removed by mistake
+
 * Tue Sep 20 2005 Peter Vrabec <pvrabec@redhat.com> 2:4.0.12-3
 - provide login.defs man page
 - adjust audit patch
