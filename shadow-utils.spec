@@ -6,22 +6,19 @@
 
 Summary: Utilities for managing accounts and shadow password files.
 Name: shadow-utils
-Version: 4.0.12
-Release: 4
+Version: 4.0.13
+Release: 1
 Epoch: 2
 URL: http://shadow.pld.org.pl/
 Source0: ftp://ftp.pld.org.pl/software/shadow/shadow-%{version}.tar.bz2
 Source1: shadow-970616.login.defs
 Source2: shadow-970616.useradd
-Patch0: shadow-4.0.12-redhat.patch
+Patch0: shadow-4.0.13-redhat.patch
 Patch1: shadow-4.0.3-noinst.patch
 Patch2: shadow-4.0.11.1-vipw.patch
-Patch3: shadow-4.0.3-goodname.patch
-Patch4: shadow-4.0.11.1-newgrpPwd.patch
-Patch5: shadow-4.0.11.1-isSelinuxEnabled.patch
-Patch6: shadow-4.0.11.1-selinux.patch
-Patch7: shadow-4.0.12-audit.patch
-Patch8: shadow-4.0.12-lOption.patch
+Patch3: shadow-4.0.13-goodname.patch
+Patch4: shadow-4.0.13-newgrpPwd.patch
+Patch5: shadow-4.0.12-lOption.patch
 License: BSD
 Group: System Environment/Base
 BuildRequires: autoconf, automake, libtool, gettext-devel
@@ -51,10 +48,7 @@ are used for managing group accounts.
 %patch2 -p1 -b .vipw
 %patch3 -p1 -b .goodname
 %patch4 -p1 -b .newgrpPwd
-%patch5 -p1 -b .isSelinuxEnabled
-%patch6 -p1 -b .selinux
-%patch7 -p1 -b .audit
-%patch8 -p1 -b .lOption
+%patch5 -p1 -b .lOption
 
 rm po/*.gmo
 rm po/stamp-po
@@ -108,7 +102,8 @@ autoconf
 	--with-selinux \
 %endif
 	--without-libpam \
-	--disable-shared
+	--disable-shared \
+	--with-libaudit
 make 
 
 %install
@@ -235,6 +230,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/man8/faillog.8*
 
 %changelog
+* Fri Oct 21 2005 Peter Vrabec <pvrabec@redhat.com> 2:4.0.13-1
+- upgrade
+
 * Fri Sep 23 2005 Peter Vrabec <pvrabec@redhat.com> 2:4.0.12-4
 - add useradd -l option back, it was removed by mistake
 

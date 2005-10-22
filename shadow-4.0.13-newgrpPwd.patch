@@ -1,0 +1,92 @@
+--- shadow-4.0.13/src/newgrp.c.newgrpPwd	2005-09-15 18:44:12.000000000 +0200
++++ shadow-4.0.13/src/newgrp.c	2005-10-21 16:02:16.000000000 +0200
+@@ -333,25 +333,37 @@ int main (int argc, char **argv)
+ 	}
+ #endif
+ 
+-	/*
+-	 * see if she is a member of this group. If she isn't a member, she
+-	 * needs to provide the group password. If there is no group
+-	 * password, she will be denied access anyway.
+-	 *
+-	 */
+-	if (!is_on_list (grp->gr_mem, name))
+-		needspasswd = 1;
++        /* Needn't password:
++         *      - default user's GID = group ID
++         *      - members of group
++         *      - root
++         * Need password:
++         *      - all others users
++         *
++         * -- Karel Zak <kzak@redhat.com> 2004/03/29
++         */
++	if (getuid ()!=0)
++        {
++                if (grp->gr_gid==pwd->pw_gid)
++                        needspasswd = 0;
++                else if (is_on_list (grp->gr_mem, name))
++                        needspasswd = 0;
++                else
++                        needspasswd = 1;
+ 
+ 	/*
+ 	 * If she does not have either a shadowed password, or a regular
+ 	 * password, and the group has a password, she needs to give the
+ 	 * group password.
+ 	 */
+-	if ((spwd = getspnam (name)))
+-		pwd->pw_passwd = spwd->sp_pwdp;
+-
+-	if (pwd->pw_passwd[0] == '\0' && grp->gr_passwd[0])
+-		needspasswd = 1;
++                if (!needspasswd)
++                {
++                        if ((spwd = getspnam (name)))
++                                pwd->pw_passwd = spwd->sp_pwdp;
++                        if (pwd->pw_passwd[0] == '\0' && grp->gr_passwd[0])
++                                needspasswd = 1;
++                }
++        }
+ 
+ 	/*
+ 	 * Now i see about letting her into the group she requested. If she
+@@ -362,7 +374,21 @@ int main (int argc, char **argv)
+ 	 * Note that she now has to provide the password to her own group,
+ 	 * unless she is listed as a member.  -- JWP
+ 	 */
+-	if (getuid () != 0 && needspasswd) {
++        if (needspasswd) {
++
++                /* note: the original util-linux newgrp didn't ask for pasword if
++                 * there is no password. It's better directly give up.
++                 * -- kzak@redhat.com
++                 */
++		if (grp->gr_passwd==NULL || grp->gr_passwd[0] == '\0') {
++                        /*
++                         * there is no password, print out "Sorry" and give up
++                         */
++                        sleep (1);
++                        fputs (_("Sorry.\n"), stderr);
++			goto failure;
++                }
++
+ 		/*
+ 		 * get the password from her, and set the salt for
+ 		 * the decryption from the group file.
+@@ -378,15 +404,6 @@ int main (int argc, char **argv)
+ 		cpasswd = pw_encrypt (cp, grp->gr_passwd);
+ 		strzero (cp);
+ 
+-		if (grp->gr_passwd[0] == '\0') {
+-			/*
+-			 * there is no password, print out "Sorry" and give up
+-			 */
+-			sleep (1);
+-			fputs (_("Sorry.\n"), stderr);
+-			goto failure;
+-		}
+-
+ 		if (strcmp (cpasswd, grp->gr_passwd) != 0) {
+ 			SYSLOG ((LOG_INFO,
+ 				 "Invalid password for group `%s' from `%s'",
