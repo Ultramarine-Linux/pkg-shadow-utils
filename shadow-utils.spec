@@ -7,7 +7,7 @@
 Summary: Utilities for managing accounts and shadow password files.
 Name: shadow-utils
 Version: 4.0.13
-Release: 1
+Release: 2
 Epoch: 2
 URL: http://shadow.pld.org.pl/
 Source0: ftp://ftp.pld.org.pl/software/shadow/shadow-%{version}.tar.bz2
@@ -19,14 +19,15 @@ Patch2: shadow-4.0.11.1-vipw.patch
 Patch3: shadow-4.0.13-goodname.patch
 Patch4: shadow-4.0.13-newgrpPwd.patch
 Patch5: shadow-4.0.12-lOption.patch
+Patch6: shadow-4.0.13-audit-update.patch 
 License: BSD
 Group: System Environment/Base
 BuildRequires: autoconf, automake, libtool, gettext-devel
 BuildRequires: libselinux-devel >= 1.25.2-1
-BuildRequires: audit-libs-devel >= 0.9.8
+BuildRequires: audit-libs-devel >= 1.0.10
 Buildroot: %{_tmppath}/%{name}-%{version}-root
 Requires: libselinux >= 1.25.2-1
-Requires: audit-libs >= 0.9.8
+Requires: audit-libs >= 1.0.10
 Obsoletes: adduser
 
 %description
@@ -49,6 +50,7 @@ are used for managing group accounts.
 %patch3 -p1 -b .goodname
 %patch4 -p1 -b .newgrpPwd
 %patch5 -p1 -b .lOption
+%patch6 -p1 -b .audit
 
 rm po/*.gmo
 rm po/stamp-po
@@ -230,6 +232,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/man8/faillog.8*
 
 %changelog
+* Sat Nov 5 2005 Steve Grubb <sgrubb@redhat.com> 2:4.0.13-2
+- Update audit communication to standard format messages
+
 * Fri Oct 21 2005 Peter Vrabec <pvrabec@redhat.com> 2:4.0.13-1
 - upgrade
 
