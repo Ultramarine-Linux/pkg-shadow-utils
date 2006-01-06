@@ -1,0 +1,77 @@
+--- shadow-4.0.14/man/useradd.8.goodname	2006-01-05 17:54:26.000000000 +0100
++++ shadow-4.0.14/man/useradd.8	2006-01-05 18:01:18.000000000 +0100
+@@ -166,8 +166,6 @@
+ Similarly, if the username already exists in an external user database such as NIS,
+ \fBuseradd\fR
+ will deny the user account creation request.
+-.PP
+-Usernames must begin with a lower case letter or an underscore, and only lower case letters, underscores, dashes, and dollar signs may follow. In regular expression terms: [a\-z_][a\-z0\-9_\-]*[$]
+ .SH "FILES"
+ .TP
+ \fI/etc/passwd\fR
+--- shadow-4.0.14/libmisc/chkname.c.goodname	2005-08-31 19:24:57.000000000 +0200
++++ shadow-4.0.14/libmisc/chkname.c	2006-01-05 17:59:45.000000000 +0100
+@@ -18,16 +18,24 @@
+ static int good_name (const char *name)
+ {
+ 	/*
+-	 * User/group names must match [a-z_][a-z0-9_-]*[$]
+-	 */
+-	if (!*name || !((*name >= 'a' && *name <= 'z') || *name == '_'))
++         * User/group names must match gnu e-regex:
++         *    [a-zA-Z0-9_.][a-zA-Z0-9_.-]{0,30}[a-zA-Z0-9_.$-]?
++         *
++         * as a non-POSIX, extension, allow "$" as the last char for
++         * sake of Samba 3.x "add machine script"
++         */
++	if (!*name || !((*name >= 'a' && *name <= 'z')
++             || (*name >= 'A' && *name <= 'Z')
++             || (*name >= '0' && *name <= '9')
++             || *name == '_' || *name == '.'))
+ 		return 0;
+ 
+ 	while (*++name) {
+-		if (!((*name >= 'a' && *name <= 'z') ||
+-		      (*name >= '0' && *name <= '9') ||
+-		      *name == '_' || *name == '-' ||
+-		      (*name == '$' && *(name + 1) == '\0')))
++		if (!(  (*name >= 'a' && *name <= 'z')
++		     || (*name >= 'A' && *name <= 'Z')
++                     || (*name >= '0' && *name <= '9')
++                     || *name == '_' || *name == '.' || *name == '-'
++                     || (*name == '$' && *(name + 1) == '\0')))
+ 			return 0;
+ 	}
+ 
+@@ -43,10 +51,9 @@
+ #endif
+ 
+ 	/*
+-	 * User names are limited by whatever utmp can
+-	 * handle (usually max 8 characters).
++	 * User names are limited by whatever utmp can handle.
+ 	 */
+-	if (strlen (name) > sizeof (ut.ut_user))
++	if (strlen(name) + 1 > sizeof(ut.ut_user))
+ 		return 0;
+ 
+ 	return good_name (name);
+@@ -54,11 +61,13 @@
+ 
+ int check_group_name (const char *name)
+ {
+-	/*
+-	 * Arbitrary limit for group names - max 16
+-	 * characters (same as on HP-UX 10).
+-	 */
+-	if (strlen (name) > 16)
++#if HAVE_UTMPX_H
++	struct utmpx ut;
++#else
++	struct utmp ut;
++#endif
++
++	if (strlen(name) + 1 > sizeof(ut.ut_user))
+ 		return 0;
+ 
+ 	return good_name (name);

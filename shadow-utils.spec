@@ -2,25 +2,21 @@
 %define WITH_SELINUX 1
 %endif
 
-%define utf8_man_pages 1
-
 Summary: Utilities for managing accounts and shadow password files.
 Name: shadow-utils
-Version: 4.0.13
-Release: 4.1
+Version: 4.0.14
+Release: 1
 Epoch: 2
 URL: http://shadow.pld.org.pl/
 Source0: ftp://ftp.pld.org.pl/software/shadow/shadow-%{version}.tar.bz2
 Source1: shadow-970616.login.defs
 Source2: shadow-970616.useradd
-Patch0: shadow-4.0.13-redhat.patch
+Patch0: shadow-4.0.14-redhat.patch
 Patch1: shadow-4.0.3-noinst.patch
 Patch2: shadow-4.0.11.1-vipw.patch
-Patch3: shadow-4.0.13-goodname.patch
+Patch3: shadow-4.0.14-goodname.patch
 Patch4: shadow-4.0.13-newgrpPwd.patch
 Patch5: shadow-4.0.12-lOption.patch
-Patch6: shadow-4.0.13-audit-update.patch 
-Patch7: shadow-4.0.13-auditUserdel.patch
 License: BSD
 Group: System Environment/Base
 BuildRequires: autoconf, automake, libtool, gettext-devel
@@ -51,45 +47,9 @@ are used for managing group accounts.
 %patch3 -p1 -b .goodname
 %patch4 -p1 -b .newgrpPwd
 %patch5 -p1 -b .lOption
-%patch6 -p1 -b .audit
-%patch7 -p1 -b .auditUserdel
 
 rm po/*.gmo
 rm po/stamp-po
-
-# Recode man pages from euc-jp to UTF-8.
-manconv() {
-flags="$-"
-set +x
-incode=$1
-outcode=$2
-shift 2
-for page in $* ; do
-	if ! iconv -f ${outcode} -t ${outcode} ${page} > /dev/null 2> /dev/null ; then
-		if iconv -f ${incode} -t ${outcode} ${page} > /dev/null 2> /dev/null ; then
-			iconv -f ${incode} -t ${outcode} ${page} > ${page}.tmp && \
-			cat ${page}.tmp > ${page} && \
-			rm ${page}.tmp
-		fi
-	fi
-done
-set -"$flags"
-}
-%if %{utf8_man_pages}
-manconv euc-jp utf-8 man/ja/*.*
-manconv iso-8859-1 utf-8 man/de/*
-manconv iso-8859-1 utf-8 man/fr/*
-manconv iso-8859-1 utf-8 man/it/*
-manconv iso-8859-1 utf-8 man/pt_BR/*
-manconv iso-8859-2 utf-8 man/hu/*
-manconv iso-8859-2 utf-8 man/pl/*
-manconv iso-8859-2 utf-8 man/cs/*
-manconv iso-8859-1 utf-8 man/es/*
-manconv koi8-u  utf-8 man/ru/*
-manconv euc-kr utf-8 man/ko/*.*
-manconv gb2312 utf-8 man/zh_CN/*.*
-manconv big5 utf-8 man/zh_TW/*.*
-%endif
 
 libtoolize --force
 aclocal
@@ -135,7 +95,7 @@ rm $RPM_BUILD_ROOT/%{_bindir}/su
 rm $RPM_BUILD_ROOT/%{_sbindir}/logoutd
 rm $RPM_BUILD_ROOT/%{_sbindir}/vipw
 rm $RPM_BUILD_ROOT/%{_sbindir}/vigr
-
+rm $RPM_BUILD_ROOT/%{_sbindir}/nologin
 rm $RPM_BUILD_ROOT/%{_mandir}/*/man1/id.*
 rm $RPM_BUILD_ROOT/%{_mandir}/man1/chfn.*
 rm $RPM_BUILD_ROOT/%{_mandir}/*/man1/chfn.*
@@ -167,6 +127,8 @@ rm $RPM_BUILD_ROOT/%{_mandir}/man8/vipw.*
 rm $RPM_BUILD_ROOT/%{_mandir}/*/man8/vipw.*
 rm $RPM_BUILD_ROOT/%{_mandir}/man8/vigr.*
 rm $RPM_BUILD_ROOT/%{_mandir}/*/man8/vigr.*
+rm $RPM_BUILD_ROOT/%{_mandir}/*/man8/sulogin.*
+rm $RPM_BUILD_ROOT/%{_mandir}/*/man3/pw_auth.*
 
 %find_lang shadow
 
@@ -175,7 +137,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files -f shadow.lang
 %defattr(-,root,root)
-%doc NEWS doc/HOWTO doc/LICENSE README doc/README.linux
+%doc NEWS doc/HOWTO README
 %dir /etc/default
 %attr(0644,root,root)	%config /etc/login.defs
 %attr(0600,root,root)	%config /etc/default/useradd
@@ -210,6 +172,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man5/login.defs.5*
 %{_mandir}/*/man5/login.defs.5*
 %{_mandir}/man5/gshadow.5*
+%{_mandir}/*/man5/gshadow.5*
 %{_mandir}/man5/faillog.5*
 %{_mandir}/*/man5/faillog.5*
 %{_mandir}/man8/adduser.8*
@@ -234,6 +197,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/man8/faillog.8*
 
 %changelog
+* Fri Jan 06 2006 Peter Vrabec <pvrabec@redhat.com> 2:4.0.14-1
+- upgrade
+
 * Fri Dec 09 2005 Jesse Keating <jkeating@redhat.com>
 - rebuilt
 
