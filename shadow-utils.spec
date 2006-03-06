@@ -5,7 +5,7 @@
 Summary: Utilities for managing accounts and shadow password files.
 Name: shadow-utils
 Version: 4.0.14
-Release: 1.2
+Release: 2
 Epoch: 2
 URL: http://shadow.pld.org.pl/
 Source0: ftp://ftp.pld.org.pl/software/shadow/shadow-%{version}.tar.bz2
@@ -17,6 +17,8 @@ Patch2: shadow-4.0.11.1-vipw.patch
 Patch3: shadow-4.0.14-goodname.patch
 Patch4: shadow-4.0.13-newgrpPwd.patch
 Patch5: shadow-4.0.12-lOption.patch
+Patch6: shadow-4.0.14-symlinks.patch
+
 License: BSD
 Group: System Environment/Base
 BuildRequires: autoconf, automake, libtool, gettext-devel
@@ -47,12 +49,13 @@ are used for managing group accounts.
 %patch3 -p1 -b .goodname
 %patch4 -p1 -b .newgrpPwd
 %patch5 -p1 -b .lOption
+%patch6 -p1 -b .symlinks
 
 rm po/*.gmo
 rm po/stamp-po
 
-libtoolize --force
 aclocal
+libtoolize --force
 automake -a
 autoconf
 
@@ -197,6 +200,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/man8/faillog.8*
 
 %changelog
+* Mon Mar 06 2006 Peter Vrabec <pvrabec@redhat.com> 2:4.0.14-2
+- use lrename() function, which follow a destination symbolic link(#181977)
+
 * Fri Feb 10 2006 Jesse Keating <jkeating@redhat.com> - 2:4.0.14-1.2
 - bump again for double-long bug on ppc(64)
 
