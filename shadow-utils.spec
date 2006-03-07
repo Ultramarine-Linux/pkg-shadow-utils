@@ -5,7 +5,7 @@
 Summary: Utilities for managing accounts and shadow password files.
 Name: shadow-utils
 Version: 4.0.14
-Release: 2
+Release: 3
 Epoch: 2
 URL: http://shadow.pld.org.pl/
 Source0: ftp://ftp.pld.org.pl/software/shadow/shadow-%{version}.tar.bz2
@@ -200,6 +200,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/man8/faillog.8*
 
 %changelog
+* Tue Mar 07 2006 Peter Vrabec <pvrabec@redhat.com> 2:4.0.14-3
+- set default umask to 077 in login.defs
+
 * Mon Mar 06 2006 Peter Vrabec <pvrabec@redhat.com> 2:4.0.14-2
 - use lrename() function, which follow a destination symbolic link(#181977)
 
