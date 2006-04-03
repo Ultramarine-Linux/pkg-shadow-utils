@@ -4,14 +4,14 @@
 
 Summary: Utilities for managing accounts and shadow password files.
 Name: shadow-utils
-Version: 4.0.14
-Release: 4
+Version: 4.0.15
+Release: 1
 Epoch: 2
 URL: http://shadow.pld.org.pl/
 Source0: ftp://ftp.pld.org.pl/software/shadow/shadow-%{version}.tar.bz2
-Source1: shadow-970616.login.defs
+Source1: shadow-4.0.15-login.defs
 Source2: shadow-970616.useradd
-Patch0: shadow-4.0.14-redhat.patch
+Patch0: shadow-4.0.15-redhat.patch
 Patch1: shadow-4.0.3-noinst.patch
 Patch2: shadow-4.0.11.1-vipw.patch
 Patch3: shadow-4.0.14-goodname.patch
@@ -99,6 +99,7 @@ rm $RPM_BUILD_ROOT/%{_sbindir}/logoutd
 rm $RPM_BUILD_ROOT/%{_sbindir}/vipw
 rm $RPM_BUILD_ROOT/%{_sbindir}/vigr
 rm $RPM_BUILD_ROOT/%{_sbindir}/nologin
+rm $RPM_BUILD_ROOT/%{_sbindir}/chgpasswd
 rm $RPM_BUILD_ROOT/%{_mandir}/*/man1/id.*
 rm $RPM_BUILD_ROOT/%{_mandir}/man1/chfn.*
 rm $RPM_BUILD_ROOT/%{_mandir}/*/man1/chfn.*
@@ -128,6 +129,8 @@ rm $RPM_BUILD_ROOT/%{_mandir}/man8/logoutd.*
 rm $RPM_BUILD_ROOT/%{_mandir}/*/man8/logoutd.*
 rm $RPM_BUILD_ROOT/%{_mandir}/man8/vipw.*
 rm $RPM_BUILD_ROOT/%{_mandir}/*/man8/vipw.*
+rm $RPM_BUILD_ROOT/%{_mandir}/man8/nologin.*
+rm $RPM_BUILD_ROOT/%{_mandir}/*/man8/nologin.*
 rm $RPM_BUILD_ROOT/%{_mandir}/man8/vigr.*
 rm $RPM_BUILD_ROOT/%{_mandir}/*/man8/vigr.*
 rm $RPM_BUILD_ROOT/%{_mandir}/*/man8/sulogin.*
@@ -200,6 +203,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/man8/faillog.8*
 
 %changelog
+* Mon Apr 03 2006 Peter Vrabec <pvrabec@redhat.com> 2:4.0.15-1
+- upgrade
+
 * Fri Mar 10 2006 Peter Vrabec <pvrabec@redhat.com> 2:4.0.14-4
 - fix lrename() function to handle relative symlinks too
 
