@@ -5,7 +5,7 @@
 Summary: Utilities for managing accounts and shadow password files.
 Name: shadow-utils
 Version: 4.0.15
-Release: 1
+Release: 2
 Epoch: 2
 URL: http://shadow.pld.org.pl/
 Source0: ftp://ftp.pld.org.pl/software/shadow/shadow-%{version}.tar.bz2
@@ -18,6 +18,7 @@ Patch3: shadow-4.0.14-goodname.patch
 Patch4: shadow-4.0.13-newgrpPwd.patch
 Patch5: shadow-4.0.12-lOption.patch
 Patch6: shadow-4.0.14-symlinks.patch
+Patch7: shadow-4.0.15-nscdFlushCash.patch
 
 License: BSD
 Group: System Environment/Base
@@ -50,6 +51,7 @@ are used for managing group accounts.
 %patch4 -p1 -b .newgrpPwd
 %patch5 -p1 -b .lOption
 %patch6 -p1 -b .symlinks
+%patch7 -p1 -b .nscdFlushCash
 
 rm po/*.gmo
 rm po/stamp-po
@@ -203,6 +205,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/man8/faillog.8*
 
 %changelog
+* Tue Apr 04 2006 Peter Vrabec <pvrabec@redhat.com> 2:4.0.15-2
+- properly notify nscd to flush its cache(#186803)
+
 * Mon Apr 03 2006 Peter Vrabec <pvrabec@redhat.com> 2:4.0.15-1
 - upgrade
 
