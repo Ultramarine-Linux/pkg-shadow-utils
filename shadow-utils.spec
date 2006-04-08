@@ -5,7 +5,7 @@
 Summary: Utilities for managing accounts and shadow password files.
 Name: shadow-utils
 Version: 4.0.15
-Release: 2
+Release: 3
 Epoch: 2
 URL: http://shadow.pld.org.pl/
 Source0: ftp://ftp.pld.org.pl/software/shadow/shadow-%{version}.tar.bz2
@@ -205,6 +205,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/man8/faillog.8*
 
 %changelog
+* Sat Apr 08 2006 Peter Vrabec <pvrabec@redhat.com> 2:4.0.15-3
+- fix typo in shadow-4.0.15-login.defs (#188263)
+
 * Tue Apr 04 2006 Peter Vrabec <pvrabec@redhat.com> 2:4.0.15-2
 - properly notify nscd to flush its cache(#186803)
 
