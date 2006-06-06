@@ -4,21 +4,19 @@
 
 Summary: Utilities for managing accounts and shadow password files.
 Name: shadow-utils
-Version: 4.0.15
-Release: 3
+Version: 4.0.16
+Release: 1
 Epoch: 2
 URL: http://shadow.pld.org.pl/
 Source0: ftp://ftp.pld.org.pl/software/shadow/shadow-%{version}.tar.bz2
 Source1: shadow-4.0.15-login.defs
 Source2: shadow-970616.useradd
-Patch0: shadow-4.0.15-redhat.patch
+Patch0: shadow-4.0.16-redhat.patch
 Patch1: shadow-4.0.3-noinst.patch
 Patch2: shadow-4.0.11.1-vipw.patch
 Patch3: shadow-4.0.14-goodname.patch
 Patch4: shadow-4.0.13-newgrpPwd.patch
-Patch5: shadow-4.0.12-lOption.patch
-Patch6: shadow-4.0.14-symlinks.patch
-Patch7: shadow-4.0.15-nscdFlushCash.patch
+Patch5: shadow-4.0.16-lOption.patch
 
 License: BSD
 Group: System Environment/Base
@@ -50,8 +48,6 @@ are used for managing group accounts.
 %patch3 -p1 -b .goodname
 %patch4 -p1 -b .newgrpPwd
 %patch5 -p1 -b .lOption
-%patch6 -p1 -b .symlinks
-%patch7 -p1 -b .nscdFlushCash
 
 rm po/*.gmo
 rm po/stamp-po
@@ -97,12 +93,13 @@ rm $RPM_BUILD_ROOT/%{_bindir}/groups
 rm $RPM_BUILD_ROOT/%{_bindir}/login
 rm $RPM_BUILD_ROOT/%{_bindir}/passwd
 rm $RPM_BUILD_ROOT/%{_bindir}/su
+rm $RPM_BUILD_ROOT/etc/login.access
+rm $RPM_BUILD_ROOT/etc/limits
 rm $RPM_BUILD_ROOT/%{_sbindir}/logoutd
 rm $RPM_BUILD_ROOT/%{_sbindir}/vipw
 rm $RPM_BUILD_ROOT/%{_sbindir}/vigr
 rm $RPM_BUILD_ROOT/%{_sbindir}/nologin
 rm $RPM_BUILD_ROOT/%{_sbindir}/chgpasswd
-rm $RPM_BUILD_ROOT/%{_mandir}/*/man1/id.*
 rm $RPM_BUILD_ROOT/%{_mandir}/man1/chfn.*
 rm $RPM_BUILD_ROOT/%{_mandir}/*/man1/chfn.*
 rm $RPM_BUILD_ROOT/%{_mandir}/man1/chsh.*
@@ -135,8 +132,8 @@ rm $RPM_BUILD_ROOT/%{_mandir}/man8/nologin.*
 rm $RPM_BUILD_ROOT/%{_mandir}/*/man8/nologin.*
 rm $RPM_BUILD_ROOT/%{_mandir}/man8/vigr.*
 rm $RPM_BUILD_ROOT/%{_mandir}/*/man8/vigr.*
-rm $RPM_BUILD_ROOT/%{_mandir}/*/man8/sulogin.*
-rm $RPM_BUILD_ROOT/%{_mandir}/*/man3/pw_auth.*
+rm $RPM_BUILD_ROOT/%{_mandir}/man8/chgpasswd.*
+rm $RPM_BUILD_ROOT/%{_mandir}/*/man8/chgpasswd.*
 
 %find_lang shadow
 
@@ -147,7 +144,7 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root)
 %doc NEWS doc/HOWTO README
 %dir /etc/default
-%attr(0644,root,root)	%config /etc/login.defs
+%attr(0644,root,root)	%config(noreplace) /etc/login.defs
 %attr(0600,root,root)	%config /etc/default/useradd
 %{_bindir}/sg
 %{_bindir}/chage
@@ -205,6 +202,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/man8/faillog.8*
 
 %changelog
+* Tue Jun 06 2006 Peter Vrabec <pvrabec@redhat.com> 2:4.0.16-1
+- upgrade
+- do not replace login.defs file (#190014)
+
 * Sat Apr 08 2006 Peter Vrabec <pvrabec@redhat.com> 2:4.0.15-3
 - fix typo in shadow-4.0.15-login.defs (#188263)
 

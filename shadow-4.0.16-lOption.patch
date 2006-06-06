@@ -1,0 +1,59 @@
+--- shadow-4.0.16/man/useradd.8.lOption	2006-06-06 10:41:47.000000000 +0200
++++ shadow-4.0.16/man/useradd.8	2006-06-06 10:42:59.000000000 +0200
+@@ -96,6 +96,9 @@
+ \fB\-m\fR
+ option. The default is to not create the directory and to not copy any files.
+ .TP 3n
++\fB-l\fR
++Do not add the user to the last login log file. This is an option added by Red Hat.
++.TP 3n
+ \fB-n\fR
+ A group having the same name as the user being added to the system will be created by default. This option will turn off this Red Hat Linux specific behavior. When this option is used, users by default will be placed in whatever group is specified in \fI/etc/default/useradd\fR. If no default group is defined, group 1 will be used.
+ .TP 3n
+--- shadow-4.0.16/src/useradd.c.lOption	2006-06-06 10:41:47.000000000 +0200
++++ shadow-4.0.16/src/useradd.c	2006-06-06 10:41:47.000000000 +0200
+@@ -124,6 +124,7 @@
+     Gflg = 0,			/* secondary group set for new account */
+     kflg = 0,			/* specify a directory to fill new user directory */
+     mflg = 0,			/* create user's home directory if it doesn't exist */
++    lflg = 0;      		/* do not add user to lastlog database file */
+     Mflg = 0,                   /* do NOT create user's home directory no matter what */
+     nflg = 0,                   /* do NOT create a group having the same name as the user */
+     oflg = 0,			/* permit non-unique user ID to be specified with -u */
+@@ -630,6 +631,7 @@
+ 			   "  -K, --key KEY=VALUE		overrides /etc/login.defs defaults\n"
+ 			   "  -m, --create-home		create home directory for the new user\n"
+ 			   "				account\n"
++			   "  -l,                       do not add user to lastlog database file\n"
+ 			   "  -M,                       do not create user's home directory(overrides /etc/login.defs)\n"
+ 			   "  -r,                       create system account\n"
+ 			   "  -o, --non-unique		allow create user with duplicate\n"
+@@ -1035,7 +1037,7 @@
+ 			{NULL, 0, NULL, '\0'}
+ 		};
+ 		while ((c =
+-			getopt_long (argc, argv, "b:c:d:De:f:g:G:k:K:mMnrop:s:u:",
++			getopt_long (argc, argv, "b:c:d:De:f:g:G:k:K:mlMnrop:s:u:",
+ 				     long_options, NULL)) != -1) {
+ 			switch (c) {
+ 			case 'b':
+@@ -1175,6 +1177,9 @@
+ 			case 'm':
+ 				mflg++;
+ 				break;
++			case 'l':
++	                        lflg++;
++                        	break;
+ 			case 'o':
+ 				oflg++;
+ 				break;
+@@ -1540,7 +1545,8 @@
+ 	 */
+ 	if (!getpwuid (user_id)) {
+ 		faillog_reset (user_id);
+-		lastlog_reset (user_id);
++		if (!lflg)
++			lastlog_reset (user_id);
+ 	}
+ 
+ 	/*
