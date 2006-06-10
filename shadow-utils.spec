@@ -5,7 +5,7 @@
 Summary: Utilities for managing accounts and shadow password files.
 Name: shadow-utils
 Version: 4.0.16
-Release: 1
+Release: 2
 Epoch: 2
 URL: http://shadow.pld.org.pl/
 Source0: ftp://ftp.pld.org.pl/software/shadow/shadow-%{version}.tar.bz2
@@ -202,6 +202,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/man8/faillog.8*
 
 %changelog
+* Sat Jun 10 2006 Peter Vrabec <pvrabec@redhat.com> 2:4.0.16-2
+- "useradd -r" must create a system group (#194728)
+
 * Tue Jun 06 2006 Peter Vrabec <pvrabec@redhat.com> 2:4.0.16-1
 - upgrade
 - do not replace login.defs file (#190014)
