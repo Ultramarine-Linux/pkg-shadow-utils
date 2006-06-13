@@ -5,12 +5,13 @@
 Summary: Utilities for managing accounts and shadow password files.
 Name: shadow-utils
 Version: 4.0.16
-Release: 2
+Release: 3
 Epoch: 2
 URL: http://shadow.pld.org.pl/
 Source0: ftp://ftp.pld.org.pl/software/shadow/shadow-%{version}.tar.bz2
 Source1: shadow-4.0.15-login.defs
 Source2: shadow-970616.useradd
+Source3: shadow-4.0.16-nscd.c
 Patch0: shadow-4.0.16-redhat.patch
 Patch1: shadow-4.0.3-noinst.patch
 Patch2: shadow-4.0.11.1-vipw.patch
@@ -48,6 +49,8 @@ are used for managing group accounts.
 %patch3 -p1 -b .goodname
 %patch4 -p1 -b .newgrpPwd
 %patch5 -p1 -b .lOption
+#replace whole file
+cp %{SOURCE3} lib/nscd.c
 
 rm po/*.gmo
 rm po/stamp-po
@@ -202,6 +205,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/man8/faillog.8*
 
 %changelog
+* Tue Jun 13 2006 Peter Vrabec <pvrabec@redhat.com> 2:4.0.16-3
+- call "nscd -i" to flush nscd cache (#191464)
+
 * Sat Jun 10 2006 Peter Vrabec <pvrabec@redhat.com> 2:4.0.16-2
 - "useradd -r" must create a system group (#194728)
 
