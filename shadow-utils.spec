@@ -4,15 +4,15 @@
 
 Summary: Utilities for managing accounts and shadow password files.
 Name: shadow-utils
-Version: 4.0.16
-Release: 3.1
+Version: 4.0.17
+Release: 1
 Epoch: 2
 URL: http://shadow.pld.org.pl/
 Source0: ftp://ftp.pld.org.pl/software/shadow/shadow-%{version}.tar.bz2
 Source1: shadow-4.0.15-login.defs
 Source2: shadow-970616.useradd
 Source3: shadow-4.0.16-nscd.c
-Patch0: shadow-4.0.16-redhat.patch
+Patch0: shadow-4.0.17-redhat.patch
 Patch1: shadow-4.0.3-noinst.patch
 Patch2: shadow-4.0.11.1-vipw.patch
 Patch3: shadow-4.0.14-goodname.patch
@@ -205,6 +205,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/man8/faillog.8*
 
 %changelog
+* Mon Jul 17 2006 Peter Vrabec <pvrabec@redhat.com> 2:4.0.17-1
+- upgrade
+
 * Wed Jul 12 2006 Jesse Keating <jkeating@redhat.com> - 2:4.0.16-3.1
 - rebuild
 
