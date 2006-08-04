@@ -5,7 +5,7 @@
 Summary: Utilities for managing accounts and shadow password files.
 Name: shadow-utils
 Version: 4.0.17
-Release: 1
+Release: 2
 Epoch: 2
 URL: http://shadow.pld.org.pl/
 Source0: ftp://ftp.pld.org.pl/software/shadow/shadow-%{version}.tar.bz2
@@ -18,6 +18,8 @@ Patch2: shadow-4.0.11.1-vipw.patch
 Patch3: shadow-4.0.14-goodname.patch
 Patch4: shadow-4.0.13-newgrpPwd.patch
 Patch5: shadow-4.0.16-lOption.patch
+Patch6: shadow-4.0.17-UID_GID.patch
+Patch7: shadow-4.0.17-notInheritFd.patch
 
 License: BSD
 Group: System Environment/Base
@@ -49,8 +51,11 @@ are used for managing group accounts.
 %patch3 -p1 -b .goodname
 %patch4 -p1 -b .newgrpPwd
 %patch5 -p1 -b .lOption
+%patch6 -p1 -b .UID_GID
+
 #replace whole file
 cp %{SOURCE3} lib/nscd.c
+%patch7 -p1 -b .notInheritFd
 
 rm po/*.gmo
 rm po/stamp-po
@@ -205,6 +210,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/man8/faillog.8*
 
 %changelog
+* Fri Aug 08 2006 Peter Vrabec <pvrabec@redhat.com> 2:4.0.17-2
+- do not inherit file desc. in execve(nscd)
+
 * Mon Jul 17 2006 Peter Vrabec <pvrabec@redhat.com> 2:4.0.17-1
 - upgrade
 

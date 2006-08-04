@@ -1,0 +1,13 @@
+--- shadow-4.0.17/lib/commonio.c.fdInherit	2006-08-04 10:56:52.000000000 +0200
++++ shadow-4.0.17/lib/commonio.c	2006-08-04 11:00:05.000000000 +0200
+@@ -457,6 +457,10 @@
+ 		}
+ 		return 0;
+ 	}
++
++	/* not not inherit fd */
++	fcntl(fileno(db->fp), F_SETFD, FD_CLOEXEC);
++
+ #ifdef WITH_SELINUX
+ 	db->scontext = NULL;
+ 	if ((is_selinux_enabled () > 0) && (!db->readonly)) {
