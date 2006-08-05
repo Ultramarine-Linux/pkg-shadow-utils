@@ -9,7 +9,7 @@ Release: 4
 Epoch: 2
 URL: http://shadow.pld.org.pl/
 Source0: ftp://ftp.pld.org.pl/software/shadow/shadow-%{version}.tar.bz2
-Source1: shadow-4.0.15-login.defs
+Source1: shadow-4.0.17-login.defs
 Source2: shadow-970616.useradd
 Source3: shadow-4.0.16-nscd.c
 Patch0: shadow-4.0.17-redhat.patch
