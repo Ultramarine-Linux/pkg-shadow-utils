@@ -5,7 +5,7 @@
 Summary: Utilities for managing accounts and shadow password files.
 Name: shadow-utils
 Version: 4.0.17
-Release: 4
+Release: 5
 Epoch: 2
 URL: http://shadow.pld.org.pl/
 Source0: ftp://ftp.pld.org.pl/software/shadow/shadow-%{version}.tar.bz2
@@ -210,13 +210,16 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/man8/faillog.8*
 
 %changelog
-* Sat Aug 09 2006 Peter Vrabec <pvrabec@redhat.com> 2:4.0.17-4
+* Fri Aug 11 2006 Peter Vrabec <pvrabec@redhat.com> 2:4.0.17-5
+- fix bug introduced with UIG_GID.patch (#201991)
+
+* Sat Aug 05 2006 Peter Vrabec <pvrabec@redhat.com> 2:4.0.17-4
 - fix userdel, it didn't delete user's group (#201379)
 
-* Fri Aug 08 2006 Peter Vrabec <pvrabec@redhat.com> 2:4.0.17-3
+* Fri Aug 04 2006 Peter Vrabec <pvrabec@redhat.com> 2:4.0.17-3
 - fix UID/GID overflow in user* group* (#198920)
 
-* Fri Aug 08 2006 Peter Vrabec <pvrabec@redhat.com> 2:4.0.17-2
+* Fri Aug 04 2006 Peter Vrabec <pvrabec@redhat.com> 2:4.0.17-2
 - do not inherit file desc. in execve(nscd)
 
 * Mon Jul 17 2006 Peter Vrabec <pvrabec@redhat.com> 2:4.0.17-1
