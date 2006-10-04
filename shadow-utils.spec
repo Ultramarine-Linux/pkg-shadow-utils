@@ -5,7 +5,7 @@
 Summary: Utilities for managing accounts and shadow password files.
 Name: shadow-utils
 Version: 4.0.17
-Release: 5
+Release: 6
 Epoch: 2
 URL: http://shadow.pld.org.pl/
 Source0: ftp://ftp.pld.org.pl/software/shadow/shadow-%{version}.tar.bz2
@@ -20,6 +20,7 @@ Patch4: shadow-4.0.13-newgrpPwd.patch
 Patch5: shadow-4.0.16-lOption.patch
 Patch6: shadow-4.0.17-UID_GID.patch
 Patch7: shadow-4.0.17-notInheritFd.patch
+Patch8: shadow-4.0.17-exitValues.patch
 
 License: BSD
 Group: System Environment/Base
@@ -56,6 +57,8 @@ are used for managing group accounts.
 #replace whole file
 cp %{SOURCE3} lib/nscd.c
 %patch7 -p1 -b .notInheritFd
+
+%patch8 -p1 -b .exitValues
 
 rm po/*.gmo
 rm po/stamp-po
@@ -161,8 +164,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/lastlog
 %{_bindir}/newgrp
 %{_sbindir}/adduser
-%{_sbindir}/user*
-%{_sbindir}/group*
+%attr(0750,root,root)	%{_sbindir}/user*
+%attr(0750,root,root)	%{_sbindir}/group*
 %{_sbindir}/grpck
 %{_sbindir}/pwck
 %{_sbindir}/*conv
@@ -210,6 +213,11 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/man8/faillog.8*
 
 %changelog
+* Wed Oct 04 2006 Peter Vrabec <pvrabec@redhat.com> 2:4.0.17-6
+- fix regression. Permissions on user* group* binaries 
+  should be 0750, because of CAPP/LSPP certification
+- fix groupdel man page
+
 * Fri Aug 11 2006 Peter Vrabec <pvrabec@redhat.com> 2:4.0.17-5
 - fix bug introduced with UIG_GID.patch (#201991)
 

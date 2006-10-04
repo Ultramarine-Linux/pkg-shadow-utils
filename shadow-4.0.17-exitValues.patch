@@ -1,0 +1,12 @@
+--- shadow-4.0.17/man/groupdel.8.exitValues	2006-10-04 22:40:59.000000000 +0200
++++ shadow-4.0.17/man/groupdel.8	2006-10-04 22:43:51.000000000 +0200
+@@ -45,6 +45,9 @@
+ \fI2\fR
+ invalid command syntax
+ .TP 3n
++\fI6\fR
++specified group doesn’t exist
++.TP 3n
+ \fI8\fR
+ can't remove user's primary group
+ .TP 3n
