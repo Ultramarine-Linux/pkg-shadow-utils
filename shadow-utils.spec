@@ -5,7 +5,7 @@
 Summary: Utilities for managing accounts and shadow password files.
 Name: shadow-utils
 Version: 4.0.17
-Release: 6
+Release: 7%{?dist}
 Epoch: 2
 URL: http://shadow.pld.org.pl/
 Source0: ftp://ftp.pld.org.pl/software/shadow/shadow-%{version}.tar.bz2
@@ -213,6 +213,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/man8/faillog.8*
 
 %changelog
+* Wed Oct 25 2006 Peter Vrabec <pvrabec@redhat.com> 2:4.0.17-7
+- add dist-tag
+
 * Wed Oct 04 2006 Peter Vrabec <pvrabec@redhat.com> 2:4.0.17-6
 - fix regression. Permissions on user* group* binaries 
   should be 0750, because of CAPP/LSPP certification
