@@ -5,7 +5,7 @@
 Summary: Utilities for managing accounts and shadow password files.
 Name: shadow-utils
 Version: 4.0.18.1
-Release: 1%{?dist}
+Release: 2%{?dist}
 Epoch: 2
 URL: http://shadow.pld.org.pl/
 Source0: ftp://ftp.pld.org.pl/software/shadow/shadow-%{version}.tar.bz2
@@ -20,6 +20,7 @@ Patch4: shadow-4.0.13-newgrpPwd.patch
 Patch5: shadow-4.0.16-lOption.patch
 Patch6: shadow-4.0.17-notInheritFd.patch
 Patch7: shadow-4.0.17-exitValues.patch
+Patch8: shadow-4.0.17-auditLogging.patch
 
 License: BSD
 Group: System Environment/Base
@@ -57,6 +58,7 @@ cp %{SOURCE3} lib/nscd.c
 %patch6 -p1 -b .notInheritFd
 
 %patch7 -p1 -b .exitValues
+%patch8 -p1 -b .auditLogging
 
 rm po/*.gmo
 rm po/stamp-po
@@ -211,6 +213,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/man8/faillog.8*
 
 %changelog
+* Fri Nov 03 2006 Peter Vrabec <pvrabec@redhat.com> 2:4.0.18.1-2
+- improve audit logging (#211659)
+- improve "-l" option. Do not reset faillog if it's used (#213450).
+ 
 * Wed Nov 01 2006 Peter Vrabec <pvrabec@redhat.com> 2:4.0.18.1-1
 - upgrade
 

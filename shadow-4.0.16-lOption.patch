@@ -1,5 +1,5 @@
---- shadow-4.0.16/man/useradd.8.lOption	2006-06-06 10:41:47.000000000 +0200
-+++ shadow-4.0.16/man/useradd.8	2006-06-06 10:42:59.000000000 +0200
+--- shadow-4.0.17/man/useradd.8.lOption	2006-11-02 18:23:50.000000000 +0100
++++ shadow-4.0.17/man/useradd.8	2006-11-02 18:23:50.000000000 +0100
 @@ -96,6 +96,9 @@
  \fB\-m\fR
  option. The default is to not create the directory and to not copy any files.
@@ -10,8 +10,8 @@
  \fB-n\fR
  A group having the same name as the user being added to the system will be created by default. This option will turn off this Red Hat Linux specific behavior. When this option is used, users by default will be placed in whatever group is specified in \fI/etc/default/useradd\fR. If no default group is defined, group 1 will be used.
  .TP 3n
---- shadow-4.0.16/src/useradd.c.lOption	2006-06-06 10:41:47.000000000 +0200
-+++ shadow-4.0.16/src/useradd.c	2006-06-06 10:41:47.000000000 +0200
+--- shadow-4.0.17/src/useradd.c.lOption	2006-11-02 18:23:50.000000000 +0100
++++ shadow-4.0.17/src/useradd.c	2006-11-02 18:26:46.000000000 +0100
 @@ -124,6 +124,7 @@
      Gflg = 0,			/* secondary group set for new account */
      kflg = 0,			/* specify a directory to fill new user directory */
@@ -28,7 +28,7 @@
  			   "  -M,                       do not create user's home directory(overrides /etc/login.defs)\n"
  			   "  -r,                       create system account\n"
  			   "  -o, --non-unique		allow create user with duplicate\n"
-@@ -1035,7 +1037,7 @@
+@@ -1041,7 +1043,7 @@
  			{NULL, 0, NULL, '\0'}
  		};
  		while ((c =
@@ -37,7 +37,7 @@
  				     long_options, NULL)) != -1) {
  			switch (c) {
  			case 'b':
-@@ -1175,6 +1177,9 @@
+@@ -1181,6 +1183,9 @@
  			case 'm':
  				mflg++;
  				break;
@@ -47,13 +47,12 @@
  			case 'o':
  				oflg++;
  				break;
-@@ -1540,7 +1545,8 @@
+@@ -1549,7 +1554,7 @@
+ 	 * no user with this UID exists yet (entries for shared UIDs
+ 	 * are left unchanged).  --marekm
  	 */
- 	if (!getpwuid (user_id)) {
+-	if (!getpwuid (user_id)) {
++	if (!getpwuid (user_id) && !lflg) {
  		faillog_reset (user_id);
--		lastlog_reset (user_id);
-+		if (!lflg)
-+			lastlog_reset (user_id);
+ 		lastlog_reset (user_id);
  	}
- 
- 	/*

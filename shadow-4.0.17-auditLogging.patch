@@ -1,0 +1,15 @@
+diff -Nurp shadow-4.0.17.orig/src/useradd.c shadow-4.0.17/src/useradd.c
+--- shadow-4.0.17.orig/src/useradd.c	2006-10-02 18:25:30.000000000 +0100
++++ shadow-4.0.17/src/useradd.c	2006-10-02 18:25:43.000000000 +0100
+@@ -1611,6 +1611,10 @@ static void create_home (void)
+ 				 _
+ 				 ("%s: cannot create directory %s\n"),
+ 				 Prog, user_home);
++#ifdef WITH_AUDIT
++			audit_logger (AUDIT_USER_CHAUTHTOK, Prog,
++				      "adding home directory", user_name, user_id, 0);
++#endif
+ 			fail_exit (E_HOMEDIR);
+ 		}
+ 		chown (user_home, user_id, user_gid);
+
