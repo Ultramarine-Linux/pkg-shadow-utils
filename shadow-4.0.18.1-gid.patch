@@ -1,0 +1,32 @@
+--- shadow-4.0.18.1/src/useradd.c.gid	2006-11-04 14:09:53.000000000 +0100
++++ shadow-4.0.18.1/src/useradd.c	2006-11-04 14:15:09.000000000 +0100
+@@ -207,11 +207,8 @@
+ 	char *errptr;
+ 
+ 	gid = strtol (grname, &errptr, 10);
+-	if (*errptr || errno == ERANGE || gid < 0) {
+-		fprintf (stderr,
+-			 _("%s: invalid numeric argument '%s'\n"), Prog, grname);
+-		exit (E_BAD_ARG);
+-	}
++	if (*grname != '\0' && *errptr == '\0' && errno != ERANGE && gid >= 0)
++		return getgrgid (gid);
+ 	return getgrnam (grname);
+ }
+ 
+--- shadow-4.0.18.1/src/usermod.c.gid	2006-11-04 14:15:23.000000000 +0100
++++ shadow-4.0.18.1/src/usermod.c	2006-11-04 14:16:42.000000000 +0100
+@@ -166,11 +166,8 @@
+ 	char *errptr;
+ 
+ 	val = strtol (grname, &errptr, 10);
+-	if (*errptr || errno == ERANGE || val < 0) {
+-		fprintf (stderr, _("%s: invalid numeric argument '%s'\n"), Prog,
+-			 grname);
+-		exit (E_BAD_ARG);
+-	}
++	if (*grname != '\0' && *errptr == '\0' && errno != ERANGE && val >= 0)
++		return getgrgid (val);
+ 	return getgrnam (grname);
+ }
+ 
