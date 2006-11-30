@@ -5,7 +5,7 @@
 Summary: Utilities for managing accounts and shadow password files.
 Name: shadow-utils
 Version: 4.0.18.1
-Release: 4%{?dist}
+Release: 5%{?dist}
 Epoch: 2
 URL: http://shadow.pld.org.pl/
 Source0: ftp://ftp.pld.org.pl/software/shadow/shadow-%{version}.tar.bz2
@@ -23,6 +23,7 @@ Patch7: shadow-4.0.17-exitValues.patch
 Patch8: shadow-4.0.17-auditLogging.patch
 Patch9: shadow-4.0.18.1-gid.patch
 Patch10: shadow-4.0.18.1-overflow.patch
+Patch11: shadow-4.0.17-useradd.patch
 
 License: BSD
 Group: System Environment/Base
@@ -63,6 +64,7 @@ cp %{SOURCE3} lib/nscd.c
 %patch8 -p1 -b .auditLogging
 %patch9 -p1 -b .gid
 %patch10 -p1 -b .overflow
+%patch11 -p1 -b .useradd
 
 rm po/*.gmo
 rm po/stamp-po
@@ -217,6 +219,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/man8/faillog.8*
 
 %changelog
+* Thu Nov 30 2006 Steve Grubb <sgrubb@redhat.com> 2:4.0.18.1-5
+- Fix SELinux context on home directories created with useradd (#217441)
+
 * Tue Nov 14 2006 Peter Vrabec <pvrabec@redhat.com> 2:4.0.18.1-4
 - fix chpasswd and chgpasswd stack overflow (#213052)
 

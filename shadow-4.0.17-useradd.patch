@@ -1,0 +1,46 @@
+diff -rup shadow-4.0.17-orig/src/useradd.c shadow-4.0.17/src/useradd.c
+--- shadow-4.0.17-orig/src/useradd.c	2006-11-29 18:31:43.000000000 -0500
++++ shadow-4.0.17/src/useradd.c	2006-11-29 21:38:22.000000000 -0500
+@@ -45,6 +45,9 @@
+ #include <sys/stat.h>
+ #include <sys/types.h>
+ #include <time.h>
++#ifdef WITH_SELINUX
++#include <selinux/selinux.h>
++#endif
+ #include "chkname.h"
+ #include "defines.h"
+ #include "faillog.h"
+@@ -1612,6 +1615,9 @@ static void usr_update (void)
+  */
+ static void create_home (void)
+ {
++        mode_t mode = 0;
++
++        mode = 0777 & ~getdef_num ("UMASK", GETDEF_DEFAULT_UMASK);
+ 	if (access (user_home, F_OK)) {
+ 		/* XXX - create missing parent directories.  --marekm */
+ 		if (mkdir (user_home, 0)) {
+@@ -1625,9 +1631,19 @@ static void create_home (void)
+ #endif
+ 			fail_exit (E_HOMEDIR);
+ 		}
++#ifdef WITH_SELINUX
++                {
++                        security_context_t con = NULL;
++
++                        if (!matchpathcon(user_home, mode, &con))
++                        {
++                                setfilecon(user_home, con);
++                                freecon(con);
++                        }
++                }
++#endif
+ 		chown (user_home, user_id, user_gid);
+-		chmod (user_home,
+-		       0777 & ~getdef_num ("UMASK", GETDEF_DEFAULT_UMASK));
++		chmod (user_home, mode);
+ 		home_added++;
+ #ifdef WITH_AUDIT
+ 		audit_logger (AUDIT_USER_CHAUTHTOK, Prog,
+Only in shadow-4.0.17/src: useradd.c.useradd
