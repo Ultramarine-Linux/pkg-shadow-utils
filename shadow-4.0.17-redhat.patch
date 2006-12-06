@@ -1,5 +1,5 @@
---- shadow-4.0.17/man/groupadd.8.redhat	2006-06-24 08:11:26.000000000 +0200
-+++ shadow-4.0.17/man/groupadd.8	2006-07-17 11:39:34.000000000 +0200
+--- shadow-4.0.18.1/man/groupadd.8.redhat	2006-07-30 22:53:48.000000000 +0200
++++ shadow-4.0.18.1/man/groupadd.8	2006-12-06 16:29:01.000000000 +0100
 @@ -14,7 +14,7 @@
  groupadd \- create a new group
  .SH "SYNOPSIS"
@@ -24,8 +24,8 @@
  .TP 3n
  \fB\-h\fR, \fB\-\-help\fR
  Display help message and exit.
---- shadow-4.0.17/man/useradd.8.redhat	2006-06-24 08:12:17.000000000 +0200
-+++ shadow-4.0.17/man/useradd.8	2006-07-17 11:39:34.000000000 +0200
+--- shadow-4.0.18.1/man/useradd.8.redhat	2006-07-30 22:54:26.000000000 +0200
++++ shadow-4.0.18.1/man/useradd.8	2006-12-06 16:29:01.000000000 +0100
 @@ -25,7 +25,7 @@
  \fB\-D\fR
  option, the
@@ -93,8 +93,30 @@
  \fI/etc/default/useradd\fR
  Default values for account creation.
  .TP 3n
---- shadow-4.0.17/src/useradd.c.redhat	2006-06-22 13:30:32.000000000 +0200
-+++ shadow-4.0.17/src/useradd.c	2006-07-17 11:39:34.000000000 +0200
+--- shadow-4.0.18.1/man/chpasswd.8.redhat	2006-07-30 22:53:40.000000000 +0200
++++ shadow-4.0.18.1/man/chpasswd.8	2006-12-06 16:24:59.000000000 +0100
+@@ -24,7 +24,7 @@
+ 
+ \fIuser_name\fR:\fIpassword\fR
+ .PP
+-By default the supplied password must be in clear\-text. Default encryption algorithm is DES. Also the password age will be updated, if present.
++By default the supplied password must be in clear\-text. Default encryption algorithm is DES, but this setting can be changed in \fI/etc/login.defs\fR. Red Hat uses MD5 to encrypt passwords by default. Also the password age will be updated, if present.
+ .PP
+ This command is intended to be used in a large system environment where many accounts are created at a single time.
+ .SH "OPTIONS"
+--- shadow-4.0.18.1/man/newusers.8.redhat	2006-07-30 22:54:08.000000000 +0200
++++ shadow-4.0.18.1/man/newusers.8	2006-12-06 16:24:59.000000000 +0100
+@@ -35,6 +35,8 @@
+ This field will be checked for existence as a directory and a new directory with the same name will be created if it does not already exist. The ownership of the directory will be set to be that of the user being created or updated.
+ .PP
+ This command is intended to be used in a large system environment where many accounts are updated at a single time.
++.PP
++Default encryption algorithm is DES, but this setting can be changed in \fI/etc/login.defs\fR. Red Hat uses MD5 to encrypt passwords by default.
+ .SH "CAVEATS"
+ .PP
+ The input file must be protected since it contains unencrypted passwords.
+--- shadow-4.0.18.1/src/useradd.c.redhat	2006-07-28 19:42:48.000000000 +0200
++++ shadow-4.0.18.1/src/useradd.c	2006-12-06 16:29:01.000000000 +0100
 @@ -81,7 +81,7 @@
  static gid_t def_group = 100;
  static const char *def_gname = "other";
@@ -125,7 +147,7 @@
      sflg = 0,			/* shell program for new account */
      uflg = 0;			/* specify user ID for new account */
  
-@@ -628,6 +630,8 @@
+@@ -633,6 +635,8 @@
  			   "  -K, --key KEY=VALUE		overrides /etc/login.defs defaults\n"
  			   "  -m, --create-home		create home directory for the new user\n"
  			   "				account\n"
@@ -134,7 +156,7 @@
  			   "  -o, --non-unique		allow create user with duplicate\n"
  			   "				(non-unique) UID\n"
  			   "  -p, --password PASSWORD	use encrypted password for the new user\n"
-@@ -680,11 +684,20 @@
+@@ -685,11 +689,20 @@
  	spent->sp_namp = (char *) user_name;
  	spent->sp_pwdp = (char *) user_pass;
  	spent->sp_lstchg = time ((time_t *) 0) / SCALE;
@@ -160,7 +182,7 @@
  	spent->sp_flag = -1;
  }
  
-@@ -832,8 +845,14 @@
+@@ -837,8 +850,14 @@
  	const struct passwd *pwd;
  	uid_t uid_min, uid_max;
  
@@ -177,7 +199,7 @@
  
  	/*
  	 * Start with some UID value if the user didn't provide us with
-@@ -863,7 +882,7 @@
+@@ -868,7 +887,7 @@
  #endif
  			exit (E_NAME_IN_USE);
  		}
@@ -186,7 +208,7 @@
  			fprintf (stderr, _("%s: UID %u is not unique\n"),
  				 Prog, (unsigned int) user_id);
  #ifdef WITH_AUDIT
-@@ -918,8 +937,13 @@
+@@ -923,8 +942,13 @@
  	const struct group *grp;
  	gid_t gid_min, gid_max;
  
@@ -202,7 +224,7 @@
  
  	/*
  	 * Start with some GID value if the user didn't provide us with
-@@ -1017,7 +1041,7 @@
+@@ -1022,7 +1046,7 @@
  			{NULL, 0, NULL, '\0'}
  		};
  		while ((c =
@@ -211,7 +233,7 @@
  				     long_options, NULL)) != -1) {
  			switch (c) {
  			case 'b':
-@@ -1189,6 +1213,15 @@
+@@ -1194,6 +1218,15 @@
  				user_id = get_uid (optarg);
  				uflg++;
  				break;
@@ -227,7 +249,7 @@
  			default:
  				usage ();
  			}
-@@ -1196,6 +1229,9 @@
+@@ -1201,6 +1234,9 @@
  		}
  	}
  
@@ -237,7 +259,7 @@
  	/*
  	 * Certain options are only valid in combination with others.
  	 * Check it here so that they can be specified in any order.
-@@ -1701,6 +1737,14 @@
+@@ -1706,6 +1742,14 @@
  	}
  #endif				/* USE_PAM */
  
@@ -252,7 +274,7 @@
  	/*
  	 * See if we are messing with the defaults file, or creating
  	 * a new user.
-@@ -1731,7 +1775,7 @@
+@@ -1736,7 +1780,7 @@
  	 * to that group, use useradd -g username username.
  	 * --bero
  	 */
@@ -261,7 +283,7 @@
  		if (getgrnam (user_name)) {
  			fprintf (stderr,
  				 _
-@@ -1782,25 +1826,18 @@
+@@ -1787,25 +1831,18 @@
  				 ("%s: warning: the home directory already exists.\n"
  				  "Not copying any file from skel directory into it.\n"),
  				 Prog);
@@ -298,8 +320,8 @@
  
  	create_mail ();
  
---- shadow-4.0.17/src/groupadd.c.redhat	2006-06-24 07:52:00.000000000 +0200
-+++ shadow-4.0.17/src/groupadd.c	2006-07-17 11:46:54.000000000 +0200
+--- shadow-4.0.18.1/src/groupadd.c.redhat	2006-07-28 19:38:52.000000000 +0200
++++ shadow-4.0.18.1/src/groupadd.c	2006-12-06 16:29:01.000000000 +0100
 @@ -74,6 +74,7 @@
  static int oflg = 0;		/* permit non-unique group ID to be specified with -g */
  static int gflg = 0;		/* ID value for the new group */
@@ -308,7 +330,7 @@
  
  /* local function prototypes */
  static void usage (void);
-@@ -99,6 +100,7 @@
+@@ -100,6 +101,7 @@
  			   "Options:\n"
  			   "  -f, --force			force exit with success status if the specified\n"
  			   "				group already exists\n"
@@ -316,7 +338,7 @@
  			   "  -g, --gid GID			use GID for the new group\n"
  			   "  -h, --help			display this help message and exit\n"
  			   "  -K, --key KEY=VALUE		overrides /etc/login.defs defaults\n"
-@@ -197,8 +199,13 @@
+@@ -198,8 +200,13 @@
  	const struct group *grp;
  	gid_t gid_min, gid_max;
  
@@ -332,7 +354,7 @@
  
  	/*
  	 * Start with some GID value if the user didn't provide us with
-@@ -412,7 +419,7 @@
+@@ -430,7 +437,7 @@
  		};
  
  		while ((c =
@@ -341,7 +363,7 @@
  				     &option_index)) != -1) {
  			switch (c) {
  			case 'f':
-@@ -425,6 +432,12 @@
+@@ -443,6 +450,12 @@
  				 */
  				fflg++;
  				break;
@@ -353,4 +375,4 @@
 +	                        break;
  			case 'g':
  				gflg++;
- 				if (!isdigit (optarg[0]))
+ 				group_id = get_gid (optarg);
