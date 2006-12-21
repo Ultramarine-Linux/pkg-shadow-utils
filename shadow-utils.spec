@@ -219,6 +219,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/man8/faillog.8*
 
 %changelog
+* Thu Dec 21 2006 Dan Walsh <dwalsh@redhat.com> 2:4.0.18.1-8
+- Fix execution and creation of Home Directories under SELinux
+- Resolves: rhbz#217441
+
 * Thu Dec 14 2006 Peter Vrabec <pvrabec@redhat.com> 2:4.0.18.1-7
 - fix rpmlint issues
 
