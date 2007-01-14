@@ -2,10 +2,10 @@
 %define WITH_SELINUX 1
 %endif
 
-Summary: Utilities for managing accounts and shadow password files
+Summary: Utilities for managing accounts and shadow password files.
 Name: shadow-utils
 Version: 4.0.18.1
-Release: 8%{?dist}
+Release: 7%{?dist}
 Epoch: 2
 URL: http://shadow.pld.org.pl/
 Source0: ftp://ftp.pld.org.pl/software/shadow/shadow-%{version}.tar.bz2
@@ -24,7 +24,7 @@ Patch8: shadow-4.0.17-auditLogging.patch
 Patch9: shadow-4.0.18.1-gid.patch
 Patch10: shadow-4.0.18.1-overflow.patch
 Patch11: shadow-4.0.17-useradd.patch
-
+Patch12: shadow-4.0.18.1-appendOption.patch
 License: BSD
 Group: System Environment/Base
 BuildRequires: autoconf, automake, libtool, gettext-devel
@@ -33,6 +33,7 @@ BuildRequires: audit-libs-devel >= 1.0.10
 Buildroot: %{_tmppath}/%{name}-%{version}-root
 Requires: libselinux >= 1.25.2-1
 Requires: audit-libs >= 1.0.10
+Obsoletes: adduser
 
 %description
 The shadow-utils package includes the necessary programs for
@@ -64,6 +65,7 @@ cp %{SOURCE3} lib/nscd.c
 %patch9 -p1 -b .gid
 %patch10 -p1 -b .overflow
 %patch11 -p1 -b .useradd
+%patch12 -p1 -b .appendOption
 
 rm po/*.gmo
 rm po/stamp-po
@@ -96,8 +98,7 @@ install -c -m 0600 %{SOURCE2} $RPM_BUILD_ROOT/etc/default/useradd
 
 
 ln -s useradd $RPM_BUILD_ROOT%{_sbindir}/adduser
-#ln -s %{_mandir}/man8/useradd.8 $RPM_BUILD_ROOT/%{_mandir}/man8/adduser.8
-ln -s useradd.8 $RPM_BUILD_ROOT/%{_mandir}/man8/adduser.8
+ln -s %{_mandir}/man8/useradd.8 $RPM_BUILD_ROOT/%{_mandir}/man8/adduser.8
 for subdir in $RPM_BUILD_ROOT/%{_mandir}/{??,??_??,??_??.*}/man* ; do
 	test -d $subdir && test -e $subdir/useradd.8 && echo ".so man8/useradd.8" > $subdir/adduser.8
 done
@@ -162,7 +163,7 @@ rm -rf $RPM_BUILD_ROOT
 %doc NEWS doc/HOWTO README
 %dir /etc/default
 %attr(0644,root,root)	%config(noreplace) /etc/login.defs
-%attr(0600,root,root)	%config(noreplace) /etc/default/useradd
+%attr(0600,root,root)	%config /etc/default/useradd
 %{_bindir}/sg
 %{_bindir}/chage
 %{_bindir}/faillog
@@ -219,12 +220,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/man8/faillog.8*
 
 %changelog
-* Thu Dec 21 2006 Dan Walsh <dwalsh@redhat.com> 2:4.0.18.1-8
-- Fix execution and creation of Home Directories under SELinux
-- Resolves: rhbz#217441
-
-* Thu Dec 14 2006 Peter Vrabec <pvrabec@redhat.com> 2:4.0.18.1-7
-- fix rpmlint issues
+* Sun Jan 14 2007 Peter Vrabec <pvrabec@redhat.com> 2:4.0.18.1-7
+- fix append option in usermod (#222540).
 
 * Wed Dec 06 2006 Peter Vrabec <pvrabec@redhat.com> 2:4.0.18.1-6
 - use MD5 encryption by default (#218629).
