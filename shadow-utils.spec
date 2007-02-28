@@ -5,7 +5,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.0.18.1
-Release: 9%{?dist}
+Release: 10%{?dist}
 Epoch: 2
 URL: http://shadow.pld.org.pl/
 Source0: ftp://ftp.pld.org.pl/software/shadow/shadow-%{version}.tar.bz2
@@ -31,7 +31,7 @@ Group: System Environment/Base
 BuildRequires: autoconf, automake, libtool, gettext-devel
 BuildRequires: libselinux-devel >= 1.25.2-1
 BuildRequires: audit-libs-devel >= 1.0.10
-Buildroot: %{_tmppath}/%{name}-%{version}-root
+Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires: libselinux >= 1.25.2-1
 Requires: audit-libs >= 1.0.10
 
@@ -92,9 +92,9 @@ make
 %install
 rm -rf $RPM_BUILD_ROOT
 make install DESTDIR=$RPM_BUILD_ROOT gnulocaledir=$RPM_BUILD_ROOT/%{_datadir}/locale MKINSTALLDIRS=`pwd`/mkinstalldirs
-install -d -m 755 $RPM_BUILD_ROOT/etc/default
-install -c -m 0644 %{SOURCE1} $RPM_BUILD_ROOT/etc/login.defs
-install -c -m 0600 %{SOURCE2} $RPM_BUILD_ROOT/etc/default/useradd
+install -d -m 755 $RPM_BUILD_ROOT/%{_sysconfdir}/default
+install -p -c -m 0644 %{SOURCE1} $RPM_BUILD_ROOT/%{_sysconfdir}/login.defs
+install -p -c -m 0600 %{SOURCE2} $RPM_BUILD_ROOT/%{_sysconfdir}/default/useradd
 
 
 ln -s useradd $RPM_BUILD_ROOT%{_sbindir}/adduser
@@ -112,8 +112,8 @@ rm $RPM_BUILD_ROOT/%{_bindir}/groups
 rm $RPM_BUILD_ROOT/%{_bindir}/login
 rm $RPM_BUILD_ROOT/%{_bindir}/passwd
 rm $RPM_BUILD_ROOT/%{_bindir}/su
-rm $RPM_BUILD_ROOT/etc/login.access
-rm $RPM_BUILD_ROOT/etc/limits
+rm $RPM_BUILD_ROOT/%{_sysconfdir}/login.access
+rm $RPM_BUILD_ROOT/%{_sysconfdir}/limits
 rm $RPM_BUILD_ROOT/%{_sbindir}/logoutd
 rm $RPM_BUILD_ROOT/%{_sbindir}/vipw
 rm $RPM_BUILD_ROOT/%{_sbindir}/vigr
@@ -162,9 +162,9 @@ rm -rf $RPM_BUILD_ROOT
 %files -f shadow.lang
 %defattr(-,root,root)
 %doc NEWS doc/HOWTO README
-%dir /etc/default
-%attr(0644,root,root)	%config(noreplace) /etc/login.defs
-%attr(0600,root,root)	%config(noreplace) /etc/default/useradd
+%dir %{_sysconfdir}/default
+%attr(0644,root,root)	%config(noreplace) %{_sysconfdir}/login.defs
+%attr(0600,root,root)	%config(noreplace) %{_sysconfdir}/default/useradd
 %{_bindir}/sg
 %{_bindir}/chage
 %{_bindir}/faillog
@@ -221,6 +221,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/man8/faillog.8*
 
 %changelog
+* Wed Feb 28 2007 Peter Vrabec <pvrabec@redhat.com> 2:4.0.18.1-10
+- spec file fixes to meet fedora standarts.
+- fix useless call of restorecon(). (#222159) 
+
 * Sun Jan 14 2007 Peter Vrabec <pvrabec@redhat.com> 2:4.0.18.1-9
 - fix append option in usermod (#222540).
 

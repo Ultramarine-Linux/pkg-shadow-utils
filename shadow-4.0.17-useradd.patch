@@ -1,5 +1,167 @@
---- shadow-4.0.17/src/useradd.c.useradd	2006-12-21 09:14:45.000000000 -0500
-+++ shadow-4.0.17/src/useradd.c	2006-12-21 09:14:45.000000000 -0500
+--- /dev/null	2007-01-16 10:10:52.644263000 +0100
++++ shadow-4.0.17/libmisc/system.c	2007-01-16 18:24:34.000000000 +0100
+@@ -0,0 +1,37 @@
++#include <config.h>
++
++#ident "$Id: shell.c,v 1.13 2006/01/18 19:38:27 kloczek Exp $"
++
++#include <stdio.h>
++#include <sys/wait.h>
++#include <fcntl.h>
++#include "prototypes.h"
++#include "defines.h"
++
++int safe_system(const char *command, const char *argv[], const char *env[], int ignore_stderr)
++{
++	int status = -1;
++	int fd;
++	pid_t pid;
++	
++	pid = fork();
++	if (pid < 0) 
++		return -1;
++
++	if (pid) {       /* Parent */
++		waitpid(pid, &status, 0);
++		return status;
++	}
++
++	fd = open("/dev/null", O_RDWR);
++	/* Child */
++	dup2(fd,0);	// Close Stdin
++	if (ignore_stderr)
++		dup2(fd,2);	// Close Stderr
++	
++	execve(command, (char *const *) argv, (char *const *) env);
++	fprintf (stderr,
++		 _("Failed to exec '%s'\n"), argv[0]);
++	exit (-1);
++}
++
+--- shadow-4.0.17/libmisc/Makefile.am.useradd	2005-09-05 18:21:37.000000000 +0200
++++ shadow-4.0.17/libmisc/Makefile.am	2007-01-16 18:24:34.000000000 +0100
+@@ -41,6 +41,7 @@
+ 	setugid.c \
+ 	setupenv.c \
+ 	shell.c \
++	system.c \
+ 	strtoday.c \
+ 	sub.c \
+ 	sulog.c \
+--- shadow-4.0.17/libmisc/copydir.c.useradd	2006-07-10 06:35:56.000000000 +0200
++++ shadow-4.0.17/libmisc/copydir.c	2007-01-16 18:24:34.000000000 +0100
+@@ -54,7 +54,7 @@
+ static struct link_name *links;
+ 
+ #ifdef WITH_SELINUX
+-static int selinux_file_context (const char *dst_name)
++int selinux_file_context (const char *dst_name)
+ {
+ 	security_context_t scontext = NULL;
+ 
+--- shadow-4.0.17/man/usermod.8.xml.useradd	2006-06-16 18:11:04.000000000 +0200
++++ shadow-4.0.17/man/usermod.8.xml	2007-01-16 18:24:34.000000000 +0100
+@@ -226,6 +226,19 @@
+ 	  </para>
+ 	</listitem>
+       </varlistentry>
++       <varlistentry>
++        <term>
++         <option>-Z</option>, <option>--selinux-user</option>
++         <replaceable>SEUSER</replaceable>
++       </term>
++       <listitem>
++         <para>
++           The SELinux user for the user's login. The default is to leave this
++           field the blank, which causes the system to select the default
++           SELinux user.
++         </para>
++       </listitem>
++      </varlistentry>
+     </variablelist>
+   </refsect1>
+ 
+--- shadow-4.0.17/man/useradd.8.xml.useradd	2006-06-16 18:11:04.000000000 +0200
++++ shadow-4.0.17/man/useradd.8.xml	2007-01-16 18:24:34.000000000 +0100
+@@ -251,6 +251,19 @@
+ 	  </para>
+ 	</listitem>
+       </varlistentry>
++      <varlistentry>
++	<term>
++	  <option>-Z</option>, <option>--selinux-user</option>
++	  <replaceable>SEUSER</replaceable>
++	</term>
++	<listitem>
++	  <para>
++	    The SELinux user for the user's login. The default is to leave this
++	    field blank, which causes the system to select the default SELinux
++            user.
++	  </para>
++	</listitem>
++      </varlistentry>
+     </variablelist>
+ 
+     <refsect2 id='changing_the_default_values'>
+--- shadow-4.0.17/man/useradd.8.useradd	2007-01-16 18:24:34.000000000 +0100
++++ shadow-4.0.17/man/useradd.8	2007-01-16 18:24:34.000000000 +0100
+@@ -137,6 +137,9 @@
+ The numerical value of the user's ID. This value must be unique, unless the
+ \fB\-o\fR
+ option is used. The value must be non\-negative. The default is to use the smallest ID value greater than 999 and greater than every other user. Values between 0 and 999 are typically reserved for system accounts.
++.TP 3n
++\fB\-Z\fR, \fB\-\-selinux-user\fR \fISEUSER\fR
++The SELinux user for the user's login. The default is to leave this field blank, which causes the system to select the default SELinux user.
+ .SS "Changing the default values"
+ .PP
+ When invoked with the
+--- shadow-4.0.17/man/usermod.8.useradd	2007-01-16 18:24:34.000000000 +0100
++++ shadow-4.0.17/man/usermod.8	2007-01-16 18:24:34.000000000 +0100
+@@ -90,6 +90,10 @@
+ \fB\-p\fR
+ or
+ \fB\-L\fR.
++.TP 3n
++\fB\-Z\fR, \fB\-\-selinux-user\fR \fISEUSER\fR
++The SELinux user for the user's login. The default is to leave this field blank, which causes the system to select the default SELinux user.
++
+ .SH "CAVEATS"
+ .PP
+ 
+--- shadow-4.0.17/lib/prototypes.h.useradd	2006-02-07 17:36:30.000000000 +0100
++++ shadow-4.0.17/lib/prototypes.h	2007-01-16 18:24:34.000000000 +0100
+@@ -52,6 +52,9 @@
+ /* copydir.c */
+ extern int copy_tree (const char *, const char *, uid_t, gid_t);
+ extern int remove_tree (const char *);
++#ifdef WITH_SELINUX
++extern int selinux_file_context (const char *dst_name);
++#endif
+ 
+ /* encrypt.c */
+ extern char *pw_encrypt (const char *, const char *);
+@@ -147,6 +150,9 @@
+ /* shell.c */
+ extern int shell (const char *, const char *, char *const *);
+ 
++/* system.c */
++extern int safe_system(const char *command, const char *argv[], const char *env[], int ignore_stderr);
++
+ /* strtoday.c */
+ extern long strtoday (const char *);
+ 
+--- shadow-4.0.17/lib/defines.h.useradd	2005-09-05 18:22:03.000000000 +0200
++++ shadow-4.0.17/lib/defines.h	2007-01-16 18:24:34.000000000 +0100
+@@ -342,4 +342,7 @@
+ #include <libaudit.h>
+ #endif
+ 
++#ifdef WITH_SELINUX
++#include <selinux/selinux.h>
++#endif
+ #endif				/* _DEFINES_H_ */
+--- shadow-4.0.17/src/useradd.c.useradd	2007-01-16 18:24:34.000000000 +0100
++++ shadow-4.0.17/src/useradd.c	2007-01-16 18:24:34.000000000 +0100
 @@ -100,6 +100,7 @@
  static const char *user_home = "";
  static const char *user_shell = "";
@@ -74,7 +236,7 @@
  			default:
  				usage ();
  			}
-@@ -1603,6 +1628,33 @@
+@@ -1603,6 +1627,33 @@
  		grp_update ();
  }
  
@@ -108,7 +270,7 @@
  /*
   * create_home - create the user's home directory
   *
-@@ -1612,7 +1664,11 @@
+@@ -1612,7 +1663,11 @@
   */
  static void create_home (void)
  {
@@ -120,7 +282,7 @@
  		/* XXX - create missing parent directories.  --marekm */
  		if (mkdir (user_home, 0)) {
  			fprintf (stderr,
-@@ -1840,6 +1896,15 @@
+@@ -1840,6 +1895,15 @@
  
  	usr_update ();
  
@@ -136,7 +298,7 @@
  	if (mflg) {
  		create_home ();
  		if (home_added)
-@@ -1863,13 +1928,6 @@
+@@ -1863,13 +1927,6 @@
           * with --gafton
           */
  
@@ -150,8 +312,8 @@
  #ifdef USE_PAM
  	if (retval == PAM_SUCCESS)
  		pam_end (pamh, PAM_SUCCESS);
---- shadow-4.0.17/src/userdel.c.useradd	2006-12-21 09:14:45.000000000 -0500
-+++ shadow-4.0.17/src/userdel.c	2006-12-21 09:20:56.000000000 -0500
+--- shadow-4.0.17/src/userdel.c.useradd	2007-01-16 18:24:34.000000000 +0100
++++ shadow-4.0.17/src/userdel.c	2007-01-16 18:24:34.000000000 +0100
 @@ -792,6 +792,17 @@
  #endif
  	}
@@ -170,8 +332,8 @@
  	/*
  	 * Cancel any crontabs or at jobs. Have to do this before we remove
  	 * the entry from /etc/passwd.
---- shadow-4.0.17/src/usermod.c.useradd	2006-12-21 09:14:45.000000000 -0500
-+++ shadow-4.0.17/src/usermod.c	2006-12-21 09:20:28.000000000 -0500
+--- shadow-4.0.17/src/usermod.c.useradd	2007-01-16 18:24:34.000000000 +0100
++++ shadow-4.0.17/src/usermod.c	2007-01-16 18:29:45.000000000 +0100
 @@ -90,6 +90,7 @@
  static char *user_home;
  static char *user_newhome;
@@ -245,7 +407,7 @@
  	if (mflg)
  		move_home ();
  
-@@ -1580,3 +1604,56 @@
+@@ -1580,3 +1604,62 @@
  	exit (E_SUCCESS);
  	/* NOT REACHED */
  }
@@ -278,17 +440,24 @@
 +		}
 +        }
 +        
-+	if (dflg && !user_selinux) {
++	if (dflg || *user_selinux) {
 +		argv[0] = "/usr/sbin/genhomedircon";
 +		argv[1] = NULL;
-+		safe_system(argv[0], argv, NULL,0);
-+	} 
++		if(safe_system(argv[0], argv, NULL,0)) {
++			fprintf (stderr,
++				 _("%s: warning: unable to relabel the homedir %s for %s.\n"),
++				 Prog, user_home, user_name);
++#ifdef WITH_AUDIT
++			audit_logger (AUDIT_USER_CHAUTHTOK, Prog,
++			      "relabeling home directory", user_name, user_id, 0);
++#endif
++		}
 +
-+	if (!mflg) {
 +		argv[0] = "/sbin/restorecon";
-+		argv[1] = "-R";
-+		argv[2] = user_home;
-+		argv[3] = NULL;
++		argv[1] = "-F";
++		argv[2] = "-R";
++		argv[3] = user_home;
++		argv[4] = NULL;
 +                if (safe_system(argv[0], argv, NULL, 0)) {
 +			fprintf (stderr,
 +				 _("%s: warning: unable to relabel the homedir %s for %s.\n"),
@@ -302,165 +471,3 @@
 +#endif
 +}
 +
---- shadow-4.0.17/man/usermod.8.xml.useradd	2006-06-16 12:11:04.000000000 -0400
-+++ shadow-4.0.17/man/usermod.8.xml	2006-12-21 09:14:45.000000000 -0500
-@@ -226,6 +226,19 @@
- 	  </para>
- 	</listitem>
-       </varlistentry>
-+       <varlistentry>
-+        <term>
-+         <option>-Z</option>, <option>--selinux-user</option>
-+         <replaceable>SEUSER</replaceable>
-+       </term>
-+       <listitem>
-+         <para>
-+           The SELinux user for the user's login. The default is to leave this
-+           field the blank, which causes the system to select the default
-+           SELinux user.
-+         </para>
-+       </listitem>
-+      </varlistentry>
-     </variablelist>
-   </refsect1>
- 
---- shadow-4.0.17/man/useradd.8.xml.useradd	2006-06-16 12:11:04.000000000 -0400
-+++ shadow-4.0.17/man/useradd.8.xml	2006-12-21 09:14:45.000000000 -0500
-@@ -251,6 +251,19 @@
- 	  </para>
- 	</listitem>
-       </varlistentry>
-+      <varlistentry>
-+	<term>
-+	  <option>-Z</option>, <option>--selinux-user</option>
-+	  <replaceable>SEUSER</replaceable>
-+	</term>
-+	<listitem>
-+	  <para>
-+	    The SELinux user for the user's login. The default is to leave this
-+	    field blank, which causes the system to select the default SELinux
-+            user.
-+	  </para>
-+	</listitem>
-+      </varlistentry>
-     </variablelist>
- 
-     <refsect2 id='changing_the_default_values'>
---- shadow-4.0.17/man/useradd.8.useradd	2006-12-21 09:14:45.000000000 -0500
-+++ shadow-4.0.17/man/useradd.8	2006-12-21 09:14:45.000000000 -0500
-@@ -137,6 +137,9 @@
- The numerical value of the user's ID. This value must be unique, unless the
- \fB\-o\fR
- option is used. The value must be non\-negative. The default is to use the smallest ID value greater than 999 and greater than every other user. Values between 0 and 999 are typically reserved for system accounts.
-+.TP 3n
-+\fB\-Z\fR, \fB\-\-selinux-user\fR \fISEUSER\fR
-+The SELinux user for the user's login. The default is to leave this field blank, which causes the system to select the default SELinux user.
- .SS "Changing the default values"
- .PP
- When invoked with the
---- shadow-4.0.17/man/usermod.8.useradd	2006-12-21 09:14:45.000000000 -0500
-+++ shadow-4.0.17/man/usermod.8	2006-12-21 09:14:45.000000000 -0500
-@@ -90,6 +90,10 @@
- \fB\-p\fR
- or
- \fB\-L\fR.
-+.TP 3n
-+\fB\-Z\fR, \fB\-\-selinux-user\fR \fISEUSER\fR
-+The SELinux user for the user's login. The default is to leave this field blank, which causes the system to select the default SELinux user.
-+
- .SH "CAVEATS"
- .PP
- 
---- /dev/null	2006-12-21 08:27:04.805433018 -0500
-+++ shadow-4.0.17/libmisc/system.c	2006-12-21 09:14:45.000000000 -0500
-@@ -0,0 +1,37 @@
-+#include <config.h>
-+
-+#ident "$Id: shell.c,v 1.13 2006/01/18 19:38:27 kloczek Exp $"
-+
-+#include <stdio.h>
-+#include <sys/wait.h>
-+#include <fcntl.h>
-+#include "prototypes.h"
-+#include "defines.h"
-+
-+int safe_system(const char *command, const char *argv[], const char *env[], int ignore_stderr)
-+{
-+	int status = -1;
-+	int fd;
-+	pid_t pid;
-+	
-+	pid = fork();
-+	if (pid < 0) 
-+		return -1;
-+
-+	if (pid) {       /* Parent */
-+		waitpid(pid, &status, 0);
-+		return status;
-+	}
-+
-+	fd = open("/dev/null", O_RDWR);
-+	/* Child */
-+	dup2(fd,0);	// Close Stdin
-+	if (ignore_stderr)
-+		dup2(fd,2);	// Close Stderr
-+	
-+	execve(command, (char *const *) argv, (char *const *) env);
-+	fprintf (stderr,
-+		 _("Failed to exec '%s'\n"), argv[0]);
-+	exit (-1);
-+}
-+
---- shadow-4.0.17/libmisc/Makefile.am.useradd	2005-09-05 12:21:37.000000000 -0400
-+++ shadow-4.0.17/libmisc/Makefile.am	2006-12-21 09:14:45.000000000 -0500
-@@ -41,6 +41,7 @@
- 	setugid.c \
- 	setupenv.c \
- 	shell.c \
-+	system.c \
- 	strtoday.c \
- 	sub.c \
- 	sulog.c \
---- shadow-4.0.17/libmisc/copydir.c.useradd	2006-07-10 00:35:56.000000000 -0400
-+++ shadow-4.0.17/libmisc/copydir.c	2006-12-21 09:14:45.000000000 -0500
-@@ -54,7 +54,7 @@
- static struct link_name *links;
- 
- #ifdef WITH_SELINUX
--static int selinux_file_context (const char *dst_name)
-+int selinux_file_context (const char *dst_name)
- {
- 	security_context_t scontext = NULL;
- 
---- shadow-4.0.17/lib/prototypes.h.useradd	2006-02-07 11:36:30.000000000 -0500
-+++ shadow-4.0.17/lib/prototypes.h	2006-12-21 09:14:45.000000000 -0500
-@@ -52,6 +52,9 @@
- /* copydir.c */
- extern int copy_tree (const char *, const char *, uid_t, gid_t);
- extern int remove_tree (const char *);
-+#ifdef WITH_SELINUX
-+extern int selinux_file_context (const char *dst_name);
-+#endif
- 
- /* encrypt.c */
- extern char *pw_encrypt (const char *, const char *);
-@@ -147,6 +150,9 @@
- /* shell.c */
- extern int shell (const char *, const char *, char *const *);
- 
-+/* system.c */
-+extern int safe_system(const char *command, const char *argv[], const char *env[], int ignore_stderr);
-+
- /* strtoday.c */
- extern long strtoday (const char *);
- 
---- shadow-4.0.17/lib/defines.h.useradd	2005-09-05 12:22:03.000000000 -0400
-+++ shadow-4.0.17/lib/defines.h	2006-12-21 09:14:45.000000000 -0500
-@@ -342,4 +342,7 @@
- #include <libaudit.h>
- #endif
- 
-+#ifdef WITH_SELINUX
-+#include <selinux/selinux.h>
-+#endif
- #endif				/* _DEFINES_H_ */
