@@ -5,7 +5,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.0.18.1
-Release: 10%{?dist}
+Release: 11%{?dist}
 Epoch: 2
 URL: http://shadow.pld.org.pl/
 Source0: ftp://ftp.pld.org.pl/software/shadow/shadow-%{version}.tar.bz2
@@ -25,6 +25,7 @@ Patch9: shadow-4.0.18.1-gid.patch
 Patch10: shadow-4.0.18.1-overflow.patch
 Patch11: shadow-4.0.17-useradd.patch
 Patch12: shadow-4.0.18.1-appendOption.patch
+Patch13: shadow-4.0.18.1-sysAccount.patch
 
 License: BSD
 Group: System Environment/Base
@@ -66,6 +67,7 @@ cp %{SOURCE3} lib/nscd.c
 %patch10 -p1 -b .overflow
 %patch11 -p1 -b .useradd
 %patch12 -p1 -b .appendOption
+%patch13 -p1 -b .sysAccount
 
 rm po/*.gmo
 rm po/stamp-po
@@ -221,6 +223,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/man8/faillog.8*
 
 %changelog
+* Fri Mar 16 2007 Peter Vrabec <pvrabec@redhat.com> 2:4.0.18.1-11
+- assign system dynamic UID/GID from the top of available UID/GID (#190523)
+
 * Wed Feb 28 2007 Peter Vrabec <pvrabec@redhat.com> 2:4.0.18.1-10
 - spec file fixes to meet fedora standarts.
 - fix useless call of restorecon(). (#222159) 
