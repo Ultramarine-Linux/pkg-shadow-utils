@@ -5,12 +5,12 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.0.18.1
-Release: 11%{?dist}
+Release: 12%{?dist}
 Epoch: 2
 URL: http://shadow.pld.org.pl/
 Source0: ftp://ftp.pld.org.pl/software/shadow/shadow-%{version}.tar.bz2
 Source1: shadow-4.0.17-login.defs
-Source2: shadow-970616.useradd
+Source2: shadow-4.0.18.1-useradd
 Source3: shadow-4.0.16-nscd.c
 Patch0: shadow-4.0.17-redhat.patch
 Patch1: shadow-4.0.3-noinst.patch
@@ -223,6 +223,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/man8/faillog.8*
 
 %changelog
+* Mon Mar 26 2007 Peter Vrabec <pvrabec@redhat.com> 2:4.0.18.1-12
+- create user's mailbox file by default (#231311)
+
 * Fri Mar 16 2007 Peter Vrabec <pvrabec@redhat.com> 2:4.0.18.1-11
 - assign system dynamic UID/GID from the top of available UID/GID (#190523)
 
