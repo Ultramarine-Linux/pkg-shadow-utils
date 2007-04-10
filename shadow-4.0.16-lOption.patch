@@ -16,7 +16,7 @@
      Gflg = 0,			/* secondary group set for new account */
      kflg = 0,			/* specify a directory to fill new user directory */
      mflg = 0,			/* create user's home directory if it doesn't exist */
-+    lflg = 0;      		/* do not add user to lastlog database file */
++    lflg = 0,      		/* do not add user to lastlog database file */
      Mflg = 0,                   /* do NOT create user's home directory no matter what */
      nflg = 0,                   /* do NOT create a group having the same name as the user */
      oflg = 0,			/* permit non-unique user ID to be specified with -u */
