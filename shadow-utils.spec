@@ -5,7 +5,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.0.18.1
-Release: 13%{?dist}
+Release: 15%{?dist}
 Epoch: 2
 URL: http://shadow.pld.org.pl/
 Source0: ftp://ftp.pld.org.pl/software/shadow/shadow-%{version}.tar.bz2
@@ -27,6 +27,7 @@ Patch11: shadow-4.0.17-useradd.patch
 Patch12: shadow-4.0.18.1-appendOption.patch
 Patch13: shadow-4.0.18.1-sysAccount.patch
 Patch14: shadow-4.0.18.1-findNewUidOnce.patch
+Patch15: shadow-4.0.18.1-groupLoop.patch
 
 License: BSD
 Group: System Environment/Base
@@ -70,6 +71,7 @@ cp %{SOURCE3} lib/nscd.c
 %patch12 -p1 -b .appendOption
 %patch13 -p1 -b .sysAccount
 %patch14 -p1 -b .findNewUidOnce
+%patch15 -p1 -b .groupLoop
 
 rm po/*.gmo
 rm po/stamp-po
@@ -225,6 +227,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/man8/faillog.8*
 
 %changelog
+* Tue Jun 06 2007 Peter Vrabec <pvrabec@redhat.com> 2:4.0.18.1-15
+- fix infinitive loop if there are duplicate entries
+  in /etc/group (#240915)
+
 * Tue Jun 06 2007 Peter Vrabec <pvrabec@redhat.com> 2:4.0.18.1-14
 - do not run find_new_uid() twice and use getpwuid() to check
   UID uniqueness (#236871)
