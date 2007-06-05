@@ -5,7 +5,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.0.18.1
-Release: 13%{?dist}
+Release: 14%{?dist}
 Epoch: 2
 URL: http://shadow.pld.org.pl/
 Source0: ftp://ftp.pld.org.pl/software/shadow/shadow-%{version}.tar.bz2
@@ -26,7 +26,7 @@ Patch10: shadow-4.0.18.1-overflow.patch
 Patch11: shadow-4.0.17-useradd.patch
 Patch12: shadow-4.0.18.1-appendOption.patch
 Patch13: shadow-4.0.18.1-sysAccount.patch
-
+Patch14: shadow-4.0.18.1-findNewUidOnce.patch
 License: BSD
 Group: System Environment/Base
 BuildRequires: autoconf, automake, libtool, gettext-devel
@@ -68,6 +68,7 @@ cp %{SOURCE3} lib/nscd.c
 %patch11 -p1 -b .useradd
 %patch12 -p1 -b .appendOption
 %patch13 -p1 -b .sysAccount
+%patch14 -p1 -b .findNewUidOnce
 
 rm po/*.gmo
 rm po/stamp-po
@@ -223,6 +224,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/man8/faillog.8*
 
 %changelog
+* Tue Jun 06 2007 Peter Vrabec <pvrabec@redhat.com> 2:4.0.18.1-14
+- do not run find_new_uid() twice and use getpwuid() to check
+  UID uniqueness (#236871)
+
 * Tue Apr 10 2007 Peter Vrabec <pvrabec@redhat.com> 2:4.0.18.1-13
 - fix useradd dump core when build without WITH_SELINUX (#235641)
 
