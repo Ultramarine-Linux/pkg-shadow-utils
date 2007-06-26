@@ -5,7 +5,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.0.18.1
-Release: 15%{?dist}
+Release: 16%{?dist}
 Epoch: 2
 URL: http://shadow.pld.org.pl/
 Source0: ftp://ftp.pld.org.pl/software/shadow/shadow-%{version}.tar.bz2
@@ -227,6 +227,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/man8/faillog.8*
 
 %changelog
+* Tue Jun 26 2007 Peter Vrabec <pvrabec@redhat.com> 2:4.0.18.1-16
+- fix "CAVEATS" section of groupadd man page (#245590)
+
 * Tue Jun 06 2007 Peter Vrabec <pvrabec@redhat.com> 2:4.0.18.1-15
 - fix infinitive loop if there are duplicate entries
   in /etc/group (#240915)

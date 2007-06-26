@@ -1,16 +1,5 @@
---- shadow-4.0.14/man/useradd.8.goodname	2006-01-05 17:54:26.000000000 +0100
-+++ shadow-4.0.14/man/useradd.8	2006-01-05 18:01:18.000000000 +0100
-@@ -166,8 +166,6 @@
- Similarly, if the username already exists in an external user database such as NIS,
- \fBuseradd\fR
- will deny the user account creation request.
--.PP
--Usernames must begin with a lower case letter or an underscore, and only lower case letters, underscores, dashes, and dollar signs may follow. In regular expression terms: [a\-z_][a\-z0\-9_\-]*[$]
- .SH "FILES"
- .TP
- \fI/etc/passwd\fR
---- shadow-4.0.14/libmisc/chkname.c.goodname	2005-08-31 19:24:57.000000000 +0200
-+++ shadow-4.0.14/libmisc/chkname.c	2006-01-05 17:59:45.000000000 +0100
+--- shadow-4.0.18.1/libmisc/chkname.c.goodname	2005-08-31 19:24:57.000000000 +0200
++++ shadow-4.0.18.1/libmisc/chkname.c	2007-06-26 16:20:40.000000000 +0200
 @@ -18,16 +18,24 @@
  static int good_name (const char *name)
  {
@@ -75,3 +64,33 @@
  		return 0;
  
  	return good_name (name);
+--- shadow-4.0.18.1/man/groupadd.8.goodname	2007-06-26 16:20:40.000000000 +0200
++++ shadow-4.0.18.1/man/groupadd.8	2007-06-26 16:22:05.000000000 +0200
+@@ -73,15 +73,11 @@
+ Shadow password suite configuration.
+ .SH "CAVEATS"
+ .PP
+-Groupnames must begin with a lower case letter or an underscore, and only lower case letters, underscores, dashes, and dollar signs may follow. In regular expression terms: [a\-z_][a\-z0\-9_\-]*[$]
+-.PP
+-Groupnames may only be up to 16 characters long.
++Groupnames may only be up to 32 characters long.
+ .PP
+ If the groupname already exists in an external group database such as NIS,
+ \fBgroupadd\fR
+ will deny the group creation request.
+-.PP
+-Groupnames may only be up to 16 characters long.
+ .SH "EXIT VALUES"
+ .PP
+ The
+--- shadow-4.0.18.1/man/useradd.8.goodname	2007-06-26 16:20:40.000000000 +0200
++++ shadow-4.0.18.1/man/useradd.8	2007-06-26 16:20:40.000000000 +0200
+@@ -179,8 +179,6 @@
+ Similarly, if the username already exists in an external user database such as NIS,
+ \fBuseradd\fR
+ will deny the user account creation request.
+-.PP
+-Usernames must begin with a lower case letter or an underscore, and only lower case letters, underscores, dashes, and dollar signs may follow. In regular expression terms: [a\-z_][a\-z0\-9_\-]*[$]
+ .SH "FILES"
+ .TP 3n
+ \fI/etc/passwd\fR
