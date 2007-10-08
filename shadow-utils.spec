@@ -5,7 +5,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.0.18.1
-Release: 17%{?dist}
+Release: 18%{?dist}
 Epoch: 2
 URL: http://shadow.pld.org.pl/
 Source0: ftp://ftp.pld.org.pl/software/shadow/shadow-%{version}.tar.bz2
@@ -161,6 +161,12 @@ rm $RPM_BUILD_ROOT/%{_mandir}/man8/chgpasswd.*
 rm $RPM_BUILD_ROOT/%{_mandir}/*/man8/chgpasswd.*
 
 %find_lang shadow
+find $RPM_BUILD_ROOT%{_mandir} -depth -type d -empty -delete
+for dir in $(ls -1d $RPM_BUILD_ROOT%{_mandir}/{??,??_??}) ; do
+    dir=$(echo $dir | sed -e "s|^$RPM_BUILD_ROOT||")
+    lang=$(basename $dir)
+    echo "%%lang($lang) $dir/man*/*" >> shadow.lang
+done
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -186,47 +192,30 @@ rm -rf $RPM_BUILD_ROOT
 %{_sbindir}/chpasswd
 %{_sbindir}/newusers
 %{_mandir}/man1/chage.1*
-%{_mandir}/*/man1/chage.1*
 %{_mandir}/man1/gpasswd.1*
-%{_mandir}/*/man1/gpasswd.1*
 %{_mandir}/man1/sg.1*
-%{_mandir}/*/man1/sg.1*
 %{_mandir}/man1/newgrp.1*
-%{_mandir}/*/man1/newgrp.1*
 %{_mandir}/man3/shadow.3*
-%{_mandir}/*/man3/shadow.3*
 %{_mandir}/man3/getspnam.3*
-%{_mandir}/*/man3/getspnam.3*
 %{_mandir}/man5/shadow.5*
-%{_mandir}/*/man5/shadow.5*
 %{_mandir}/man5/login.defs.5*
-%{_mandir}/*/man5/login.defs.5*
 %{_mandir}/man5/gshadow.5*
-%{_mandir}/*/man5/gshadow.5*
 %{_mandir}/man5/faillog.5*
-%{_mandir}/*/man5/faillog.5*
 %{_mandir}/man8/adduser.8*
-%{_mandir}/*/man8/adduser.8*
 %{_mandir}/man8/group*.8*
-%{_mandir}/*/man8/group*.8*
 %{_mandir}/man8/user*.8*
-%{_mandir}/*/man8/user*.8*
 %{_mandir}/man8/pwck.8*
-%{_mandir}/*/man8/pwck.8*
 %{_mandir}/man8/grpck.8*
-%{_mandir}/*/man8/grpck.8*
 %{_mandir}/man8/chpasswd.8*
-%{_mandir}/*/man8/chpasswd.8*
 %{_mandir}/man8/newusers.8*
-%{_mandir}/*/man8/newusers.8*
 %{_mandir}/man8/*conv.8*
-%{_mandir}/*/man8/*conv.8*
 %{_mandir}/man8/lastlog.8*
-%{_mandir}/*/man8/lastlog.8*
 %{_mandir}/man8/faillog.8*
-%{_mandir}/*/man8/faillog.8*
 
 %changelog
+* Mon Oct 08 2007 Peter Vrabec <pvrabec@redhat.com> 2:4.0.18.1-18
+- mark localized man pages with %%lang
+
 * Wed Aug 22 2007 Peter Vrabec <pvrabec@redhat.com> 2:4.0.18.1-17
 - rebuild
 
