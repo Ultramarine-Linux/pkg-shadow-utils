@@ -5,7 +5,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.0.18.1
-Release: 18%{?dist}
+Release: 19%{?dist}
 Epoch: 2
 URL: http://shadow.pld.org.pl/
 Source0: ftp://ftp.pld.org.pl/software/shadow/shadow-%{version}.tar.bz2
@@ -28,6 +28,7 @@ Patch12: shadow-4.0.18.1-appendOption.patch
 Patch13: shadow-4.0.18.1-sysAccount.patch
 Patch14: shadow-4.0.18.1-findNewUidOnce.patch
 Patch15: shadow-4.0.18.1-groupLoop.patch
+Patch16: shadow-4.0.18.1-mtime.patch
 
 License: BSD
 Group: System Environment/Base
@@ -72,6 +73,7 @@ cp %{SOURCE3} lib/nscd.c
 %patch13 -p1 -b .sysAccount
 %patch14 -p1 -b .findNewUidOnce
 %patch15 -p1 -b .groupLoop
+%patch16 -p1 -b .mtime
 
 rm po/*.gmo
 rm po/stamp-po
@@ -213,6 +215,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/faillog.8*
 
 %changelog
+* Thu Oct 18 2007 Peter Vrabec <pvrabec@redhat.com> 2:4.0.18.1-19
+- fix timestamps when moving home dirs to another file system (#278571)
+
 * Mon Oct 08 2007 Peter Vrabec <pvrabec@redhat.com> 2:4.0.18.1-18
 - mark localized man pages with %%lang
 
