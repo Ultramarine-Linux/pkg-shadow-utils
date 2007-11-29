@@ -1,5 +1,15 @@
---- /dev/null	2007-01-16 10:10:52.644263000 +0100
-+++ shadow-4.0.17/libmisc/system.c	2007-01-16 18:24:34.000000000 +0100
+--- shadow-4.0.18.1/libmisc/Makefile.am.useradd	2005-09-05 18:21:37.000000000 +0200
++++ shadow-4.0.18.1/libmisc/Makefile.am	2007-11-29 15:47:39.000000000 +0100
+@@ -41,6 +41,7 @@ libmisc_a_SOURCES = \
+ 	setugid.c \
+ 	setupenv.c \
+ 	shell.c \
++	system.c \
+ 	strtoday.c \
+ 	sub.c \
+ 	sulog.c \
+--- shadow-4.0.18.1/libmisc/system.c.useradd	2007-11-29 15:47:39.000000000 +0100
++++ shadow-4.0.18.1/libmisc/system.c	2007-11-29 15:47:39.000000000 +0100
 @@ -0,0 +1,37 @@
 +#include <config.h>
 +
@@ -38,19 +48,9 @@
 +	exit (-1);
 +}
 +
---- shadow-4.0.17/libmisc/Makefile.am.useradd	2005-09-05 18:21:37.000000000 +0200
-+++ shadow-4.0.17/libmisc/Makefile.am	2007-01-16 18:24:34.000000000 +0100
-@@ -41,6 +41,7 @@
- 	setugid.c \
- 	setupenv.c \
- 	shell.c \
-+	system.c \
- 	strtoday.c \
- 	sub.c \
- 	sulog.c \
---- shadow-4.0.17/libmisc/copydir.c.useradd	2006-07-10 06:35:56.000000000 +0200
-+++ shadow-4.0.17/libmisc/copydir.c	2007-01-16 18:24:34.000000000 +0100
-@@ -54,7 +54,7 @@
+--- shadow-4.0.18.1/libmisc/copydir.c.useradd	2006-07-10 06:35:56.000000000 +0200
++++ shadow-4.0.18.1/libmisc/copydir.c	2007-11-29 15:47:39.000000000 +0100
+@@ -54,7 +54,7 @@ struct link_name {
  static struct link_name *links;
  
  #ifdef WITH_SELINUX
@@ -59,8 +59,8 @@
  {
  	security_context_t scontext = NULL;
  
---- shadow-4.0.17/man/usermod.8.xml.useradd	2006-06-16 18:11:04.000000000 +0200
-+++ shadow-4.0.17/man/usermod.8.xml	2007-01-16 18:24:34.000000000 +0100
+--- shadow-4.0.18.1/man/usermod.8.xml.useradd	2006-07-24 07:48:36.000000000 +0200
++++ shadow-4.0.18.1/man/usermod.8.xml	2007-11-29 15:47:39.000000000 +0100
 @@ -226,6 +226,19 @@
  	  </para>
  	</listitem>
@@ -81,8 +81,33 @@
      </variablelist>
    </refsect1>
  
---- shadow-4.0.17/man/useradd.8.xml.useradd	2006-06-16 18:11:04.000000000 +0200
-+++ shadow-4.0.17/man/useradd.8.xml	2007-01-16 18:24:34.000000000 +0100
+--- shadow-4.0.18.1/man/usermod.8.useradd	2006-07-30 22:54:28.000000000 +0200
++++ shadow-4.0.18.1/man/usermod.8	2007-11-29 15:47:39.000000000 +0100
+@@ -92,6 +92,10 @@ Unlock a user's password. This removes t
+ \fB\-p\fR
+ or
+ \fB\-L\fR.
++.TP 3n
++\fB\-Z\fR, \fB\-\-selinux-user\fR \fISEUSER\fR
++The SELinux user for the user's login. The default is to leave this field blank, which causes the system to select the default SELinux user.
++
+ .SH "CAVEATS"
+ .PP
+ 
+--- shadow-4.0.18.1/man/useradd.8.useradd	2007-11-29 15:46:24.000000000 +0100
++++ shadow-4.0.18.1/man/useradd.8	2007-11-29 15:47:39.000000000 +0100
+@@ -137,6 +137,9 @@ The name of the user's login shell. The 
+ The numerical value of the user's ID. This value must be unique, unless the
+ \fB\-o\fR
+ option is used. The value must be non\-negative. The default is to use the smallest ID value greater than 999 and greater than every other user. Values between 0 and 999 are typically reserved for system accounts.
++.TP 3n
++\fB\-Z\fR, \fB\-\-selinux-user\fR \fISEUSER\fR
++The SELinux user for the user's login. The default is to leave this field blank, which causes the system to select the default SELinux user.
+ .SS "Changing the default values"
+ .PP
+ When invoked with the
+--- shadow-4.0.18.1/man/useradd.8.xml.useradd	2006-07-24 07:48:36.000000000 +0200
++++ shadow-4.0.18.1/man/useradd.8.xml	2007-11-29 15:47:39.000000000 +0100
 @@ -251,6 +251,19 @@
  	  </para>
  	</listitem>
@@ -103,218 +128,9 @@
      </variablelist>
  
      <refsect2 id='changing_the_default_values'>
---- shadow-4.0.17/man/useradd.8.useradd	2007-01-16 18:24:34.000000000 +0100
-+++ shadow-4.0.17/man/useradd.8	2007-01-16 18:24:34.000000000 +0100
-@@ -137,6 +137,9 @@
- The numerical value of the user's ID. This value must be unique, unless the
- \fB\-o\fR
- option is used. The value must be non\-negative. The default is to use the smallest ID value greater than 999 and greater than every other user. Values between 0 and 999 are typically reserved for system accounts.
-+.TP 3n
-+\fB\-Z\fR, \fB\-\-selinux-user\fR \fISEUSER\fR
-+The SELinux user for the user's login. The default is to leave this field blank, which causes the system to select the default SELinux user.
- .SS "Changing the default values"
- .PP
- When invoked with the
---- shadow-4.0.17/man/usermod.8.useradd	2007-01-16 18:24:34.000000000 +0100
-+++ shadow-4.0.17/man/usermod.8	2007-01-16 18:24:34.000000000 +0100
-@@ -90,6 +90,10 @@
- \fB\-p\fR
- or
- \fB\-L\fR.
-+.TP 3n
-+\fB\-Z\fR, \fB\-\-selinux-user\fR \fISEUSER\fR
-+The SELinux user for the user's login. The default is to leave this field blank, which causes the system to select the default SELinux user.
-+
- .SH "CAVEATS"
- .PP
- 
---- shadow-4.0.17/lib/prototypes.h.useradd	2006-02-07 17:36:30.000000000 +0100
-+++ shadow-4.0.17/lib/prototypes.h	2007-01-16 18:24:34.000000000 +0100
-@@ -52,6 +52,9 @@
- /* copydir.c */
- extern int copy_tree (const char *, const char *, uid_t, gid_t);
- extern int remove_tree (const char *);
-+#ifdef WITH_SELINUX
-+extern int selinux_file_context (const char *dst_name);
-+#endif
- 
- /* encrypt.c */
- extern char *pw_encrypt (const char *, const char *);
-@@ -147,6 +150,9 @@
- /* shell.c */
- extern int shell (const char *, const char *, char *const *);
- 
-+/* system.c */
-+extern int safe_system(const char *command, const char *argv[], const char *env[], int ignore_stderr);
-+
- /* strtoday.c */
- extern long strtoday (const char *);
- 
---- shadow-4.0.17/lib/defines.h.useradd	2005-09-05 18:22:03.000000000 +0200
-+++ shadow-4.0.17/lib/defines.h	2007-01-16 18:24:34.000000000 +0100
-@@ -342,4 +342,7 @@
- #include <libaudit.h>
- #endif
- 
-+#ifdef WITH_SELINUX
-+#include <selinux/selinux.h>
-+#endif
- #endif				/* _DEFINES_H_ */
---- shadow-4.0.17/src/useradd.c.useradd	2007-01-16 18:24:34.000000000 +0100
-+++ shadow-4.0.17/src/useradd.c	2007-01-16 18:24:34.000000000 +0100
-@@ -100,6 +100,7 @@
- static const char *user_home = "";
- static const char *user_shell = "";
- static const char *create_mail_spool = "";
-+static const char *user_selinux = "";
- 
- static long user_expire = -1;
- static int is_shadow_pwd;
-@@ -170,6 +171,7 @@
- static int get_groups (char *);
- static void usage (void);
- static void new_pwent (struct passwd *);
-+static void selinux_update_mapping (void);
- 
- static long scale_age (long);
- static void new_spent (struct spwd *);
-@@ -361,6 +363,7 @@
- 			def_create_mail_spool = xstrdup (cp);
- 		}
- 	}
-+	fclose(fp);
- }
- 
- /*
-@@ -648,7 +651,10 @@
- 			   "  -p, --password PASSWORD	use encrypted password for the new user\n"
- 			   "				account\n"
- 			   "  -s, --shell SHELL		the login shell for the new user account\n"
--			   "  -u, --uid UID			force use the UID for the new user account\n"
-+			   "  -u, --uid UID	       		force use the UID for the new user account\n"
-+#ifdef WITH_SELINUX
-+			   "  -Z, --selinux-user SEUSER	use a specific SEUSER for the SELinux user mapping\n"
-+#endif
- 			   "\n"));
- 	exit (E_USAGE);
- }
-@@ -1048,11 +1054,18 @@
- 			{"non-unique", no_argument, NULL, 'o'},
- 			{"password", required_argument, NULL, 'p'},
- 			{"shell", required_argument, NULL, 's'},
-+#ifdef WITH_SELINUX
-+			{"selinux-user", required_argument, NULL, 'Z'},
-+#endif
- 			{"uid", required_argument, NULL, 'u'},
- 			{NULL, 0, NULL, '\0'}
- 		};
- 		while ((c =
--			getopt_long (argc, argv, "b:c:d:De:f:g:G:k:K:mlMnrop:s:u:",
-+#ifdef WITH_SELINUX
-+			getopt_long (argc, argv, "b:c:d:De:f:g:G:k:K:mlMnrop:s:u:Z:",
-+#else
-+			getopt_long (argc, argv, "b:c:d:De:f:g:G:k:K:mlMnrop:s:u:",
-+#endif
- 				     long_options, NULL)) != -1) {
- 			switch (c) {
- 			case 'b':
-@@ -1236,6 +1249,17 @@
-                         case 'M':
-                                 Mflg++;
-                                 break;
-+#ifdef WITH_SELINUX
-+                        case 'Z':
-+				if (is_selinux_enabled() > 0)
-+					user_selinux = optarg;
-+				else {
-+					fprintf (stderr,_("%s: -Z requires SELinux enabled kernel\n"), Prog);
-+
-+					exit (E_BAD_ARG);
-+				}
-+                                break;
-+#endif
- 			default:
- 				usage ();
- 			}
-@@ -1603,6 +1627,33 @@
- 		grp_update ();
- }
- 
-+static void selinux_update_mapping () {
-+
-+#ifdef WITH_SELINUX
-+	if (is_selinux_enabled() <= 0) return;
-+
-+        if (*user_selinux) { /* must be done after passwd write() */
-+		const char *argv[7];
-+		argv[0] = "/usr/sbin/semanage";
-+		argv[1] = "login";
-+		argv[2] = "-a";
-+		argv[3] = "-s";
-+		argv[4] = user_selinux;
-+		argv[5] = user_name;
-+		argv[6] = NULL;
-+                if (safe_system(argv[0], argv, NULL, 0)) {
-+			fprintf (stderr,
-+				 _("%s: warning: the user name %s to %s SELinux user mapping failed.\n"),
-+				 Prog, user_name, user_selinux);
-+#ifdef WITH_AUDIT
-+			audit_logger (AUDIT_USER_CHAUTHTOK, Prog,
-+				      "adding SELinux user mapping", user_name, user_id, 0);
-+#endif        
-+		}
-+	}
-+#endif
-+
-+}
- /*
-  * create_home - create the user's home directory
-  *
-@@ -1612,7 +1663,11 @@
-  */
- static void create_home (void)
- {
-+
- 	if (access (user_home, F_OK)) {
-+#ifdef WITH_SELINUX
-+		selinux_file_context (user_home);
-+#endif
- 		/* XXX - create missing parent directories.  --marekm */
- 		if (mkdir (user_home, 0)) {
- 			fprintf (stderr,
-@@ -1840,6 +1895,15 @@
- 
- 	usr_update ();
- 
-+	create_mail ();
-+
-+	nscd_flush_cache ("passwd");
-+	nscd_flush_cache ("group");
-+
-+	close_files ();
-+
-+	selinux_update_mapping();
-+
- 	if (mflg) {
- 		create_home ();
- 		if (home_added)
-@@ -1863,13 +1927,6 @@
-          * with --gafton
-          */
- 
--	create_mail ();
--
--	nscd_flush_cache ("passwd");
--	nscd_flush_cache ("group");
--
--	close_files ();
--
- #ifdef USE_PAM
- 	if (retval == PAM_SUCCESS)
- 		pam_end (pamh, PAM_SUCCESS);
---- shadow-4.0.17/src/userdel.c.useradd	2007-01-16 18:24:34.000000000 +0100
-+++ shadow-4.0.17/src/userdel.c	2007-01-16 18:24:34.000000000 +0100
-@@ -792,6 +792,17 @@
+--- shadow-4.0.18.1/src/userdel.c.useradd	2007-11-29 15:46:24.000000000 +0100
++++ shadow-4.0.18.1/src/userdel.c	2007-11-29 15:47:39.000000000 +0100
+@@ -792,6 +792,17 @@ int main (int argc, char **argv)
  #endif
  	}
  
@@ -332,9 +148,9 @@
  	/*
  	 * Cancel any crontabs or at jobs. Have to do this before we remove
  	 * the entry from /etc/passwd.
---- shadow-4.0.17/src/usermod.c.useradd	2007-01-16 18:24:34.000000000 +0100
-+++ shadow-4.0.17/src/usermod.c	2007-01-16 18:29:45.000000000 +0100
-@@ -90,6 +90,7 @@
+--- shadow-4.0.18.1/src/usermod.c.useradd	2007-11-29 15:46:24.000000000 +0100
++++ shadow-4.0.18.1/src/usermod.c	2007-11-29 15:47:39.000000000 +0100
+@@ -90,6 +90,7 @@ static char *user_comment;
  static char *user_home;
  static char *user_newhome;
  static char *user_shell;
@@ -342,7 +158,7 @@
  static long user_expire;
  static long user_inactive;
  static long sys_ngroups;
-@@ -132,6 +133,7 @@
+@@ -132,6 +133,7 @@ static int is_shadow_grp;
  static int get_groups (char *);
  static void usage (void);
  static void new_pwent (struct passwd *);
@@ -350,7 +166,7 @@
  
  static void new_spent (struct spwd *);
  static void fail_exit (int);
-@@ -301,6 +303,9 @@
+@@ -294,6 +296,9 @@ static void usage (void)
  			   "  -s, --shell SHELL		new login shell for the user account\n"
  			   "  -u, --uid UID			new UID for the user account\n"
  			   "  -U, --unlock			unlock the user account\n"
@@ -360,7 +176,7 @@
  			   "\n"));
  	exit (E_USAGE);
  }
-@@ -925,13 +930,20 @@
+@@ -918,13 +923,20 @@ static void process_flags (int argc, cha
  			{"move-home", no_argument, NULL, 'm'},
  			{"non-unique", no_argument, NULL, 'o'},
  			{"password", required_argument, NULL, 'p'},
@@ -381,7 +197,7 @@
  				     long_options, NULL)) != -1) {
  			switch (c) {
  			case 'a':
-@@ -1080,6 +1092,16 @@
+@@ -1073,6 +1085,16 @@ static void process_flags (int argc, cha
  
  				Uflg++;
  				break;
@@ -398,7 +214,7 @@
  			default:
  				usage ();
  			}
-@@ -1549,6 +1571,8 @@
+@@ -1542,6 +1564,8 @@ int main (int argc, char **argv)
  	if (Gflg || lflg)
  		grp_err = grp_update ();
  
@@ -407,7 +223,7 @@
  	if (mflg)
  		move_home ();
  
-@@ -1580,3 +1604,62 @@
+@@ -1573,3 +1597,62 @@ int main (int argc, char **argv)
  	exit (E_SUCCESS);
  	/* NOT REACHED */
  }
@@ -470,4 +286,190 @@
 +	}
 +#endif
 +}
+--- shadow-4.0.18.1/src/useradd.c.useradd	2007-11-29 15:46:24.000000000 +0100
++++ shadow-4.0.18.1/src/useradd.c	2007-11-29 15:52:00.000000000 +0100
+@@ -100,6 +100,7 @@ static const char *user_comment = "";
+ static const char *user_home = "";
+ static const char *user_shell = "";
+ static const char *create_mail_spool = "";
++static const char *user_selinux = "";
+ 
+ static long user_expire = -1;
+ static int is_shadow_pwd;
+@@ -170,6 +171,7 @@ static int set_defaults (void);
+ static int get_groups (char *);
+ static void usage (void);
+ static void new_pwent (struct passwd *);
++static void selinux_update_mapping (void);
+ 
+ static long scale_age (long);
+ static void new_spent (struct spwd *);
+@@ -354,6 +356,7 @@ static void get_defaults (void)
+ 			def_create_mail_spool = xstrdup (cp);
+ 		}
+ 	}
++	fclose(fp);
+ }
+ 
+ /*
+@@ -641,7 +644,10 @@ static void usage (void)
+ 			   "  -p, --password PASSWORD	use encrypted password for the new user\n"
+ 			   "				account\n"
+ 			   "  -s, --shell SHELL		the login shell for the new user account\n"
+-			   "  -u, --uid UID			force use the UID for the new user account\n"
++			   "  -u, --uid UID	       		force use the UID for the new user account\n"
++#ifdef WITH_SELINUX
++			   "  -Z, --selinux-user SEUSER	use a specific SEUSER for the SELinux user mapping\n"
++#endif
+ 			   "\n"));
+ 	exit (E_USAGE);
+ }
+@@ -1041,11 +1047,18 @@ static void process_flags (int argc, cha
+ 			{"non-unique", no_argument, NULL, 'o'},
+ 			{"password", required_argument, NULL, 'p'},
+ 			{"shell", required_argument, NULL, 's'},
++#ifdef WITH_SELINUX
++			{"selinux-user", required_argument, NULL, 'Z'},
++#endif
+ 			{"uid", required_argument, NULL, 'u'},
+ 			{NULL, 0, NULL, '\0'}
+ 		};
+ 		while ((c =
++#ifdef WITH_SELINUX
++			getopt_long (argc, argv, "b:c:d:De:f:g:G:k:K:mlMnrop:s:u:Z:",
++#else
+ 			getopt_long (argc, argv, "b:c:d:De:f:g:G:k:K:mlMnrop:s:u:",
++#endif
+ 				     long_options, NULL)) != -1) {
+ 			switch (c) {
+ 			case 'b':
+@@ -1229,6 +1242,17 @@ static void process_flags (int argc, cha
+                         case 'M':
+                                 Mflg++;
+                                 break;
++#ifdef WITH_SELINUX
++                        case 'Z':
++				if (is_selinux_enabled() > 0)
++					user_selinux = optarg;
++				else {
++					fprintf (stderr,_("%s: -Z requires SELinux enabled kernel\n"), Prog);
 +
++					exit (E_BAD_ARG);
++				}
++                                break;
++#endif
+ 			default:
+ 				usage ();
+ 			}
+@@ -1596,6 +1620,33 @@ static void usr_update (void)
+ 		grp_update ();
+ }
+ 
++static void selinux_update_mapping () {
++
++#ifdef WITH_SELINUX
++	if (is_selinux_enabled() <= 0) return;
++
++        if (*user_selinux) { /* must be done after passwd write() */
++		const char *argv[7];
++		argv[0] = "/usr/sbin/semanage";
++		argv[1] = "login";
++		argv[2] = "-a";
++		argv[3] = "-s";
++		argv[4] = user_selinux;
++		argv[5] = user_name;
++		argv[6] = NULL;
++                if (safe_system(argv[0], argv, NULL, 0)) {
++			fprintf (stderr,
++				 _("%s: warning: the user name %s to %s SELinux user mapping failed.\n"),
++				 Prog, user_name, user_selinux);
++#ifdef WITH_AUDIT
++			audit_logger (AUDIT_USER_CHAUTHTOK, Prog,
++				      "adding SELinux user mapping", user_name, user_id, 0);
++#endif        
++		}
++	}
++#endif
++
++}
+ /*
+  * create_home - create the user's home directory
+  *
+@@ -1605,7 +1656,11 @@ static void usr_update (void)
+  */
+ static void create_home (void)
+ {
++
+ 	if (access (user_home, F_OK)) {
++#ifdef WITH_SELINUX
++		selinux_file_context (user_home);
++#endif
+ 		/* XXX - create missing parent directories.  --marekm */
+ 		if (mkdir (user_home, 0)) {
+ 			fprintf (stderr,
+@@ -1833,6 +1888,17 @@ int main (int argc, char **argv)
+ 
+ 	usr_update ();
+ 
++	/* Do not create mail directory for system accounts */
++	if( !rflg )
++		create_mail ();
++
++	nscd_flush_cache ("passwd");
++	nscd_flush_cache ("group");
++
++	close_files ();
++
++	selinux_update_mapping();
++
+ 	if (mflg) {
+ 		create_home ();
+ 		if (home_added)
+@@ -1856,15 +1922,6 @@ int main (int argc, char **argv)
+          * with --gafton
+          */
+ 
+-	/* Do not create mail directory for system accounts */
+-	if( !rflg )
+-		create_mail ();
+-
+-	nscd_flush_cache ("passwd");
+-	nscd_flush_cache ("group");
+-
+-	close_files ();
+-
+ #ifdef USE_PAM
+ 	if (retval == PAM_SUCCESS)
+ 		pam_end (pamh, PAM_SUCCESS);
+--- shadow-4.0.18.1/lib/defines.h.useradd	2005-09-05 18:22:03.000000000 +0200
++++ shadow-4.0.18.1/lib/defines.h	2007-11-29 15:47:39.000000000 +0100
+@@ -342,4 +342,7 @@ extern char *strerror ();
+ #include <libaudit.h>
+ #endif
+ 
++#ifdef WITH_SELINUX
++#include <selinux/selinux.h>
++#endif
+ #endif				/* _DEFINES_H_ */
+--- shadow-4.0.18.1/lib/prototypes.h.useradd	2006-02-07 17:36:30.000000000 +0100
++++ shadow-4.0.18.1/lib/prototypes.h	2007-11-29 15:47:39.000000000 +0100
+@@ -52,6 +52,9 @@ extern int is_listed (const char *, cons
+ /* copydir.c */
+ extern int copy_tree (const char *, const char *, uid_t, gid_t);
+ extern int remove_tree (const char *);
++#ifdef WITH_SELINUX
++extern int selinux_file_context (const char *dst_name);
++#endif
+ 
+ /* encrypt.c */
+ extern char *pw_encrypt (const char *, const char *);
+@@ -147,6 +150,9 @@ extern void setup_env (struct passwd *);
+ /* shell.c */
+ extern int shell (const char *, const char *, char *const *);
+ 
++/* system.c */
++extern int safe_system(const char *command, const char *argv[], const char *env[], int ignore_stderr);
++
+ /* strtoday.c */
+ extern long strtoday (const char *);
+ 
