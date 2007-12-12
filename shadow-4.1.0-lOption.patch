@@ -1,0 +1,66 @@
+diff -up shadow-4.1.0/src/useradd.c.lOption shadow-4.1.0/src/useradd.c
+--- shadow-4.1.0/src/useradd.c.lOption	2007-12-12 14:03:22.000000000 +0100
++++ shadow-4.1.0/src/useradd.c	2007-12-12 14:08:43.000000000 +0100
+@@ -124,6 +124,7 @@ static int
+     Gflg = 0,			/* secondary group set for new account */
+     kflg = 0,			/* specify a directory to fill new user directory */
+     mflg = 0,			/* create user's home directory if it doesn't exist */
++    lflg = 0,      		/* do not add user to lastlog database file */
+     Mflg = 0,                   /* do NOT create user's home directory no matter what */
+     nflg = 0,                   /* do NOT create a group having the same name as the user */
+     oflg = 0,			/* permit non-unique user ID to be specified with -u */
+@@ -634,8 +635,9 @@ static void usage (void)
+ 			   "  -K, --key KEY=VALUE           overrides /etc/login.defs defaults\n"
+ 			   "  -m, --create-home             create home directory for the new user\n"
+ 			   "                                account\n"
+-                           "  -M,                       do not create user's home directory(overrides /etc/login.defs)\n"
+-                           "  -r,                       create system account\n"
++                           "  -l,                           do not add user to lastlog database file\n"
++                           "  -M,                           do not create user's home directory(overrides /etc/login.defs)\n"
++                           "  -r,                           create system account\n"
+ 			   "  -o, --non-unique              allow create user with duplicate\n"
+ 			   "                                (non-unique) UID\n"
+ 			   "  -p, --password PASSWORD       use encrypted password for the new user\n"
+@@ -1032,7 +1034,7 @@ static void process_flags (int argc, cha
+ 			{NULL, 0, NULL, '\0'}
+ 		};
+ 		while ((c =
+-			getopt_long (argc, argv, "b:c:d:De:f:g:G:k:K:mMnrop:s:u:",
++			getopt_long (argc, argv, "b:c:d:De:f:g:G:k:K:mlMnrop:s:u:",
+ 				     long_options, NULL)) != -1) {
+ 			switch (c) {
+ 			case 'b':
+@@ -1169,6 +1171,9 @@ static void process_flags (int argc, cha
+ 			case 'm':
+ 				mflg++;
+ 				break;
++			case 'l':
++	                        lflg++;
++                        	break;
+ 			case 'o':
+ 				oflg++;
+ 				break;
+@@ -1538,7 +1543,7 @@ static void usr_update (void)
+ 	 * are left unchanged).  --marekm
+ 	 */
+ 	/* local, no need for xgetpwuid */
+-	if (!getpwuid (user_id)) {
++	if (!getpwuid (user_id) && !lflg) {
+ 		faillog_reset (user_id);
+ 		lastlog_reset (user_id);
+ 	}
+diff -up shadow-4.1.0/man/useradd.8.lOption shadow-4.1.0/man/useradd.8
+--- shadow-4.1.0/man/useradd.8.lOption	2007-12-12 14:03:22.000000000 +0100
++++ shadow-4.1.0/man/useradd.8	2007-12-12 14:06:31.000000000 +0100
+@@ -53,6 +53,11 @@ option is not used,
+ must exist\.
+ .RE
+ .PP
++\fB-l\fR
++.RS 4
++Do not add the user to the last login log file. This is an option added by Red Hat.
++.RE
++.PP
+ \fB\-D\fR
+ .RS 4
+ See below, the subsection "Changing the default values"\.

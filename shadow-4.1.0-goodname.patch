@@ -1,5 +1,6 @@
---- shadow-4.0.18.1/libmisc/chkname.c.goodname	2005-08-31 19:24:57.000000000 +0200
-+++ shadow-4.0.18.1/libmisc/chkname.c	2007-06-26 16:20:40.000000000 +0200
+diff -up shadow-4.1.0/libmisc/chkname.c.goodname shadow-4.1.0/libmisc/chkname.c
+--- shadow-4.1.0/libmisc/chkname.c.goodname	2007-11-11 00:45:59.000000000 +0100
++++ shadow-4.1.0/libmisc/chkname.c	2007-12-12 13:57:20.000000000 +0100
 @@ -18,16 +18,24 @@
  static int good_name (const char *name)
  {
@@ -32,7 +33,7 @@
  			return 0;
  	}
  
-@@ -43,10 +51,9 @@
+@@ -43,10 +51,9 @@ int check_user_name (const char *name)
  #endif
  
  	/*
@@ -45,7 +46,7 @@
  		return 0;
  
  	return good_name (name);
-@@ -54,11 +61,13 @@
+@@ -54,11 +61,13 @@ int check_user_name (const char *name)
  
  int check_group_name (const char *name)
  {
@@ -64,33 +65,29 @@
  		return 0;
  
  	return good_name (name);
---- shadow-4.0.18.1/man/groupadd.8.goodname	2007-06-26 16:20:40.000000000 +0200
-+++ shadow-4.0.18.1/man/groupadd.8	2007-06-26 16:22:05.000000000 +0200
-@@ -73,15 +73,11 @@
- Shadow password suite configuration.
+diff -up shadow-4.1.0/man/groupadd.8.goodname shadow-4.1.0/man/groupadd.8
+--- shadow-4.1.0/man/groupadd.8.goodname	2007-12-12 13:51:43.000000000 +0100
++++ shadow-4.1.0/man/groupadd.8	2007-12-12 14:00:29.000000000 +0100
+@@ -126,9 +126,7 @@ Shadow password suite configuration\.
+ .RE
  .SH "CAVEATS"
  .PP
--Groupnames must begin with a lower case letter or an underscore, and only lower case letters, underscores, dashes, and dollar signs may follow. In regular expression terms: [a\-z_][a\-z0\-9_\-]*[$]
+-Groupnames must begin with a lower case letter or an underscore, and only lower case letters, underscores, dashes, and dollar signs may follow\. In regular expression terms: [a\-z_][a\-z0\-9_\-]*[$]
 -.PP
--Groupnames may only be up to 16 characters long.
-+Groupnames may only be up to 32 characters long.
+-Groupnames may only be up to 16 characters long\.
++Groupnames may only be up to 32 characters long\.
  .PP
- If the groupname already exists in an external group database such as NIS,
- \fBgroupadd\fR
- will deny the group creation request.
--.PP
--Groupnames may only be up to 16 characters long.
- .SH "EXIT VALUES"
+ You may not add a NIS or LDAP group\. This must be performed on the corresponding server\.
  .PP
- The
---- shadow-4.0.18.1/man/useradd.8.goodname	2007-06-26 16:20:40.000000000 +0200
-+++ shadow-4.0.18.1/man/useradd.8	2007-06-26 16:20:40.000000000 +0200
-@@ -179,8 +179,6 @@
- Similarly, if the username already exists in an external user database such as NIS,
+diff -up shadow-4.1.0/man/useradd.8.goodname shadow-4.1.0/man/useradd.8
+--- shadow-4.1.0/man/useradd.8.goodname	2007-12-12 13:51:43.000000000 +0100
++++ shadow-4.1.0/man/useradd.8	2007-12-12 14:01:36.000000000 +0100
+@@ -242,8 +242,6 @@ You may not add a user to a NIS or LDAP 
+ Similarly, if the username already exists in an external user database such as NIS or LDAP,
  \fBuseradd\fR
- will deny the user account creation request.
+ will deny the user account creation request\.
 -.PP
--Usernames must begin with a lower case letter or an underscore, and only lower case letters, underscores, dashes, and dollar signs may follow. In regular expression terms: [a\-z_][a\-z0\-9_\-]*[$]
- .SH "FILES"
- .TP 3n
- \fI/etc/passwd\fR
+-Usernames must begin with a lower case letter or an underscore, and only lower case letters, underscores, dashes, and dollar signs may follow\. In regular expression terms: [a\-z_][a\-z0\-9_\-]*[$]
+ .SH "CONFIGURATION"
+ .PP
+ The following configuration variables in

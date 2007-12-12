@@ -4,31 +4,22 @@
 
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
-Version: 4.0.18.1
-Release: 20%{?dist}
+Version: 4.1.0
+Release: 1%{?dist}
 Epoch: 2
-URL: http://shadow.pld.org.pl/
-Source0: ftp://ftp.pld.org.pl/software/shadow/shadow-%{version}.tar.bz2
+URL: http://pkg-shadow.alioth.debian.org/
+Source0: ftp://pkg-shadow.alioth.debian.org/pub/pkg-shadow/shadow-%{version}.tar.bz2
 Source1: shadow-4.0.17-login.defs
 Source2: shadow-4.0.18.1-useradd
-Source3: shadow-4.0.16-nscd.c
-Patch0: shadow-4.0.17-redhat.patch
+
+Patch0: shadow-4.1.0-redhat.patch
 Patch1: shadow-4.0.3-noinst.patch
-Patch2: shadow-4.0.11.1-vipw.patch
-Patch3: shadow-4.0.14-goodname.patch
-Patch4: shadow-4.0.13-newgrpPwd.patch
-Patch5: shadow-4.0.16-lOption.patch
-Patch6: shadow-4.0.17-notInheritFd.patch
-Patch7: shadow-4.0.17-exitValues.patch
-Patch8: shadow-4.0.17-auditLogging.patch
-Patch9: shadow-4.0.18.1-gid.patch
-Patch10: shadow-4.0.18.1-overflow.patch
-Patch11: shadow-4.0.17-useradd.patch
-Patch12: shadow-4.0.18.1-appendOption.patch
-Patch13: shadow-4.0.18.1-sysAccount.patch
-Patch14: shadow-4.0.18.1-findNewUidOnce.patch
-Patch15: shadow-4.0.18.1-groupLoop.patch
-Patch16: shadow-4.0.18.1-mtime.patch
+Patch2: shadow-4.1.0-goodname.patch
+Patch3: shadow-4.1.0-lOption.patch
+Patch4: shadow-4.1.0-selinux.patch
+Patch5: shadow-4.0.18.1-sysAccount.patch
+Patch6: shadow-4.0.18.1-findNewUidOnce.patch
+Patch7: shadow-4.0.18.1-mtime.patch
 
 License: BSD
 Group: System Environment/Base
@@ -55,25 +46,12 @@ are used for managing group accounts.
 %setup -q -n shadow-%{version}
 %patch0 -p1 -b .redhat
 %patch1 -p1 -b .noinst
-%patch2 -p1 -b .vipw
-%patch3 -p1 -b .goodname
-%patch4 -p1 -b .newgrpPwd
-%patch5 -p1 -b .lOption
-
-#replace whole file
-cp %{SOURCE3} lib/nscd.c
-%patch6 -p1 -b .notInheritFd
-
-%patch7 -p1 -b .exitValues
-%patch8 -p1 -b .auditLogging
-%patch9 -p1 -b .gid
-%patch10 -p1 -b .overflow
-%patch11 -p1 -b .useradd
-%patch12 -p1 -b .appendOption
-%patch13 -p1 -b .sysAccount
-%patch14 -p1 -b .findNewUidOnce
-%patch15 -p1 -b .groupLoop
-%patch16 -p1 -b .mtime
+%patch2 -p1 -b .goodname
+%patch3 -p1 -b .lOption
+%patch4 -p1 -b .selinux
+%patch5 -p1 -b .sysAccount
+%patch6 -p1 -b .findNewUidOnce
+%patch7 -p1 -b .mtime
 
 rm po/*.gmo
 rm po/stamp-po
@@ -123,8 +101,6 @@ rm $RPM_BUILD_ROOT/%{_bindir}/su
 rm $RPM_BUILD_ROOT/%{_sysconfdir}/login.access
 rm $RPM_BUILD_ROOT/%{_sysconfdir}/limits
 rm $RPM_BUILD_ROOT/%{_sbindir}/logoutd
-rm $RPM_BUILD_ROOT/%{_sbindir}/vipw
-rm $RPM_BUILD_ROOT/%{_sbindir}/vigr
 rm $RPM_BUILD_ROOT/%{_sbindir}/nologin
 rm $RPM_BUILD_ROOT/%{_sbindir}/chgpasswd
 rm $RPM_BUILD_ROOT/%{_mandir}/man1/chfn.*
@@ -153,12 +129,8 @@ rm $RPM_BUILD_ROOT/%{_mandir}/man5/suauth.*
 rm $RPM_BUILD_ROOT/%{_mandir}/*/man5/suauth.*
 rm $RPM_BUILD_ROOT/%{_mandir}/man8/logoutd.*
 rm $RPM_BUILD_ROOT/%{_mandir}/*/man8/logoutd.*
-rm $RPM_BUILD_ROOT/%{_mandir}/man8/vipw.*
-rm $RPM_BUILD_ROOT/%{_mandir}/*/man8/vipw.*
 rm $RPM_BUILD_ROOT/%{_mandir}/man8/nologin.*
 rm $RPM_BUILD_ROOT/%{_mandir}/*/man8/nologin.*
-rm $RPM_BUILD_ROOT/%{_mandir}/man8/vigr.*
-rm $RPM_BUILD_ROOT/%{_mandir}/*/man8/vigr.*
 rm $RPM_BUILD_ROOT/%{_mandir}/man8/chgpasswd.*
 rm $RPM_BUILD_ROOT/%{_mandir}/*/man8/chgpasswd.*
 
@@ -193,6 +165,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_sbindir}/*conv
 %{_sbindir}/chpasswd
 %{_sbindir}/newusers
+%{_sbindir}/vipw
+%{_sbindir}/vigr
 %{_mandir}/man1/chage.1*
 %{_mandir}/man1/gpasswd.1*
 %{_mandir}/man1/sg.1*
@@ -213,8 +187,14 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/*conv.8*
 %{_mandir}/man8/lastlog.8*
 %{_mandir}/man8/faillog.8*
+%{_mandir}/man8/vipw.8*
+%{_mandir}/man8/vigr.8*
 
 %changelog
+* Wed Dec 12 2007 Peter Vrabec <pvrabec@redhat.com> 2:4.1.0-1
+- new upgrade release from new upstream
+- provide vipw and vigr
+
 * Thu Nov 29 2007 Peter Vrabec <pvrabec@redhat.com> 2:4.0.18.1-20
 - do not create mail spool entries for system accounts (#402351)
 
