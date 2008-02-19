@@ -1,0 +1,12 @@
+diff -up shadow-4.1.0/src/groupmems.c.segfault shadow-4.1.0/src/groupmems.c
+--- shadow-4.1.0/src/groupmems.c.segfault	2008-02-19 12:39:23.000000000 +0100
++++ shadow-4.1.0/src/groupmems.c	2008-02-19 12:55:06.000000000 +0100
+@@ -106,7 +106,7 @@ static void addtogroup (char *user, char
+ 		}
+ 	}
+ 
+-	members = (char **) realloc (members, sizeof (char *) * i);
++	members = (char **) realloc (members, sizeof (char *) * (i + 2));
+ 	members[i] = user;
+ 	members[i + 1] = NULL;
+ }

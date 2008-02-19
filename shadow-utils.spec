@@ -5,7 +5,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.1.0
-Release: 2%{?dist}
+Release: 3%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: ftp://pkg-shadow.alioth.debian.org/pub/pkg-shadow/shadow-%{version}.tar.bz2
@@ -21,6 +21,7 @@ Patch5: shadow-4.0.18.1-sysAccount.patch
 Patch6: shadow-4.0.18.1-findNewUidOnce.patch
 Patch7: shadow-4.0.18.1-mtime.patch
 Patch8: shadow-4.1.0-audit-newgrp.patch
+Patch9: shadow-4.1.0-segfault.patch
 
 License: BSD
 Group: System Environment/Base
@@ -54,6 +55,7 @@ are used for managing group accounts.
 %patch6 -p1 -b .findNewUidOnce
 %patch7 -p1 -b .mtime
 %patch8 -p1 -b .auditNewgrp
+%patch9 -p1 -b .segfault
 
 rm po/*.gmo
 rm po/stamp-po
@@ -193,6 +195,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Tue Feb 19 2008 Peter Vrabec <pvrabec@redhat.com> 2:4.1.0-3
+- fix groupmems segmentation fault (#430813)
+
 * Wed Feb 13 2008 Peter Vrabec <pvrabec@redhat.com> 2:4.1.0-2
 - fix newgrp audit event
 
