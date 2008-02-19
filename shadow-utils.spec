@@ -5,13 +5,14 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.0.18.1
-Release: 20%{?dist}
+Release: 21%{?dist}
 Epoch: 2
 URL: http://shadow.pld.org.pl/
 Source0: ftp://ftp.pld.org.pl/software/shadow/shadow-%{version}.tar.bz2
 Source1: shadow-4.0.17-login.defs
 Source2: shadow-4.0.18.1-useradd
 Source3: shadow-4.0.16-nscd.c
+
 Patch0: shadow-4.0.17-redhat.patch
 Patch1: shadow-4.0.3-noinst.patch
 Patch2: shadow-4.0.11.1-vipw.patch
@@ -29,6 +30,7 @@ Patch13: shadow-4.0.18.1-sysAccount.patch
 Patch14: shadow-4.0.18.1-findNewUidOnce.patch
 Patch15: shadow-4.0.18.1-groupLoop.patch
 Patch16: shadow-4.0.18.1-mtime.patch
+Patch17: shadow-4.1.0-segfault.patch
 
 License: BSD
 Group: System Environment/Base
@@ -74,6 +76,7 @@ cp %{SOURCE3} lib/nscd.c
 %patch14 -p1 -b .findNewUidOnce
 %patch15 -p1 -b .groupLoop
 %patch16 -p1 -b .mtime
+%patch17 -p1 -b .segfault
 
 rm po/*.gmo
 rm po/stamp-po
@@ -215,6 +218,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/faillog.8*
 
 %changelog
+* Tue Feb 19 2008 Peter Vrabec <pvrabec@redhat.com> 2:4.0.18.1-21
+- fix groupmems segmentation fault (#430813)
+
 * Thu Nov 29 2007 Peter Vrabec <pvrabec@redhat.com> 2:4.0.18.1-20
 - do not create mail spool entries for system accounts (#402351)
 
