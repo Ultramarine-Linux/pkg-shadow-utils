@@ -5,7 +5,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.1.0
-Release: 4%{?dist}
+Release: 5%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: ftp://pkg-shadow.alioth.debian.org/pub/pkg-shadow/shadow-%{version}.tar.bz2
@@ -22,6 +22,7 @@ Patch6: shadow-4.0.18.1-findNewUidOnce.patch
 Patch7: shadow-4.0.18.1-mtime.patch
 Patch8: shadow-4.1.0-audit-newgrp.patch
 Patch9: shadow-4.1.0-segfault.patch
+Patch10: shadow-4.1.0-fasterReset.patch
 
 License: BSD
 Group: System Environment/Base
@@ -56,6 +57,7 @@ are used for managing group accounts.
 %patch7 -p1 -b .mtime
 %patch8 -p1 -b .auditNewgrp
 %patch9 -p1 -b .segfault
+%patch10 -p1 -b .fasterReset
 
 rm po/*.gmo
 rm po/stamp-po
@@ -195,6 +197,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Fri Mar 07 2008 Peter Vrabec <pvrabec@redhat.com> 2:4.1.0-5
+- improve newgrp audit patch
+
 * Mon Mar 03 2008 Peter Vrabec <pvrabec@redhat.com> 2:4.1.0-4
 - fix selinux labeling  (#433757)
 

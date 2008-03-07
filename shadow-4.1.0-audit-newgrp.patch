@@ -1,7 +1,7 @@
 diff -urp shadow-4.1.0.orig/src/newgrp.c shadow-4.1.0/src/newgrp.c
 --- shadow-4.1.0.orig/src/newgrp.c	2007-11-18 18:15:05.000000000 -0500
-+++ shadow-4.1.0/src/newgrp.c	2008-02-12 16:45:20.000000000 -0500
-@@ -122,6 +122,8 @@ int main (int argc, char **argv)
++++ shadow-4.1.0/src/newgrp.c	2008-03-06 10:01:17.000000000 -0500
+@@ -122,6 +123,8 @@ int main (int argc, char **argv)
  #endif
  
  #ifdef WITH_AUDIT
@@ -10,7 +10,7 @@ diff -urp shadow-4.1.0.orig/src/newgrp.c shadow-4.1.0/src/newgrp.c
  	audit_help_open ();
  #endif
  	setlocale (LC_ALL, "");
-@@ -164,7 +166,7 @@ int main (int argc, char **argv)
+@@ -164,7 +167,7 @@ int main (int argc, char **argv)
  	if (!pwd) {
  		fprintf (stderr, _("unknown UID: %u\n"), getuid ());
  #ifdef WITH_AUDIT
@@ -19,41 +19,69 @@ diff -urp shadow-4.1.0.orig/src/newgrp.c shadow-4.1.0/src/newgrp.c
  			      getuid (), 0);
  #endif
  		SYSLOG ((LOG_WARN, "unknown UID %u", getuid ()));
-@@ -272,8 +274,14 @@ int main (int argc, char **argv)
+@@ -272,7 +275,13 @@ int main (int argc, char **argv)
  	if (ngroups < 0) {
  		perror ("getgroups");
  #ifdef WITH_AUDIT
 -		audit_logger (AUDIT_USER_START, Prog,
--			      "changing", NULL, getuid (), 0);
 +		if (group) {
-+			snprintf(audit_buf, sizeof(audit_buf),
-+				"changing new-group=%s", group);
++			snprintf (audit_buf, sizeof(audit_buf),
++				"changing new_group=%s", group);
 +			audit_logger (AUDIT_CHGRP_ID, Prog,
 +				audit_buf, NULL, getuid (), 0);
 +		} else
 +			audit_logger (AUDIT_CHGRP_ID, Prog,
-+				      "changing", NULL, getuid (), 0);
+ 			      "changing", NULL, getuid (), 0);
  #endif
  		exit (1);
+@@ -394,13 +403,26 @@ int main (int argc, char **argv)
+ 
+ 		if (grp->gr_passwd[0] == '\0' ||
+ 		    strcmp (cpasswd, grp->gr_passwd) != 0) {
++#ifdef WITH_AUDIT
++			snprintf (audit_buf, sizeof(audit_buf),
++				"authentication new_gid=%d",
++				grp->gr_gid);
++			audit_logger (AUDIT_GRP_AUTH, Prog,
++				audit_buf, NULL, getuid (), 0);
++#endif
+ 			SYSLOG ((LOG_INFO,
+ 				 "Invalid password for group `%s' from `%s'",
+ 				 group, name));
+ 			sleep (1);
+-			fputs (_("Invalid password."), stderr);
++			fputs (_("Invalid password.\n"), stderr);
+ 			goto failure;
+ 		}
++#ifdef WITH_AUDIT
++		snprintf (audit_buf, sizeof(audit_buf),
++			"authentication new_gid=%d", grp->gr_gid);
++		audit_logger (AUDIT_GRP_AUTH, Prog,
++			audit_buf, NULL, getuid (), 1);
++#endif
  	}
-@@ -461,8 +469,14 @@ int main (int argc, char **argv)
- 			fprintf (stderr, _("%s: failure forking: %s"),
+ 
+ 	/*
+@@ -458,10 +480,16 @@ int main (int argc, char **argv)
+ 		child = fork ();
+ 		if (child < 0) {
+ 			/* error in fork() */
+-			fprintf (stderr, _("%s: failure forking: %s"),
++			fprintf (stderr, _("%s: failure forking: %s\n"),
  				 is_newgrp ? "newgrp" : "sg", strerror (errno));
  #ifdef WITH_AUDIT
 -			audit_logger (AUDIT_USER_START, Prog, "changing",
--				      NULL, getuid (), 0);
 +			if (group) {
-+				snprintf(audit_buf, sizeof(audit_buf),
-+					"changing new-group=%s", group);
++				snprintf (audit_buf, sizeof(audit_buf),
++					"changing new_group=%s", group);
 +				audit_logger (AUDIT_CHGRP_ID, Prog,
 +					audit_buf, NULL, getuid (), 0);
 +			} else
 +				audit_logger (AUDIT_CHGRP_ID, Prog, "changing",
-+					      NULL, getuid (), 0);
+ 				      NULL, getuid (), 0);
  #endif
  			exit (1);
- 		} else if (child) {
-@@ -531,14 +545,24 @@ int main (int argc, char **argv)
+@@ -531,14 +559,24 @@ int main (int argc, char **argv)
  	 * to the real UID. For root, this also sets the real GID to the
  	 * new group id.
  	 */
@@ -61,8 +89,8 @@ diff -urp shadow-4.1.0.orig/src/newgrp.c shadow-4.1.0/src/newgrp.c
 +	if (setgid (gid)) {
  		perror ("setgid");
 +#ifdef WITH_AUDIT
-+		snprintf(audit_buf, sizeof(audit_buf),
-+			"changing new-gid=%d", gid);
++		snprintf (audit_buf, sizeof(audit_buf),
++			"changing new_gid=%d", gid);
 +		audit_logger (AUDIT_CHGRP_ID, Prog,
 +			audit_buf, NULL, getuid (), 0);
 +#endif
@@ -74,44 +102,44 @@ diff -urp shadow-4.1.0.orig/src/newgrp.c shadow-4.1.0/src/newgrp.c
  #ifdef WITH_AUDIT
 -		audit_logger (AUDIT_USER_START, Prog, "changing",
 -			      NULL, getuid (), 0);
-+		snprintf(audit_buf, sizeof(audit_buf),
-+			"changing new-gid=%d", gid);
++		snprintf (audit_buf, sizeof(audit_buf),
++			"changing new_gid=%d", gid);
 +		audit_logger (AUDIT_CHGRP_ID, Prog,
 +			audit_buf, NULL, getuid (), 0);
  #endif
  		exit (1);
  	}
-@@ -551,8 +575,10 @@ int main (int argc, char **argv)
+@@ -551,8 +589,10 @@ int main (int argc, char **argv)
  		closelog ();
  		execl ("/bin/sh", "sh", "-c", command, (char *) 0);
  #ifdef WITH_AUDIT
 -		audit_logger (AUDIT_USER_START, Prog, "changing",
 -			      NULL, getuid (), 0);
-+		snprintf(audit_buf, sizeof(audit_buf),
-+			"changing new-gid=%d", gid);
++		snprintf (audit_buf, sizeof(audit_buf),
++			"changing new_gid=%d", gid);
 +		audit_logger (AUDIT_CHGRP_ID, Prog,
 +			audit_buf, NULL, getuid (), 0);
  #endif
  		perror ("/bin/sh");
  		exit (errno == ENOENT ? E_CMD_NOTFOUND : E_CMD_NOEXEC);
-@@ -618,7 +644,8 @@ int main (int argc, char **argv)
+@@ -618,7 +658,8 @@ int main (int argc, char **argv)
  	}
  
  #ifdef WITH_AUDIT
 -	audit_logger (AUDIT_USER_START, Prog, "changing", NULL, getuid (), 1);
-+	snprintf(audit_buf, sizeof(audit_buf), "changing new-gid=%d", gid);
++	snprintf (audit_buf, sizeof(audit_buf), "changing new_gid=%d", gid);
 +	audit_logger (AUDIT_CHGRP_ID, Prog, audit_buf, NULL, getuid (), 1);
  #endif
  	/*
  	 * Exec the login shell and go away. We are trying to get back to
-@@ -641,7 +668,14 @@ int main (int argc, char **argv)
+@@ -641,7 +682,14 @@ int main (int argc, char **argv)
  	 */
  	closelog ();
  #ifdef WITH_AUDIT
 -	audit_logger (AUDIT_USER_START, Prog, "changing", NULL, getuid (), 0);
 +	if (group) {
-+		snprintf(audit_buf, sizeof(audit_buf),
-+			"changing new-group=%s", group);
++		snprintf (audit_buf, sizeof(audit_buf),
++			"changing new_group=%s", group);
 +		audit_logger (AUDIT_CHGRP_ID, Prog, 
 +			audit_buf, NULL, getuid (), 0);
 +	} else
