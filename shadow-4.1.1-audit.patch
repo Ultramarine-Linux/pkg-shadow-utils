@@ -1,0 +1,26 @@
+diff -up shadow-4.1.1/src/newgrp.c.audit shadow-4.1.1/src/newgrp.c
+--- shadow-4.1.1/src/newgrp.c.audit	2008-04-03 15:20:25.000000000 +0200
++++ shadow-4.1.1/src/newgrp.c	2008-04-03 15:22:00.000000000 +0200
+@@ -53,6 +53,10 @@ static GETGROUPS_T *grouplist;
+ static char *Prog;
+ static int is_newgrp;
+ 
++#ifdef WITH_AUDIT
++	char audit_buf[80];
++#endif
++
+ /* local function prototypes */
+ static void usage (void);
+ static void check_perms (const struct group *grp,
+@@ -349,10 +353,9 @@ int main (int argc, char **argv)
+ #endif
+ 
+ #ifdef WITH_AUDIT
+-	char audit_buf[80];
+-
+ 	audit_help_open ();
+ #endif
++
+ 	setlocale (LC_ALL, "");
+ 	bindtextdomain (PACKAGE, LOCALEDIR);
+ 	textdomain (PACKAGE);

@@ -4,34 +4,28 @@
 
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
-Version: 4.1.0
-Release: 5%{?dist}
+Version: 4.1.1
+Release: 1%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: ftp://pkg-shadow.alioth.debian.org/pub/pkg-shadow/shadow-%{version}.tar.bz2
 Source1: shadow-4.0.17-login.defs
 Source2: shadow-4.0.18.1-useradd
 
-Patch0: shadow-4.1.0-redhat.patch
-Patch1: shadow-4.0.3-noinst.patch
-Patch2: shadow-4.1.0-goodname.patch
-Patch3: shadow-4.1.0-lOption.patch
-Patch4: shadow-4.1.0-selinux.patch
-Patch5: shadow-4.0.18.1-sysAccount.patch
-Patch6: shadow-4.0.18.1-findNewUidOnce.patch
-Patch7: shadow-4.0.18.1-mtime.patch
-Patch8: shadow-4.1.0-audit-newgrp.patch
-Patch9: shadow-4.1.0-segfault.patch
-Patch10: shadow-4.1.0-fasterReset.patch
+Patch0: shadow-4.1.1-redhat.patch
+Patch1: shadow-4.1.1-audit.patch
+Patch3: shadow-4.1.0-goodname.patch
+Patch4: shadow-4.1.1-selinux.patch
+Patch5: shadow-4.1.1-sysAccountDownhill.patch
 
 License: BSD
 Group: System Environment/Base
 BuildRequires: autoconf, automake, libtool, gettext-devel
 BuildRequires: libselinux-devel >= 1.25.2-1
-BuildRequires: audit-libs-devel >= 1.0.10
-Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+BuildRequires: audit-libs-devel >= 1.6.5
 Requires: libselinux >= 1.25.2-1
-Requires: audit-libs >= 1.0.10
+Requires: audit-libs >= 1.6.5
+Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 %description
 The shadow-utils package includes the necessary programs for
@@ -48,16 +42,11 @@ are used for managing group accounts.
 %prep
 %setup -q -n shadow-%{version}
 %patch0 -p1 -b .redhat
-%patch1 -p1 -b .noinst
-%patch2 -p1 -b .goodname
-%patch3 -p1 -b .lOption
+%patch1 -p1 -b .audit
+%patch3 -p1 -b .goodname
 %patch4 -p1 -b .selinux
-%patch5 -p1 -b .sysAccount
-%patch6 -p1 -b .findNewUidOnce
-%patch7 -p1 -b .mtime
-%patch8 -p1 -b .auditNewgrp
-%patch9 -p1 -b .segfault
-%patch10 -p1 -b .fasterReset
+%patch5 -p1 -b .sysAccountDownhill
+
 
 rm po/*.gmo
 rm po/stamp-po
@@ -197,6 +186,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Mon Apr 07 2008 Peter Vrabec <pvrabec@redhat.com> 2:4.1.1-1
+- upgrade
+
 * Fri Mar 07 2008 Peter Vrabec <pvrabec@redhat.com> 2:4.1.0-5
 - improve newgrp audit patch
 
