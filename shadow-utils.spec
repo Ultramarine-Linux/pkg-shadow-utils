@@ -5,7 +5,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.0.18.1
-Release: 21%{?dist}
+Release: 22%{?dist}
 Epoch: 2
 URL: http://shadow.pld.org.pl/
 Source0: ftp://ftp.pld.org.pl/software/shadow/shadow-%{version}.tar.bz2
@@ -31,6 +31,7 @@ Patch14: shadow-4.0.18.1-findNewUidOnce.patch
 Patch15: shadow-4.0.18.1-groupLoop.patch
 Patch16: shadow-4.0.18.1-mtime.patch
 Patch17: shadow-4.1.0-segfault.patch
+Patch18: shadow-4.0.18.1-bflg.patch
 
 License: BSD
 Group: System Environment/Base
@@ -77,6 +78,7 @@ cp %{SOURCE3} lib/nscd.c
 %patch15 -p1 -b .groupLoop
 %patch16 -p1 -b .mtime
 %patch17 -p1 -b .segfault
+%patch18 -p1 -b .bflg
 
 rm po/*.gmo
 rm po/stamp-po
@@ -218,6 +220,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/faillog.8*
 
 %changelog
+* Tue Apr 08 2008 Peter Vrabec <pvrabec@redhat.com> 2:4.0.18.1-22
+- fix "-b" option (#441460)
+
 * Tue Feb 19 2008 Peter Vrabec <pvrabec@redhat.com> 2:4.0.18.1-21
 - fix groupmems segmentation fault (#430813)
 

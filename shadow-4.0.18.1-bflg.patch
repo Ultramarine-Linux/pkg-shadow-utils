@@ -1,0 +1,13 @@
+diff -up shadow-4.0.18.1/src/useradd.c.bflg shadow-4.0.18.1/src/useradd.c
+--- shadow-4.0.18.1/src/useradd.c.bflg	2008-04-08 14:50:43.000000000 +0200
++++ shadow-4.0.18.1/src/useradd.c	2008-04-08 14:50:53.000000000 +0200
+@@ -1051,9 +1051,6 @@ static void process_flags (int argc, cha
+ 				     long_options, NULL)) != -1) {
+ 			switch (c) {
+ 			case 'b':
+-				if (!Dflg)
+-					usage ();
+-
+ 				if (!VALID (optarg)
+ 				    || optarg[0] != '/') {
+ 					fprintf (stderr,
