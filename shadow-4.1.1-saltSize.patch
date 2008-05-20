@@ -1,0 +1,17 @@
+diff -up shadow-4.1.1/libmisc/salt.c.saltSize shadow-4.1.1/libmisc/salt.c
+--- shadow-4.1.1/libmisc/salt.c.saltSize	2008-05-20 13:36:06.000000000 +0200
++++ shadow-4.1.1/libmisc/salt.c	2008-05-20 13:39:30.000000000 +0200
+@@ -90,9 +90,10 @@ static void seedRNG (void)
+  */
+ static unsigned int SHA_salt_size (void)
+ {
+-	double rand_rounds = 9 * random ();
+-	rand_rounds /= RAND_MAX;
+-	return 8 + rand_rounds;
++        unsigned int rand_rounds;
++        seedRNG ();
++        rand_rounds = random () % 9;
++        return 8 + rand_rounds;
+ }
+ 
+ /* ! Arguments evaluated twice ! */
