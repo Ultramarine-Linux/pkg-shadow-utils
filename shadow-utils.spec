@@ -4,20 +4,18 @@
 
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
-Version: 4.1.1
-Release: 2%{?dist}
+Version: 4.1.2
+Release: 1%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: ftp://pkg-shadow.alioth.debian.org/pub/pkg-shadow/shadow-%{version}.tar.bz2
 Source1: shadow-4.0.17-login.defs
 Source2: shadow-4.0.18.1-useradd
 
-Patch0: shadow-4.1.1-redhat.patch
-Patch1: shadow-4.1.1-audit.patch
-Patch3: shadow-4.1.0-goodname.patch
-Patch4: shadow-4.1.1-selinux.patch
-Patch5: shadow-4.1.1-sysAccountDownhill.patch
-Patch6: shadow-4.1.1-saltSize.patch
+Patch0: shadow-4.1.2-redhat.patch
+Patch1: shadow-4.1.2-goodname.patch
+Patch2: shadow-4.1.1-selinux.patch
+Patch3: shadow-4.1.2-sysAccountDownhill.patch
 
 License: BSD
 Group: System Environment/Base
@@ -43,11 +41,9 @@ are used for managing group accounts.
 %prep
 %setup -q -n shadow-%{version}
 %patch0 -p1 -b .redhat
-%patch1 -p1 -b .audit
-%patch3 -p1 -b .goodname
-%patch4 -p1 -b .selinux
-%patch5 -p1 -b .sysAccountDownhill
-%patch6 -p1 -b .saltSize
+%patch1 -p1 -b .goodname
+%patch2 -p1 -b .selinux
+%patch3 -p1 -b .sysAccountDownhill
 
 
 rm po/*.gmo
@@ -188,6 +184,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Mon May 26 2008 Peter Vrabec <pvrabec@redhat.com> 2:4.1.2-1
+- upgrade
+
 * Tue May 20 2008 Peter Vrabec <pvrabec@redhat.com> 2:4.1.1-2
 - fix salt size problem (#447136)
 

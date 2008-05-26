@@ -1,7 +1,7 @@
-diff -up shadow-4.1.1/libmisc/find_new_ids.c.redhat shadow-4.1.1/libmisc/find_new_ids.c
---- shadow-4.1.1/libmisc/find_new_ids.c.redhat	2008-04-03 12:18:51.000000000 +0200
-+++ shadow-4.1.1/libmisc/find_new_ids.c	2008-04-03 13:30:44.000000000 +0200
-@@ -26,11 +26,11 @@ int find_new_uid (int sys_user, uid_t *u
+diff -up shadow-4.1.2/libmisc/find_new_ids.c.redhat shadow-4.1.2/libmisc/find_new_ids.c
+--- shadow-4.1.2/libmisc/find_new_ids.c.redhat	2008-04-22 00:00:19.000000000 +0200
++++ shadow-4.1.2/libmisc/find_new_ids.c	2008-05-26 14:18:43.000000000 +0200
+@@ -56,11 +56,11 @@ int find_new_uid (int sys_user, uid_t *u
  	assert (uid != NULL);
  
  	if (sys_user == 0) {
@@ -15,7 +15,7 @@ diff -up shadow-4.1.1/libmisc/find_new_ids.c.redhat shadow-4.1.1/libmisc/find_ne
  		uid_max = getdef_unum ("SYS_UID_MAX", uid_max);
  	}
  
-@@ -108,11 +108,11 @@ int find_new_gid (int sys_group, gid_t *
+@@ -139,11 +139,11 @@ int find_new_gid (int sys_group, gid_t *
  	assert (gid != NULL);
  
  	if (sys_group == 0) {
@@ -29,10 +29,10 @@ diff -up shadow-4.1.1/libmisc/find_new_ids.c.redhat shadow-4.1.1/libmisc/find_ne
  		gid_max = getdef_unum ("SYS_GID_MAX", gid_max);
  	}
  
-diff -up shadow-4.1.1/src/useradd.c.redhat shadow-4.1.1/src/useradd.c
---- shadow-4.1.1/src/useradd.c.redhat	2008-03-08 23:42:05.000000000 +0100
-+++ shadow-4.1.1/src/useradd.c	2008-04-03 14:07:32.000000000 +0200
-@@ -82,7 +82,7 @@
+diff -up shadow-4.1.2/src/useradd.c.redhat shadow-4.1.2/src/useradd.c
+--- shadow-4.1.2/src/useradd.c.redhat	2008-05-19 22:31:52.000000000 +0200
++++ shadow-4.1.2/src/useradd.c	2008-05-26 14:18:43.000000000 +0200
+@@ -85,7 +85,7 @@
  static gid_t def_group = 100;
  static const char *def_gname = "other";
  static const char *def_home = "/home";
@@ -41,7 +41,7 @@ diff -up shadow-4.1.1/src/useradd.c.redhat shadow-4.1.1/src/useradd.c
  static const char *def_template = SKEL_DIR;
  static const char *def_create_mail_spool = "no";
  
-@@ -94,7 +94,7 @@ static char def_file[] = USER_DEFAULTS_F
+@@ -97,7 +97,7 @@ static char def_file[] = USER_DEFAULTS_F
  #define	VALID(s)	(strcspn (s, ":\n") == strlen (s))
  
  static const char *user_name = "";
@@ -50,7 +50,7 @@ diff -up shadow-4.1.1/src/useradd.c.redhat shadow-4.1.1/src/useradd.c
  static uid_t user_id;
  static gid_t user_gid;
  static const char *user_comment = "";
-@@ -130,6 +130,7 @@ static int
+@@ -133,6 +133,7 @@ static int
      kflg = 0,			/* specify a directory to fill new user directory */
      lflg = 0,			/* do not add user to lastlog database file */
      mflg = 0,			/* create user's home directory if it doesn't exist */
@@ -58,7 +58,7 @@ diff -up shadow-4.1.1/src/useradd.c.redhat shadow-4.1.1/src/useradd.c
      Nflg = 0,			/* do not create a group having the same name as the user, but add the user to def_group (or the group specified with -g) */
      oflg = 0,			/* permit non-unique user ID to be specified with -u */
      rflg = 0,			/* create a system account */
-@@ -653,6 +654,7 @@ static void usage (void)
+@@ -656,6 +657,7 @@ static void usage (void)
  	         "                                faillog databases\n"
  	         "  -m, --create-home             create home directory for the new user\n"
  	         "                                account\n"
@@ -66,7 +66,7 @@ diff -up shadow-4.1.1/src/useradd.c.redhat shadow-4.1.1/src/useradd.c
  	         "  -N, --no-user-group           do not create a group with the same name as\n"
  	         "                                the user\n"
  	         "  -o, --non-unique              allow create user with duplicate\n"
-@@ -883,7 +885,7 @@ static void process_flags (int argc, cha
+@@ -886,7 +888,7 @@ static void process_flags (int argc, cha
  			{NULL, 0, NULL, '\0'}
  		};
  		while ((c =
@@ -75,7 +75,7 @@ diff -up shadow-4.1.1/src/useradd.c.redhat shadow-4.1.1/src/useradd.c
  				     long_options, NULL)) != -1) {
  			switch (c) {
  			case 'b':
-@@ -1023,6 +1025,10 @@ static void process_flags (int argc, cha
+@@ -1026,6 +1028,10 @@ static void process_flags (int argc, cha
  			case 'm':
  				mflg++;
  				break;
@@ -86,7 +86,7 @@ diff -up shadow-4.1.1/src/useradd.c.redhat shadow-4.1.1/src/useradd.c
  			case 'N':
  				Nflg++;
  				break;
-@@ -1076,6 +1082,9 @@ static void process_flags (int argc, cha
+@@ -1079,6 +1085,9 @@ static void process_flags (int argc, cha
  		Uflg = getdef_bool ("USERGROUPS_ENAB");
  	}
  
@@ -96,7 +96,7 @@ diff -up shadow-4.1.1/src/useradd.c.redhat shadow-4.1.1/src/useradd.c
  	/*
  	 * Certain options are only valid in combination with others.
  	 * Check it here so that they can be specified in any order.
-@@ -1625,6 +1634,14 @@ int main (int argc, char **argv)
+@@ -1628,6 +1637,14 @@ int main (int argc, char **argv)
  	}
  #endif				/* USE_PAM */
  
@@ -111,7 +111,7 @@ diff -up shadow-4.1.1/src/useradd.c.redhat shadow-4.1.1/src/useradd.c
  	/*
  	 * See if we are messing with the defaults file, or creating
  	 * a new user.
-@@ -1724,27 +1741,22 @@ int main (int argc, char **argv)
+@@ -1727,27 +1744,22 @@ int main (int argc, char **argv)
  				 ("%s: warning: the home directory already exists.\n"
  				  "Not copying any file from skel directory into it.\n"),
  				 Prog);
@@ -154,33 +154,30 @@ diff -up shadow-4.1.1/src/useradd.c.redhat shadow-4.1.1/src/useradd.c
  
  	close_files ();
  
-diff -up shadow-4.1.1/src/groupadd.c.redhat shadow-4.1.1/src/groupadd.c
-diff -up shadow-4.1.1/man/useradd.8.redhat shadow-4.1.1/man/useradd.8
---- shadow-4.1.1/man/useradd.8.redhat	2008-04-03 00:43:14.000000000 +0200
-+++ shadow-4.1.1/man/useradd.8	2008-04-03 14:20:23.000000000 +0200
-@@ -25,9 +25,9 @@ When invoked without the
- \fB\-D\fR
- option, the
+diff -up shadow-4.1.2/man/useradd.8.redhat shadow-4.1.2/man/useradd.8
+--- shadow-4.1.2/man/useradd.8.redhat	2008-05-25 01:20:26.000000000 +0200
++++ shadow-4.1.2/man/useradd.8	2008-05-26 14:26:14.000000000 +0200
+@@ -27,7 +27,7 @@ option, the
  \fBuseradd\fR
--command creates a new user account using the values specified on the command line plus the default values from the system\. Depending on command line options, the
-+command creates a new user account using the values specified on the command line and the default values from the system. Depending on command line options, the 
+ command creates a new user account using the values specified on the command line plus the default values from the system\&. Depending on command line options, the
  \fBuseradd\fR
--command will update system files and may also create the new user\'s home directory and copy initial files\.
-+command will update system files and may also create the new user's home directory and copy initial files. The version provided with Red Hat Linux will create a group for each user added to the system by default.
+-command will update system files and may also create the new user\'s home directory and copy initial files\&.
++command will update system files and may also create the new user\'s home directory and copy initial files\&. The version provided with Red Hat Linux will create a group for each user added to the system by default\&.
  .SH "OPTIONS"
  .PP
  The options which apply to the
-@@ -84,7 +84,7 @@ The number of days after a password expi
+@@ -84,8 +84,7 @@ The number of days after a password expi
  .PP
  \fB\-g\fR, \fB\-\-gid\fR \fIGROUP\fR
  .RS 4
--The group name or number of the user\'s initial login group\. The group name must exist\. A group number must refer to an already existing group\. The default group number is 1 or whatever is specified in
-+The group name or number of the user\'s initial login group\. The group name must exist\. A group number must refer to an already existing group\.
- \fI/etc/default/useradd\fR\.
+-The group name or number of the user\'s initial login group\&. The group name must exist\&. A group number must refer to an already existing group\&. The default group number is 1 or whatever is specified in
+-\fI/etc/default/useradd\fR\&.
++The group name or number of the user\'s initial login group\&. The group name must exist\&. A group number must refer to an already existing group\&.
  .RE
  .PP
-@@ -100,6 +100,13 @@ option\. The default is for the user to 
- Display help message and exit\.
+ \fB\-G\fR, \fB\-\-groups\fR \fIGROUP1\fR[\fI,GROUP2,\&.\&.\&.\fR[\fI,GROUPN\fR]]]
+@@ -143,6 +142,13 @@ Do not add the user to the lastlog and f
+ By default, the user\'s entries in the lastlog and faillog databases are resetted to avoid reusing the entry from a previously deleted user\&.
  .RE
  .PP
 +\fB-M\fR
@@ -192,9 +189,9 @@ diff -up shadow-4.1.1/man/useradd.8.redhat shadow-4.1.1/man/useradd.8
 +.PP
  \fB\-m\fR, \fB\-\-create\-home\fR
  .RS 4
- The user\'s home directory will be created if it does not exist\. The files contained in
-@@ -174,6 +181,19 @@ The encrypted password, as returned by
- \fBcrypt\fR(3)\. The default is to disable the account\.
+ Create the user\'s home directory if it does not exist\&. The files and directories contained in the skeleton directory (which can be defined with the
+@@ -195,6 +201,19 @@ range, defined in
+ counterparts for the creation of groups)\&.
  .RE
  .PP
 +\fB-r\fR
@@ -212,18 +209,18 @@ diff -up shadow-4.1.1/man/useradd.8.redhat shadow-4.1.1/man/useradd.8
 +.PP
  \fB\-s\fR, \fB\-\-shell\fR \fISHELL\fR
  .RS 4
- The name of the user\'s login shell\. The default is to leave this field blank, which causes the system to select the default login shell\.
-@@ -244,6 +264,8 @@ The name of a new user\'s login shell\.
+ The name of the user\'s login shell\&. The default is to leave this field blank, which causes the system to select the default login shell\&.
+@@ -265,6 +284,8 @@ The name of a new user\'s login shell\&.
  The system administrator is responsible for placing the default user files in the
  \fI/etc/skel/\fR
- directory\.
+ directory\&.
 +.br
-+This version of useradd was modified by Red Hat to suit Red Hat user/group conventions\.
++This version of useradd was modified by Red Hat to suit Red Hat user/group conventions\&.
  .SH "CAVEATS"
  .PP
- You may not add a user to a NIS or LDAP group\. This must be performed on the corresponding server\.
-@@ -381,6 +403,11 @@ Secure user account information\.
- Group account information\.
+ You may not add a user to a NIS or LDAP group\&. This must be performed on the corresponding server\&.
+@@ -407,6 +428,11 @@ Group account information\&.
+ Secure group account information\&.
  .RE
  .PP
 +\fI/etc/gshadow\fR
@@ -233,10 +230,10 @@ diff -up shadow-4.1.1/man/useradd.8.redhat shadow-4.1.1/man/useradd.8
 +.PP
  \fI/etc/default/useradd\fR
  .RS 4
- Default values for account creation\.
-diff -up shadow-4.1.1/man/groupadd.8.redhat shadow-4.1.1/man/groupadd.8
---- shadow-4.1.1/man/groupadd.8.redhat	2008-04-03 00:42:54.000000000 +0200
-+++ shadow-4.1.1/man/groupadd.8	2008-04-03 14:27:04.000000000 +0200
+ Default values for account creation\&.
+diff -up shadow-4.1.2/man/groupadd.8.redhat shadow-4.1.2/man/groupadd.8
+--- shadow-4.1.2/man/groupadd.8.redhat	2008-05-25 01:20:05.000000000 +0200
++++ shadow-4.1.2/man/groupadd.8	2008-05-26 14:35:49.000000000 +0200
 @@ -14,7 +14,7 @@
  groupadd \- create a new group
  .SH "SYNOPSIS"
@@ -247,26 +244,26 @@ diff -up shadow-4.1.1/man/groupadd.8.redhat shadow-4.1.1/man/groupadd.8
  .PP
  The
 @@ -34,11 +34,22 @@ This option causes the command to simply
- is turned off)\.
+ is turned off)\&.
  .RE
  .PP
 +\fB-r\fR
 +.RS 4
 +This flag instructs
 +\fBgroupadd\fR
-+to add a system account\.  The first available
++to add a system account\. The first available
 +\fIgid\fR
-+lower than 499 will be automatically selected unless the
++lower than 500 will be automatically selected unless the
 +\fB-g\fR
 +option is also given on the command line\. This is an option added by Red Hat\.
 +.RE
 +.PP
  \fB\-g\fR, \fB\-\-gid\fR \fIGID\fR
  .RS 4
- The numerical value of the group\'s ID\. This value must be unique, unless the
+ The numerical value of the group\'s ID\&. This value must be unique, unless the
  \fB\-o\fR
--option is used\. The value must be non\-negative\. The default is to use the smallest ID value greater than 999 and greater than every other group\. Values between 0 and 999 are typically reserved for system accounts\.
-+option is used\. The value must be non\-negative\. The default is to use the smallest ID value greater than 499 and greater than every other group\. Values between 0 and 500 are typically reserved for system accounts\.
+-option is used\&. The value must be non\-negative\&. The default is to use the smallest ID value greater than 999 and greater than every other group\&. Values between 0 and 999 are typically reserved for system accounts\&.
++option is used\&. The value must be non\-negative\&. The default is to use the smallest ID value greater than 499 and greater than every other group\&. Values between 0 and 500 are typically reserved for system accounts\&.
  .RE
  .PP
  \fB\-h\fR, \fB\-\-help\fR
