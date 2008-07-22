@@ -126,6 +126,8 @@ rm $RPM_BUILD_ROOT/%{_mandir}/man8/nologin.*
 rm $RPM_BUILD_ROOT/%{_mandir}/*/man8/nologin.*
 rm $RPM_BUILD_ROOT/%{_mandir}/man8/chgpasswd.*
 rm $RPM_BUILD_ROOT/%{_mandir}/*/man8/chgpasswd.*
+rm $RPM_BUILD_ROOT/%{_mandir}/man3/getspnam.*
+rm $RPM_BUILD_ROOT/%{_mandir}/*/man3/getspnam.*
 
 %find_lang shadow
 find $RPM_BUILD_ROOT%{_mandir} -depth -type d -empty -delete
@@ -165,7 +167,6 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man1/sg.1*
 %{_mandir}/man1/newgrp.1*
 %{_mandir}/man3/shadow.3*
-%{_mandir}/man3/getspnam.3*
 %{_mandir}/man5/shadow.5*
 %{_mandir}/man5/login.defs.5*
 %{_mandir}/man5/gshadow.5*
@@ -184,6 +185,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Tue Jul 22 2008 Peter Vrabec <pvrabec@redhat.com> 2:4.1.2-2
+- provide getspnam by man-pages
+
 * Mon May 26 2008 Peter Vrabec <pvrabec@redhat.com> 2:4.1.2-1
 - upgrade
 
