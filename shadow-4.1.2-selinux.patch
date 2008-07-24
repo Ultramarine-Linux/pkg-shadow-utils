@@ -1,6 +1,6 @@
-diff -up /dev/null shadow-4.1.1/libmisc/system.c
---- /dev/null	2008-03-19 11:34:26.687502959 +0100
-+++ shadow-4.1.1/libmisc/system.c	2008-04-05 14:55:29.000000000 +0200
+diff -up /dev/null shadow-4.1.2/libmisc/system.c
+--- /dev/null	2008-07-15 12:00:55.602698860 +0200
++++ shadow-4.1.2/libmisc/system.c	2008-07-24 10:14:24.000000000 +0200
 @@ -0,0 +1,37 @@
 +#include <config.h>
 +
@@ -39,10 +39,10 @@ diff -up /dev/null shadow-4.1.1/libmisc/system.c
 +	exit (-1);
 +}
 +
-diff -up shadow-4.1.1/libmisc/copydir.c.selinux shadow-4.1.1/libmisc/copydir.c
---- shadow-4.1.1/libmisc/copydir.c.selinux	2008-01-06 13:02:04.000000000 +0100
-+++ shadow-4.1.1/libmisc/copydir.c	2008-04-05 14:55:29.000000000 +0200
-@@ -82,7 +82,7 @@ static int copy_file (const char *src, c
+diff -up shadow-4.1.2/libmisc/copydir.c.selinux shadow-4.1.2/libmisc/copydir.c
+--- shadow-4.1.2/libmisc/copydir.c.selinux	2008-05-24 17:35:17.000000000 +0200
++++ shadow-4.1.2/libmisc/copydir.c	2008-07-24 10:14:24.000000000 +0200
+@@ -85,7 +85,7 @@ static int copy_file (const char *src, c
   *	symlink, directory, ...
   *
   */
@@ -51,7 +51,7 @@ diff -up shadow-4.1.1/libmisc/copydir.c.selinux shadow-4.1.1/libmisc/copydir.c
  {
  	security_context_t scontext = NULL;
  
-@@ -253,6 +253,12 @@ int copy_tree (const char *src_root, con
+@@ -256,6 +256,12 @@ int copy_tree (const char *src_root, con
  		src_orig = 0;
  		dst_orig = 0;
  	}
@@ -64,9 +64,9 @@ diff -up shadow-4.1.1/libmisc/copydir.c.selinux shadow-4.1.1/libmisc/copydir.c
  	return err;
  }
  
-diff -up shadow-4.1.1/libmisc/Makefile.am.selinux shadow-4.1.1/libmisc/Makefile.am
---- shadow-4.1.1/libmisc/Makefile.am.selinux	2008-01-27 15:21:48.000000000 +0100
-+++ shadow-4.1.1/libmisc/Makefile.am	2008-04-05 14:55:29.000000000 +0200
+diff -up shadow-4.1.2/libmisc/Makefile.am.selinux shadow-4.1.2/libmisc/Makefile.am
+--- shadow-4.1.2/libmisc/Makefile.am.selinux	2008-01-27 15:21:48.000000000 +0100
++++ shadow-4.1.2/libmisc/Makefile.am	2008-07-24 10:14:24.000000000 +0200
 @@ -43,6 +43,7 @@ libmisc_a_SOURCES = \
  	setugid.c \
  	setupenv.c \
@@ -75,10 +75,10 @@ diff -up shadow-4.1.1/libmisc/Makefile.am.selinux shadow-4.1.1/libmisc/Makefile.
  	strtoday.c \
  	sub.c \
  	sulog.c \
-diff -up shadow-4.1.1/src/useradd.c.selinux shadow-4.1.1/src/useradd.c
---- shadow-4.1.1/src/useradd.c.selinux	2008-04-05 14:55:29.000000000 +0200
-+++ shadow-4.1.1/src/useradd.c	2008-04-05 14:55:29.000000000 +0200
-@@ -101,6 +101,7 @@ static const char *user_comment = "";
+diff -up shadow-4.1.2/src/useradd.c.selinux shadow-4.1.2/src/useradd.c
+--- shadow-4.1.2/src/useradd.c.selinux	2008-07-24 10:13:23.000000000 +0200
++++ shadow-4.1.2/src/useradd.c	2008-07-24 10:14:24.000000000 +0200
+@@ -104,6 +104,7 @@ static const char *user_comment = "";
  static const char *user_home = "";
  static const char *user_shell = "";
  static const char *create_mail_spool = "";
@@ -86,7 +86,7 @@ diff -up shadow-4.1.1/src/useradd.c.selinux shadow-4.1.1/src/useradd.c
  
  static long user_expire = -1;
  static int is_shadow_pwd;
-@@ -173,6 +174,7 @@ static int set_defaults (void);
+@@ -176,6 +177,7 @@ static int set_defaults (void);
  static int get_groups (char *);
  static void usage (void);
  static void new_pwent (struct passwd *);
@@ -94,7 +94,7 @@ diff -up shadow-4.1.1/src/useradd.c.selinux shadow-4.1.1/src/useradd.c
  
  static long scale_age (long);
  static void new_spent (struct spwd *);
-@@ -373,6 +375,7 @@ static void get_defaults (void)
+@@ -376,6 +378,7 @@ static void get_defaults (void)
  			def_create_mail_spool = xstrdup (cp);
  		}
  	}
@@ -102,7 +102,7 @@ diff -up shadow-4.1.1/src/useradd.c.selinux shadow-4.1.1/src/useradd.c
  }
  
  /*
-@@ -665,6 +668,9 @@ static void usage (void)
+@@ -668,6 +671,9 @@ static void usage (void)
  	         "  -s, --shell SHELL             the login shell for the new user account\n"
  	         "  -u, --uid UID                 force use the UID for the new user account\n"
  	         "  -U, --user-group              create a group with the same name as the user\n"
@@ -112,7 +112,7 @@ diff -up shadow-4.1.1/src/useradd.c.selinux shadow-4.1.1/src/useradd.c
  	         "\n"), stderr);
  	exit (E_USAGE);
  }
-@@ -880,12 +886,19 @@ static void process_flags (int argc, cha
+@@ -883,12 +889,19 @@ static void process_flags (int argc, cha
  			{"password", required_argument, NULL, 'p'},
  			{"system", no_argument, NULL, 'r'},
  			{"shell", required_argument, NULL, 's'},
@@ -132,7 +132,7 @@ diff -up shadow-4.1.1/src/useradd.c.selinux shadow-4.1.1/src/useradd.c
  				     long_options, NULL)) != -1) {
  			switch (c) {
  			case 'b':
-@@ -1070,6 +1083,17 @@ static void process_flags (int argc, cha
+@@ -1073,6 +1086,17 @@ static void process_flags (int argc, cha
  			case 'U':
  				Uflg++;
  				break;
@@ -150,7 +150,7 @@ diff -up shadow-4.1.1/src/useradd.c.selinux shadow-4.1.1/src/useradd.c
  			default:
  				usage ();
  			}
-@@ -1476,6 +1500,33 @@ static void usr_update (void)
+@@ -1479,6 +1503,33 @@ static void usr_update (void)
  		grp_update ();
  }
  
@@ -184,7 +184,7 @@ diff -up shadow-4.1.1/src/useradd.c.selinux shadow-4.1.1/src/useradd.c
  /*
   * create_home - create the user's home directory
   *
-@@ -1485,7 +1536,11 @@ static void usr_update (void)
+@@ -1488,7 +1539,11 @@ static void usr_update (void)
   */
  static void create_home (void)
  {
@@ -196,7 +196,7 @@ diff -up shadow-4.1.1/src/useradd.c.selinux shadow-4.1.1/src/useradd.c
  		/* XXX - create missing parent directories.  --marekm */
  		if (mkdir (user_home, 0)) {
  			fprintf (stderr,
-@@ -1507,6 +1562,10 @@ static void create_home (void)
+@@ -1510,6 +1565,10 @@ static void create_home (void)
  		audit_logger (AUDIT_USER_CHAUTHTOK, Prog,
  			      "adding home directory", user_name, user_id, 1);
  #endif
@@ -207,7 +207,7 @@ diff -up shadow-4.1.1/src/useradd.c.selinux shadow-4.1.1/src/useradd.c
  	}
  }
  
-@@ -1760,6 +1819,8 @@ int main (int argc, char **argv)
+@@ -1763,6 +1822,8 @@ int main (int argc, char **argv)
  
  	close_files ();
  
@@ -216,10 +216,10 @@ diff -up shadow-4.1.1/src/useradd.c.selinux shadow-4.1.1/src/useradd.c
  	nscd_flush_cache ("passwd");
  	nscd_flush_cache ("group");
  
-diff -up shadow-4.1.1/src/usermod.c.selinux shadow-4.1.1/src/usermod.c
---- shadow-4.1.1/src/usermod.c.selinux	2008-02-24 13:35:13.000000000 +0100
-+++ shadow-4.1.1/src/usermod.c	2008-04-05 14:55:29.000000000 +0200
-@@ -91,6 +91,7 @@ static char *user_newcomment;
+diff -up shadow-4.1.2/src/usermod.c.selinux shadow-4.1.2/src/usermod.c
+--- shadow-4.1.2/src/usermod.c.selinux	2008-05-24 17:35:17.000000000 +0200
++++ shadow-4.1.2/src/usermod.c	2008-07-24 10:14:24.000000000 +0200
+@@ -94,6 +94,7 @@ static char *user_newcomment;
  static char *user_home;
  static char *user_newhome;
  static char *user_shell;
@@ -227,7 +227,7 @@ diff -up shadow-4.1.1/src/usermod.c.selinux shadow-4.1.1/src/usermod.c
  static char *user_newshell;
  static long user_expire;
  static long user_newexpire;
-@@ -138,6 +139,7 @@ static void date_to_str (char *buf, size
+@@ -141,6 +142,7 @@ static void date_to_str (char *buf, size
  static int get_groups (char *);
  static void usage (void);
  static void new_pwent (struct passwd *);
@@ -235,7 +235,7 @@ diff -up shadow-4.1.1/src/usermod.c.selinux shadow-4.1.1/src/usermod.c
  
  static void new_spent (struct spwd *);
  static void fail_exit (int);
-@@ -320,6 +322,9 @@ static void usage (void)
+@@ -323,6 +325,9 @@ static void usage (void)
  	         "  -s, --shell SHELL             new login shell for the user account\n"
  	         "  -u, --uid UID                 new UID for the user account\n"
  	         "  -U, --unlock                  unlock the user account\n"
@@ -245,7 +245,7 @@ diff -up shadow-4.1.1/src/usermod.c.selinux shadow-4.1.1/src/usermod.c
  	         "\n"), stderr);
  	exit (E_USAGE);
  }
-@@ -846,13 +851,20 @@ static void process_flags (int argc, cha
+@@ -849,13 +854,20 @@ static void process_flags (int argc, cha
  			{"move-home", no_argument, NULL, 'm'},
  			{"non-unique", no_argument, NULL, 'o'},
  			{"password", required_argument, NULL, 'p'},
@@ -267,7 +267,7 @@ diff -up shadow-4.1.1/src/usermod.c.selinux shadow-4.1.1/src/usermod.c
  				     long_options, NULL)) != -1) {
  			switch (c) {
  			case 'a':
-@@ -953,6 +965,16 @@ static void process_flags (int argc, cha
+@@ -956,6 +968,16 @@ static void process_flags (int argc, cha
  			case 'U':
  				Uflg++;
  				break;
@@ -284,7 +284,7 @@ diff -up shadow-4.1.1/src/usermod.c.selinux shadow-4.1.1/src/usermod.c
  			default:
  				usage ();
  			}
-@@ -1530,6 +1552,8 @@ int main (int argc, char **argv)
+@@ -1534,6 +1556,8 @@ int main (int argc, char **argv)
  	nscd_flush_cache ("passwd");
  	nscd_flush_cache ("group");
  
@@ -293,7 +293,7 @@ diff -up shadow-4.1.1/src/usermod.c.selinux shadow-4.1.1/src/usermod.c
  	if (mflg)
  		move_home ();
  
-@@ -1558,3 +1582,62 @@ int main (int argc, char **argv)
+@@ -1562,3 +1586,62 @@ int main (int argc, char **argv)
  	exit (E_SUCCESS);
  	/* NOT REACHED */
  }
@@ -356,10 +356,10 @@ diff -up shadow-4.1.1/src/usermod.c.selinux shadow-4.1.1/src/usermod.c
 +	}
 +#endif
 +}
-diff -up shadow-4.1.1/src/userdel.c.selinux shadow-4.1.1/src/userdel.c
---- shadow-4.1.1/src/userdel.c.selinux	2008-03-08 21:48:26.000000000 +0100
-+++ shadow-4.1.1/src/userdel.c	2008-04-05 14:55:29.000000000 +0200
-@@ -809,6 +809,17 @@ int main (int argc, char **argv)
+diff -up shadow-4.1.2/src/userdel.c.selinux shadow-4.1.2/src/userdel.c
+--- shadow-4.1.2/src/userdel.c.selinux	2008-05-24 17:35:17.000000000 +0200
++++ shadow-4.1.2/src/userdel.c	2008-07-24 10:14:24.000000000 +0200
+@@ -811,6 +811,17 @@ int main (int argc, char **argv)
  #endif
  	}
  
@@ -377,12 +377,12 @@ diff -up shadow-4.1.1/src/userdel.c.selinux shadow-4.1.1/src/userdel.c
  	/*
  	 * Cancel any crontabs or at jobs. Have to do this before we remove
  	 * the entry from /etc/passwd.
-diff -up shadow-4.1.1/man/useradd.8.selinux shadow-4.1.1/man/useradd.8
---- shadow-4.1.1/man/useradd.8.selinux	2008-04-05 14:55:29.000000000 +0200
-+++ shadow-4.1.1/man/useradd.8	2008-04-05 15:00:03.000000000 +0200
-@@ -219,6 +219,11 @@ options are not specified) is defined by
+diff -up shadow-4.1.2/man/useradd.8.selinux shadow-4.1.2/man/useradd.8
+--- shadow-4.1.2/man/useradd.8.selinux	2008-07-24 10:13:23.000000000 +0200
++++ shadow-4.1.2/man/useradd.8	2008-07-24 10:20:27.000000000 +0200
+@@ -239,6 +239,11 @@ options are not specified) is defined by
  variable in
- \fIlogin\.defs\fR\.
+ \fIlogin\&.defs\fR\&.
  .RE
 +.PP
 +\fB\-Z\fR, \fB\-\-selinux-user\fR \fISEUSER\fR
@@ -392,9 +392,9 @@ diff -up shadow-4.1.1/man/useradd.8.selinux shadow-4.1.1/man/useradd.8
  .SS "Changing the default values"
  .PP
  When invoked with only the
-diff -up shadow-4.1.1/man/usermod.8.xml.selinux shadow-4.1.1/man/usermod.8.xml
---- shadow-4.1.1/man/usermod.8.xml.selinux	2007-12-31 17:48:34.000000000 +0100
-+++ shadow-4.1.1/man/usermod.8.xml	2008-04-05 14:55:29.000000000 +0200
+diff -up shadow-4.1.2/man/usermod.8.xml.selinux shadow-4.1.2/man/usermod.8.xml
+--- shadow-4.1.2/man/usermod.8.xml.selinux	2007-12-31 17:48:34.000000000 +0100
++++ shadow-4.1.2/man/usermod.8.xml	2008-07-24 10:14:24.000000000 +0200
 @@ -245,6 +245,19 @@
  	  </para>
  	</listitem>
@@ -415,12 +415,12 @@ diff -up shadow-4.1.1/man/usermod.8.xml.selinux shadow-4.1.1/man/usermod.8.xml
      </variablelist>
    </refsect1>
  
-diff -up shadow-4.1.1/man/usermod.8.selinux shadow-4.1.1/man/usermod.8
---- shadow-4.1.1/man/usermod.8.selinux	2008-04-03 00:43:16.000000000 +0200
-+++ shadow-4.1.1/man/usermod.8	2008-04-05 14:55:29.000000000 +0200
+diff -up shadow-4.1.2/man/usermod.8.selinux shadow-4.1.2/man/usermod.8
+--- shadow-4.1.2/man/usermod.8.selinux	2008-05-25 01:20:28.000000000 +0200
++++ shadow-4.1.2/man/usermod.8	2008-07-24 10:21:39.000000000 +0200
 @@ -133,6 +133,11 @@ Note: if you wish to unlock the account 
  value from
- \fI/etc/default/useradd\fR)\.
+ \fI/etc/default/useradd\fR)\&.
  .RE
 +.PP
 +\fB\-Z\fR, \fB\-\-selinux-user\fR \fISEUSER\fR
@@ -430,10 +430,10 @@ diff -up shadow-4.1.1/man/usermod.8.selinux shadow-4.1.1/man/usermod.8
  .SH "CAVEATS"
  .PP
  
-diff -up shadow-4.1.1/man/useradd.8.xml.selinux shadow-4.1.1/man/useradd.8.xml
---- shadow-4.1.1/man/useradd.8.xml.selinux	2008-02-25 22:01:23.000000000 +0100
-+++ shadow-4.1.1/man/useradd.8.xml	2008-04-05 14:55:29.000000000 +0200
-@@ -326,6 +326,19 @@
+diff -up shadow-4.1.2/man/useradd.8.xml.selinux shadow-4.1.2/man/useradd.8.xml
+--- shadow-4.1.2/man/useradd.8.xml.selinux	2008-05-20 00:18:17.000000000 +0200
++++ shadow-4.1.2/man/useradd.8.xml	2008-07-24 10:14:24.000000000 +0200
+@@ -363,6 +363,19 @@
  	  </para>
  	</listitem>
        </varlistentry>
@@ -453,9 +453,9 @@ diff -up shadow-4.1.1/man/useradd.8.xml.selinux shadow-4.1.1/man/useradd.8.xml
      </variablelist>
  
      <refsect2 id='changing_the_default_values'>
-diff -up shadow-4.1.1/lib/defines.h.selinux shadow-4.1.1/lib/defines.h
---- shadow-4.1.1/lib/defines.h.selinux	2008-02-03 18:52:52.000000000 +0100
-+++ shadow-4.1.1/lib/defines.h	2008-04-05 14:55:29.000000000 +0200
+diff -up shadow-4.1.2/lib/defines.h.selinux shadow-4.1.2/lib/defines.h
+--- shadow-4.1.2/lib/defines.h.selinux	2008-05-24 19:35:54.000000000 +0200
++++ shadow-4.1.2/lib/defines.h	2008-07-24 10:14:24.000000000 +0200
 @@ -321,4 +321,7 @@ extern char *strerror ();
  # define unused
  #endif
@@ -464,10 +464,10 @@ diff -up shadow-4.1.1/lib/defines.h.selinux shadow-4.1.1/lib/defines.h
 +#include <selinux/selinux.h>
 +#endif
  #endif				/* _DEFINES_H_ */
-diff -up shadow-4.1.1/lib/prototypes.h.selinux shadow-4.1.1/lib/prototypes.h
---- shadow-4.1.1/lib/prototypes.h.selinux	2008-03-18 00:01:32.000000000 +0100
-+++ shadow-4.1.1/lib/prototypes.h	2008-04-05 15:03:41.000000000 +0200
-@@ -51,6 +51,10 @@ extern int copy_tree (const char *src_ro
+diff -up shadow-4.1.2/lib/prototypes.h.selinux shadow-4.1.2/lib/prototypes.h
+--- shadow-4.1.2/lib/prototypes.h.selinux	2008-04-27 02:40:13.000000000 +0200
++++ shadow-4.1.2/lib/prototypes.h	2008-07-24 10:14:24.000000000 +0200
+@@ -83,6 +83,10 @@ extern int copy_tree (const char *src_ro
                        long int uid, long int gid);
  extern int remove_tree (const char *root);
  
@@ -478,7 +478,7 @@ diff -up shadow-4.1.1/lib/prototypes.h.selinux shadow-4.1.1/lib/prototypes.h
  /* encrypt.c */
  extern char *pw_encrypt (const char *, const char *);
  
-@@ -194,6 +198,9 @@ extern struct spwd *__spw_dup (const str
+@@ -226,6 +230,9 @@ extern struct spwd *__spw_dup (const str
  /* shell.c */
  extern int shell (const char *, const char *, char *const *);
  

@@ -5,7 +5,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.1.2
-Release: 2%{?dist}
+Release: 3%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: ftp://pkg-shadow.alioth.debian.org/pub/pkg-shadow/shadow-%{version}.tar.bz2
@@ -14,7 +14,7 @@ Source2: shadow-4.0.18.1-useradd
 
 Patch0: shadow-4.1.2-redhat.patch
 Patch1: shadow-4.1.2-goodname.patch
-Patch2: shadow-4.1.1-selinux.patch
+Patch2: shadow-4.1.2-selinux.patch
 Patch3: shadow-4.1.2-sysAccountDownhill.patch
 
 License: BSD
@@ -185,6 +185,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Thu Jul 24 2008 Peter Vrabec <pvrabec@redhat.com> 2:4.1.2-3
+- recreate selinux patch
+
 * Tue Jul 22 2008 Peter Vrabec <pvrabec@redhat.com> 2:4.1.2-2
 - provide getspnam by man-pages
 
