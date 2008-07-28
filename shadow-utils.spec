@@ -5,7 +5,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.1.1
-Release: 2%{?dist}
+Release: 3%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: ftp://pkg-shadow.alioth.debian.org/pub/pkg-shadow/shadow-%{version}.tar.bz2
@@ -60,16 +60,15 @@ autoconf
 
 %build
 %configure \
-	--disable-desrpc \
 	--enable-shadowgrp \
-	--without-libcrack \
-	--with-libcrypt \
+	--with-audit \
+	--with-sha-crypt \
 %if %{WITH_SELINUX}
 	--with-selinux \
 %endif
+	--without-libcrack \
 	--without-libpam \
-	--disable-shared \
-	--with-libaudit
+	--disable-shared
 make 
 
 %install
@@ -188,6 +187,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Mon Jul 28 2008 Peter Vrabec <pvrabec@redhat.com> 2:4.1.1-3
+- fix configure options (#456748)
+
 * Tue May 20 2008 Peter Vrabec <pvrabec@redhat.com> 2:4.1.1-2
 - fix salt size problem (#447136)
 
