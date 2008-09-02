@@ -5,7 +5,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.1.2
-Release: 5%{?dist}
+Release: 6%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: ftp://pkg-shadow.alioth.debian.org/pub/pkg-shadow/shadow-%{version}.tar.bz2
@@ -17,6 +17,7 @@ Patch1: shadow-4.1.2-goodname.patch
 Patch2: shadow-4.1.2-selinux.patch
 Patch3: shadow-4.1.2-sysAccountDownhill.patch
 Patch4: shadow-4.1.2-gmSEGV.patch
+Patch5: shadow-4.1.2-audit.patch
 
 License: BSD
 Group: System Environment/Base
@@ -46,6 +47,7 @@ are used for managing group accounts.
 %patch2 -p1 -b .selinux
 %patch3 -p1 -b .sysAccountDownhill
 %patch4 -p1 -b .gmSEGV
+%patch5 -p1 -b .audit
 
 
 rm po/*.gmo
@@ -186,6 +188,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Thu Sep 02 2008 Peter Vrabec <pvrabec@redhat.com> 2:4.1.2-6
+- audit improvements, thnx. to sgrubb@redhat.com
+
 * Thu Sep 02 2008 Peter Vrabec <pvrabec@redhat.com> 2:4.1.2-5
 - fix groupmems issues (#459825)
 
