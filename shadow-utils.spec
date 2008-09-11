@@ -5,7 +5,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.1.2
-Release: 6%{?dist}
+Release: 7%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: ftp://pkg-shadow.alioth.debian.org/pub/pkg-shadow/shadow-%{version}.tar.bz2
@@ -18,6 +18,7 @@ Patch2: shadow-4.1.2-selinux.patch
 Patch3: shadow-4.1.2-sysAccountDownhill.patch
 Patch4: shadow-4.1.2-gmSEGV.patch
 Patch5: shadow-4.1.2-audit.patch
+Patch6: shadow-4.1.1-selinuxUserMappings.patch
 
 License: BSD
 Group: System Environment/Base
@@ -48,6 +49,7 @@ are used for managing group accounts.
 %patch3 -p1 -b .sysAccountDownhill
 %patch4 -p1 -b .gmSEGV
 %patch5 -p1 -b .audit
+%patch6 -p1 -b .selinuxUserMappings
 
 
 rm po/*.gmo
@@ -188,10 +190,13 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
-* Thu Sep 02 2008 Peter Vrabec <pvrabec@redhat.com> 2:4.1.2-6
+* Thu Sep 11 2008 Peter Vrabec <pvrabec@redhat.com> 2:4.1.2-7
+- fix usermod SELinux user mappings change (#458766)
+
+* Tue Sep 02 2008 Peter Vrabec <pvrabec@redhat.com> 2:4.1.2-6
 - audit improvements, thnx. to sgrubb@redhat.com
 
-* Thu Sep 02 2008 Peter Vrabec <pvrabec@redhat.com> 2:4.1.2-5
+* Tue Sep 02 2008 Peter Vrabec <pvrabec@redhat.com> 2:4.1.2-5
 - fix groupmems issues (#459825)
 
 * Mon Jul 28 2008 Peter Vrabec <pvrabec@redhat.com> 2:4.1.2-4
