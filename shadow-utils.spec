@@ -5,7 +5,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.1.2
-Release: 8%{?dist}
+Release: 9%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: ftp://pkg-shadow.alioth.debian.org/pub/pkg-shadow/shadow-%{version}.tar.bz2
@@ -29,6 +29,7 @@ BuildRequires: libselinux-devel >= 1.25.2-1
 BuildRequires: audit-libs-devel >= 1.6.5
 Requires: libselinux >= 1.25.2-1
 Requires: audit-libs >= 1.6.5
+Requires: setup
 Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 %description
@@ -194,6 +195,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Sun Dec 21 2008 Jesse Keating <jkeating@redhat.com> - 2:4.1.2-9
+- Add setup as a Requires. Perhaps this should be a files requires. (#477529)
+
 * Wed Sep 24 2008 Peter Vrabec <pvrabec@redhat.com> 2:4.1.2-8
 - groupmems: check username for valid character (#455603)
 - groupmems: don't segfault on nonexistent group (#456088)
