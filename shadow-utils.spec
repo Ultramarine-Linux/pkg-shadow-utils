@@ -5,7 +5,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.1.2
-Release: 10%{?dist}
+Release: 11%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: ftp://pkg-shadow.alioth.debian.org/pub/pkg-shadow/shadow-%{version}.tar.bz2
@@ -22,7 +22,7 @@ Patch6: shadow-4.1.1-selinuxUserMappings.patch
 Patch7: shadow-4.1.2-checkName.patch
 Patch8: shadow-4.1.2-gmNoGroup.patch
 
-License: BSD
+License: BSD and GPLv2+
 Group: System Environment/Base
 BuildRequires: autoconf, automake, libtool, gettext-devel
 BuildRequires: libselinux-devel >= 1.25.2-1
@@ -56,6 +56,8 @@ are used for managing group accounts.
 %patch7 -p1 -b .checkName
 %patch8 -p1 -b .gmNoGroup
 
+iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
+cp -f doc/HOWTO.utf8 doc/HOWTO
 
 rm po/*.gmo
 rm po/stamp-po
@@ -67,16 +69,16 @@ autoconf
 
 %build
 %configure \
-	--enable-shadowgrp \
-	--with-audit \
-	--with-sha-crypt \
+        --enable-shadowgrp \
+        --with-audit \
+        --with-sha-crypt \
 %if %{WITH_SELINUX}
-	--with-selinux \
+        --with-selinux \
 %endif
-	--without-libcrack \
-	--without-libpam \
-	--disable-shared
-make 
+        --without-libcrack \
+        --without-libpam \
+        --disable-shared
+make
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -90,7 +92,7 @@ ln -s useradd $RPM_BUILD_ROOT%{_sbindir}/adduser
 #ln -s %{_mandir}/man8/useradd.8 $RPM_BUILD_ROOT/%{_mandir}/man8/adduser.8
 ln -s useradd.8 $RPM_BUILD_ROOT/%{_mandir}/man8/adduser.8
 for subdir in $RPM_BUILD_ROOT/%{_mandir}/{??,??_??,??_??.*}/man* ; do
-	test -d $subdir && test -e $subdir/useradd.8 && echo ".so man8/useradd.8" > $subdir/adduser.8
+        test -d $subdir && test -e $subdir/useradd.8 && echo ".so man8/useradd.8" > $subdir/adduser.8
 done
 
 # Remove binaries we don't use.
@@ -154,8 +156,8 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root)
 %doc NEWS doc/HOWTO README
 %dir %{_sysconfdir}/default
-%attr(0644,root,root)	%config(noreplace) %{_sysconfdir}/login.defs
-%attr(0600,root,root)	%config(noreplace) %{_sysconfdir}/default/useradd
+%attr(0644,root,root)   %config(noreplace) %{_sysconfdir}/login.defs
+%attr(0600,root,root)   %config(noreplace) %{_sysconfdir}/default/useradd
 %{_bindir}/sg
 %{_bindir}/chage
 %{_bindir}/faillog
@@ -163,8 +165,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/lastlog
 %{_bindir}/newgrp
 %{_sbindir}/adduser
-%attr(0750,root,root)	%{_sbindir}/user*
-%attr(0750,root,root)	%{_sbindir}/group*
+%attr(0750,root,root)   %{_sbindir}/user*
+%attr(0750,root,root)   %{_sbindir}/group*
 %{_sbindir}/grpck
 %{_sbindir}/pwck
 %{_sbindir}/*conv
@@ -195,6 +197,11 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Mon Jan 19 2009 Peter Vrabec <pvrabec@redhat.com> 2:4.1.2-11
+- fix license tag (#226416)
+- get rid of tabs in spec file (#226416)
+- convert HOWTO to UTF8 (#226416)
+
 * Mon Jan 05 2009 Peter Vrabec <pvrabec@redhat.com> 2:4.1.2-10
 - Add policycoreutils as Requires, because of restorecon (#478494)
 
