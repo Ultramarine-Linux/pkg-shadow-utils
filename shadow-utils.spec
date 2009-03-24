@@ -5,7 +5,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.1.2
-Release: 12%{?dist}
+Release: 13%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: ftp://pkg-shadow.alioth.debian.org/pub/pkg-shadow/shadow-%{version}.tar.bz2
@@ -21,6 +21,7 @@ Patch5: shadow-4.1.2-audit.patch
 Patch6: shadow-4.1.1-selinuxUserMappings.patch
 Patch7: shadow-4.1.2-checkName.patch
 Patch8: shadow-4.1.2-gmNoGroup.patch
+Patch9: shadow-4.1.2-uid.patch
 
 License: BSD and GPLv2+
 Group: System Environment/Base
@@ -55,6 +56,7 @@ are used for managing group accounts.
 %patch6 -p1 -b .selinuxUserMappings
 %patch7 -p1 -b .checkName
 %patch8 -p1 -b .gmNoGroup
+%patch9 -p1 -b .uid
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -197,6 +199,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Tue Mar 24 2009 Peter Vrabec <pvrabec@redhat.com> 2:4.1.2-13
+- do not allow UID/GID = 4294967295 (#484040,#133664)
+
 * Wed Feb 25 2009 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2:4.1.2-12
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_11_Mass_Rebuild
 
