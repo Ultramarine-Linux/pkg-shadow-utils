@@ -1,36 +1,22 @@
-%if %{?WITH_SELINUX:0}%{!?WITH_SELINUX:1}
-%define WITH_SELINUX 1
-%endif
-
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
-Version: 4.1.2
-Release: 13%{?dist}
+Version: 4.1.3
+Release: 1%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: ftp://pkg-shadow.alioth.debian.org/pub/pkg-shadow/shadow-%{version}.tar.bz2
 Source1: shadow-4.0.17-login.defs
 Source2: shadow-4.0.18.1-useradd
-
-Patch0: shadow-4.1.2-redhat.patch
-Patch1: shadow-4.1.2-goodname.patch
-Patch2: shadow-4.1.2-selinux.patch
-Patch3: shadow-4.1.2-sysAccountDownhill.patch
-Patch4: shadow-4.1.2-gmSEGV.patch
-Patch5: shadow-4.1.2-audit.patch
-Patch6: shadow-4.1.1-selinuxUserMappings.patch
-Patch7: shadow-4.1.2-checkName.patch
-Patch8: shadow-4.1.2-gmNoGroup.patch
-Patch9: shadow-4.1.2-uid.patch
-
+Patch0: shadow-4.1.3-redhat.patch
+Patch1: shadow-4.1.3-goodname.patch
 License: BSD and GPLv2+
 Group: System Environment/Base
-BuildRequires: autoconf, automake, libtool, gettext-devel
 BuildRequires: libselinux-devel >= 1.25.2-1
 BuildRequires: audit-libs-devel >= 1.6.5
+#BuildRequires: autoconf, automake, libtool, gettext-devel
 Requires: libselinux >= 1.25.2-1
 Requires: audit-libs >= 1.6.5
-Requires: setup policycoreutils
+Requires: setup
 Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 %description
@@ -49,34 +35,23 @@ are used for managing group accounts.
 %setup -q -n shadow-%{version}
 %patch0 -p1 -b .redhat
 %patch1 -p1 -b .goodname
-%patch2 -p1 -b .selinux
-%patch3 -p1 -b .sysAccountDownhill
-%patch4 -p1 -b .gmSEGV
-%patch5 -p1 -b .audit
-%patch6 -p1 -b .selinuxUserMappings
-%patch7 -p1 -b .checkName
-%patch8 -p1 -b .gmNoGroup
-%patch9 -p1 -b .uid
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
 
-rm po/*.gmo
-rm po/stamp-po
-
-aclocal
-libtoolize --force
-automake -a
-autoconf
+#rm po/*.gmo
+#rm po/stamp-po
+#aclocal
+#libtoolize --force
+#automake -a
+#autoconf
 
 %build
 %configure \
         --enable-shadowgrp \
         --with-audit \
         --with-sha-crypt \
-%if %{WITH_SELINUX}
         --with-selinux \
-%endif
         --without-libcrack \
         --without-libpam \
         --disable-shared
@@ -199,11 +174,11 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
-* Tue Mar 24 2009 Peter Vrabec <pvrabec@redhat.com> 2:4.1.2-13
-- do not allow UID/GID = 4294967295 (#484040,#133664)
+* Tue Apr 14 2009 Peter Vrabec <pvrabec@redhat.com> 2:4.1.3-1
+- upgrade
 
-* Wed Feb 25 2009 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2:4.1.2-12
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_11_Mass_Rebuild
+* Tue Mar 24 2009 Peter Vrabec <pvrabec@redhat.com> 2:4.1.2-12
+- don not allow UID/GID = 4294967295 (#484040)
 
 * Mon Jan 19 2009 Peter Vrabec <pvrabec@redhat.com> 2:4.1.2-11
 - fix license tag (#226416)
