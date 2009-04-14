@@ -1,6 +1,6 @@
-diff -up shadow-4.1.3-rc1/libmisc/find_new_gid.c.redhat shadow-4.1.3-rc1/libmisc/find_new_gid.c
---- shadow-4.1.3-rc1/libmisc/find_new_gid.c.redhat	2009-04-06 15:46:43.000000000 +0200
-+++ shadow-4.1.3-rc1/libmisc/find_new_gid.c	2009-04-06 15:48:29.000000000 +0200
+diff -up shadow-4.1.3/libmisc/find_new_gid.c.redhat shadow-4.1.3/libmisc/find_new_gid.c
+--- shadow-4.1.3/libmisc/find_new_gid.c.redhat	2009-04-11 17:55:13.000000000 +0200
++++ shadow-4.1.3/libmisc/find_new_gid.c	2009-04-14 14:49:34.000000000 +0200
 @@ -56,11 +56,11 @@ int find_new_gid (bool sys_group, gid_t 
  	assert (gid != NULL);
  
@@ -15,9 +15,9 @@ diff -up shadow-4.1.3-rc1/libmisc/find_new_gid.c.redhat shadow-4.1.3-rc1/libmisc
  		gid_max = getdef_ulong ("SYS_GID_MAX", (unsigned long) gid_max);
  	}
  	used_gids = alloca (sizeof (char) * gid_max +1);
-diff -up shadow-4.1.3-rc1/libmisc/find_new_uid.c.redhat shadow-4.1.3-rc1/libmisc/find_new_uid.c
---- shadow-4.1.3-rc1/libmisc/find_new_uid.c.redhat	2009-04-06 15:46:49.000000000 +0200
-+++ shadow-4.1.3-rc1/libmisc/find_new_uid.c	2009-04-06 15:48:46.000000000 +0200
+diff -up shadow-4.1.3/libmisc/find_new_uid.c.redhat shadow-4.1.3/libmisc/find_new_uid.c
+--- shadow-4.1.3/libmisc/find_new_uid.c.redhat	2009-04-11 17:53:19.000000000 +0200
++++ shadow-4.1.3/libmisc/find_new_uid.c	2009-04-14 14:49:34.000000000 +0200
 @@ -56,11 +56,11 @@ int find_new_uid (bool sys_user, uid_t *
  	assert (uid != NULL);
  
@@ -32,9 +32,9 @@ diff -up shadow-4.1.3-rc1/libmisc/find_new_uid.c.redhat shadow-4.1.3-rc1/libmisc
  		uid_max = getdef_ulong ("SYS_UID_MAX", (unsigned long) uid_max);
  	}
  	used_uids = alloca (sizeof (char) * uid_max +1);
-diff -up shadow-4.1.3-rc1/src/useradd.c.redhat shadow-4.1.3-rc1/src/useradd.c
---- shadow-4.1.3-rc1/src/useradd.c.redhat	2009-04-06 15:49:02.000000000 +0200
-+++ shadow-4.1.3-rc1/src/useradd.c	2009-04-06 15:55:22.000000000 +0200
+diff -up shadow-4.1.3/src/useradd.c.redhat shadow-4.1.3/src/useradd.c
+--- shadow-4.1.3/src/useradd.c.redhat	2009-04-11 20:39:52.000000000 +0200
++++ shadow-4.1.3/src/useradd.c	2009-04-14 14:58:17.000000000 +0200
 @@ -89,7 +89,7 @@ char *Prog;
  static gid_t def_group = 100;
  static const char *def_gname = "other";
@@ -53,3 +53,23 @@ diff -up shadow-4.1.3-rc1/src/useradd.c.redhat shadow-4.1.3-rc1/src/useradd.c
  static uid_t user_id;
  static gid_t user_gid;
  static const char *user_comment = "";
+@@ -978,9 +978,9 @@ static void process_flags (int argc, cha
+ 		};
+ 		while ((c = getopt_long (argc, argv,
+ #ifdef WITH_SELINUX
+-		                         "b:c:d:De:f:g:G:k:K:lmMNop:rs:u:UZ:",
++		                         "b:c:d:De:f:g:G:k:K:lmMnNop:rs:u:UZ:",
+ #else
+-		                         "b:c:d:De:f:g:G:k:K:lmMNop:rs:u:U",
++		                         "b:c:d:De:f:g:G:k:K:lmMnNop:rs:u:U",
+ #endif
+ 		                         long_options, NULL)) != -1) {
+ 			switch (c) {
+@@ -1130,6 +1130,7 @@ static void process_flags (int argc, cha
+ 			case 'M':
+ 				Mflg = true;
+ 				break;
++			case 'n':
+ 			case 'N':
+ 				Nflg = true;
+ 				break;

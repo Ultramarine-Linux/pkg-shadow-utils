@@ -1,0 +1,54 @@
+diff -up shadow-4.1.3/src/useradd.c.selinux shadow-4.1.3/src/useradd.c
+--- shadow-4.1.3/src/useradd.c.selinux	2009-04-14 15:55:44.000000000 +0200
++++ shadow-4.1.3/src/useradd.c	2009-04-14 15:55:44.000000000 +0200
+@@ -2011,9 +2011,7 @@ int main (int argc, char **argv)
+ 	close_files ();
+ 
+ #ifdef WITH_SELINUX
+-	if (Zflg) {
+-		selinux_update_mapping ();
+-	}
++	selinux_update_mapping ();
+ #endif
+ 
+ 	nscd_flush_cache ("passwd");
+diff -up shadow-4.1.3/src/userdel.c.selinux shadow-4.1.3/src/userdel.c
+--- shadow-4.1.3/src/userdel.c.selinux	2009-04-11 18:52:42.000000000 +0200
++++ shadow-4.1.3/src/userdel.c	2009-04-14 16:01:10.000000000 +0200
+@@ -797,17 +797,6 @@ int main (int argc, char **argv)
+ 	audit_help_open ();
+ #endif
+ 
+-#ifdef WITH_SELINUX
+-	if (is_selinux_enabled () > 0) {
+-		const char *args[5];
+-		args[0] = "/usr/sbin/semanage";
+-		args[1] = "login";
+-		args[2] = "-d";
+-		args[3] = user_name;
+-		args[4] = NULL;
+-		safe_system (args[0], args, NULL, 1);
+-	}
+-#endif
+ 	/*
+ 	 * Get my name so that I can use it to report errors.
+ 	 */
+@@ -1010,6 +999,18 @@ int main (int argc, char **argv)
+ 	}
+ #endif
+ 
++#ifdef WITH_SELINUX
++	if (is_selinux_enabled () > 0) {
++		const char *args[5];
++		args[0] = "/usr/sbin/semanage";
++		args[1] = "login";
++		args[2] = "-d";
++		args[3] = user_name;
++		args[4] = NULL;
++		safe_system (args[0], args, NULL, 1);
++	}
++#endif
++
+ 	/*
+ 	 * Cancel any crontabs or at jobs. Have to do this before we remove
+ 	 * the entry from /etc/passwd.
