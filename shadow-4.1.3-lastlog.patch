@@ -1,0 +1,21 @@
+diff -up shadow-4.1.3.1/src/lastlog.c.lastlog shadow-4.1.3.1/src/lastlog.c
+--- shadow-4.1.3.1/src/lastlog.c.lastlog	2009-04-22 10:29:53.000000000 +0200
++++ shadow-4.1.3.1/src/lastlog.c	2009-04-22 10:30:40.000000000 +0200
+@@ -266,8 +266,7 @@ int main (int argc, char **argv)
+ 		exit (1);
+ 	}
+ 
+-	print ();
+-	/* Get the laslog size */
++	 /* Get the lastlog size */
+ 	if (fstat (fileno (lastlogfile), &statbuf) != 0) {
+ 		fprintf (stderr,
+ 		         _("lastlog: Cannot get the size of %s: %s\n"),
+@@ -275,6 +274,7 @@ int main (int argc, char **argv)
+ 		exit (1);
+ 	}
+ 
++	print ();
+ 	fclose (lastlogfile);
+ 	exit (0);
+ }
