@@ -1,14 +1,15 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
-Version: 4.1.4
+Version: 4.1.4.1
 Release: 1%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
-Source0: ftp://pkg-shadow.alioth.debian.org/pub/pkg-shadow/shadow-%{version}.tar.gz
+Source0: ftp://pkg-shadow.alioth.debian.org/pub/pkg-shadow/shadow-%{version}.tar.bz2
 Source1: shadow-4.0.17-login.defs
 Source2: shadow-4.0.18.1-useradd
 Patch0: shadow-4.1.4-redhat.patch
-Patch1: shadow-4.1.3-goodname.patch
+Patch1: shadow-4.1.4.1-goodname.patch
+Patch2: shadow-4.1.4.1-largeGroup.patch
 License: BSD and GPLv2+
 Group: System Environment/Base
 BuildRequires: libselinux-devel >= 1.25.2-1
@@ -35,6 +36,7 @@ are used for managing group accounts.
 %setup -q -n shadow-%{version}
 %patch0 -p1 -b .redhat
 %patch1 -p1 -b .goodname
+%patch2 -p1 -b .largeGroup
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -174,6 +176,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Tue Jun 16 2009 Peter Vrabec <pvrabec@redhat.com> 2:4.1.4.1-1
+- upgrade
+
 * Fri May 15 2009 Peter Vrabec <pvrabec@redhat.com> 2:4.1.4-1
 - upgrade
 
