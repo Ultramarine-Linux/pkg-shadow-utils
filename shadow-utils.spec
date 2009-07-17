@@ -1,15 +1,17 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
-Version: 4.1.3
-Release: 2%{?dist}
+Version: 4.1.4.1
+Release: 4%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: ftp://pkg-shadow.alioth.debian.org/pub/pkg-shadow/shadow-%{version}.tar.bz2
 Source1: shadow-4.0.17-login.defs
 Source2: shadow-4.0.18.1-useradd
-Patch0: shadow-4.1.3-redhat.patch
-Patch1: shadow-4.1.3-goodname.patch
-Patch2: shadow-4.1.3-selinux.patch
+Patch0: shadow-4.1.4-redhat.patch
+Patch1: shadow-4.1.4.1-goodname.patch
+Patch2: shadow-4.1.4.1-largeGroup.patch
+Patch3: shadow-4.1.4.1-ldap.patch
+Patch4: shadow-4.1.4.1-sysacc.patch
 License: BSD and GPLv2+
 Group: System Environment/Base
 BuildRequires: libselinux-devel >= 1.25.2-1
@@ -36,7 +38,9 @@ are used for managing group accounts.
 %setup -q -n shadow-%{version}
 %patch0 -p1 -b .redhat
 %patch1 -p1 -b .goodname
-%patch2 -p1 -b .selinux
+%patch2 -p1 -b .largeGroup
+%patch3 -p1 -b .ldap
+%patch4 -p1 -b .sysacc
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -125,7 +129,9 @@ find $RPM_BUILD_ROOT%{_mandir} -depth -type d -empty -delete
 for dir in $(ls -1d $RPM_BUILD_ROOT%{_mandir}/{??,??_??}) ; do
     dir=$(echo $dir | sed -e "s|^$RPM_BUILD_ROOT||")
     lang=$(basename $dir)
-    echo "%%lang($lang) $dir/man*/*" >> shadow.lang
+    echo "%%lang($lang) $dir" >> shadow.lang
+    echo "%%lang($lang) $dir/man*" >> shadow.lang
+#    echo "%%lang($lang) $dir/man*/*" >> shadow.lang
 done
 
 %clean
@@ -176,6 +182,27 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Thu Jul 16 2009 Peter Vrabec <pvrabec@redhat.com> 2:4.1.4.1-4
+- fix a list of owned directories (#510366)
+
+* Thu Jul 16 2009 Peter Vrabec <pvrabec@redhat.com> 2:4.1.4.1-3
+- reduce the reuse of system IDs
+
+* Wed Jul 15 2009 Peter Vrabec <pvrabec@redhat.com> 2:4.1.4.1-2
+- speed up sys users look up on LDAP boxes (#511813)
+
+* Tue Jun 16 2009 Peter Vrabec <pvrabec@redhat.com> 2:4.1.4.1-1
+- upgrade
+
+* Fri May 15 2009 Peter Vrabec <pvrabec@redhat.com> 2:4.1.4-1
+- upgrade
+
+* Wed Apr 22 2009 Peter Vrabec <pvrabec@redhat.com> 2:4.1.3.1-2
+- lastlog fix
+
+* Fri Apr 17 2009 Peter Vrabec <pvrabec@redhat.com> 2:4.1.3.1-1
+- upgrade
+
 * Tue Apr 14 2009 Peter Vrabec <pvrabec@redhat.com> 2:4.1.3-2
 - get "-n" option back
 - fix selinux issues
