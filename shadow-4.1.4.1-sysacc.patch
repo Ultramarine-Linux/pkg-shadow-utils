@@ -15,7 +15,7 @@ diff -up shadow-4.1.4.1/libmisc/find_new_gid.c.sysacc shadow-4.1.4.1/libmisc/fin
  		gid_max = (gid_t) getdef_ulong ("GID_MAX", 60000UL);
  	} else {
 -		gid_min = (gid_t) getdef_ulong ("SYS_GID_MIN", 1UL);
-+		gid_min = (gid_t) getdef_ulong ("SYS_GID_MIN", 101UL);
++		gid_min = (gid_t) getdef_ulong ("SYS_GID_MIN", 201UL);
  		gid_max = (gid_t) getdef_ulong ("GID_MIN", 500UL) - 1;
  		gid_max = (gid_t) getdef_ulong ("SYS_GID_MAX", (unsigned long) gid_max);
  	}
@@ -161,7 +161,7 @@ diff -up shadow-4.1.4.1/libmisc/find_new_uid.c.sysacc shadow-4.1.4.1/libmisc/fin
  		uid_max = (uid_t) getdef_ulong ("UID_MAX", 60000UL);
  	} else {
 -		uid_min = (uid_t) getdef_ulong ("SYS_UID_MIN", 1UL);
-+		uid_min = (uid_t) getdef_ulong ("SYS_UID_MIN", 101UL);
++		uid_min = (uid_t) getdef_ulong ("SYS_UID_MIN", 201UL);
  		uid_max = (uid_t) getdef_ulong ("UID_MIN", 500UL) - 1;
  		uid_max = (uid_t) getdef_ulong ("SYS_UID_MAX", (unsigned long) uid_max);
  	}
