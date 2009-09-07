@@ -1,6 +1,6 @@
-diff -up shadow-4.1.4/libmisc/find_new_gid.c.redhat shadow-4.1.4/libmisc/find_new_gid.c
---- shadow-4.1.4/libmisc/find_new_gid.c.redhat	2009-04-23 19:36:42.000000000 +0200
-+++ shadow-4.1.4/libmisc/find_new_gid.c	2009-05-15 12:01:18.000000000 +0200
+diff -up shadow-4.1.4.2/libmisc/find_new_gid.c.redhat shadow-4.1.4.2/libmisc/find_new_gid.c
+--- shadow-4.1.4.2/libmisc/find_new_gid.c.redhat	2009-07-18 01:53:42.000000000 +0200
++++ shadow-4.1.4.2/libmisc/find_new_gid.c	2009-09-07 16:34:26.640814090 +0200
 @@ -58,11 +58,11 @@ int find_new_gid (bool sys_group,
  	assert (gid != NULL);
  
@@ -9,15 +9,16 @@ diff -up shadow-4.1.4/libmisc/find_new_gid.c.redhat shadow-4.1.4/libmisc/find_ne
 +		gid_min = (gid_t) getdef_ulong ("GID_MIN", 500UL);
  		gid_max = (gid_t) getdef_ulong ("GID_MAX", 60000UL);
  	} else {
- 		gid_min = (gid_t) getdef_ulong ("SYS_GID_MIN", 1UL);
+-		gid_min = (gid_t) getdef_ulong ("SYS_GID_MIN", 101UL);
 -		gid_max = (gid_t) getdef_ulong ("GID_MIN", 1000UL) - 1;
++		gid_min = (gid_t) getdef_ulong ("SYS_GID_MIN", 201UL);
 +		gid_max = (gid_t) getdef_ulong ("GID_MIN", 500UL) - 1;
  		gid_max = (gid_t) getdef_ulong ("SYS_GID_MAX", (unsigned long) gid_max);
  	}
  	used_gids = alloca (sizeof (bool) * (gid_max +1));
-diff -up shadow-4.1.4/libmisc/find_new_uid.c.redhat shadow-4.1.4/libmisc/find_new_uid.c
---- shadow-4.1.4/libmisc/find_new_uid.c.redhat	2009-04-23 19:37:12.000000000 +0200
-+++ shadow-4.1.4/libmisc/find_new_uid.c	2009-05-15 12:01:39.000000000 +0200
+diff -up shadow-4.1.4.2/libmisc/find_new_uid.c.redhat shadow-4.1.4.2/libmisc/find_new_uid.c
+--- shadow-4.1.4.2/libmisc/find_new_uid.c.redhat	2009-07-18 01:53:43.000000000 +0200
++++ shadow-4.1.4.2/libmisc/find_new_uid.c	2009-09-07 16:34:19.695877000 +0200
 @@ -58,11 +58,11 @@ int find_new_uid (bool sys_user,
  	assert (uid != NULL);
  
@@ -26,15 +27,16 @@ diff -up shadow-4.1.4/libmisc/find_new_uid.c.redhat shadow-4.1.4/libmisc/find_ne
 +		uid_min = (uid_t) getdef_ulong ("UID_MIN", 500UL);
  		uid_max = (uid_t) getdef_ulong ("UID_MAX", 60000UL);
  	} else {
- 		uid_min = (uid_t) getdef_ulong ("SYS_UID_MIN", 1UL);
+-		uid_min = (uid_t) getdef_ulong ("SYS_UID_MIN", 101UL);
 -		uid_max = (uid_t) getdef_ulong ("UID_MIN", 1000UL) - 1;
++		uid_min = (uid_t) getdef_ulong ("SYS_UID_MIN", 201UL);
 +		uid_max = (uid_t) getdef_ulong ("UID_MIN", 500UL) - 1;
  		uid_max = (uid_t) getdef_ulong ("SYS_UID_MAX", (unsigned long) uid_max);
  	}
  	used_uids = alloca (sizeof (bool) * (uid_max +1));
-diff -up shadow-4.1.4/src/useradd.c.redhat shadow-4.1.4/src/useradd.c
---- shadow-4.1.4/src/useradd.c.redhat	2009-05-10 20:26:35.000000000 +0200
-+++ shadow-4.1.4/src/useradd.c	2009-05-15 11:59:40.000000000 +0200
+diff -up shadow-4.1.4.2/src/useradd.c.redhat shadow-4.1.4.2/src/useradd.c
+--- shadow-4.1.4.2/src/useradd.c.redhat	2009-06-06 00:16:58.000000000 +0200
++++ shadow-4.1.4.2/src/useradd.c	2009-09-07 16:34:01.402878101 +0200
 @@ -90,7 +90,7 @@ char *Prog;
  static gid_t def_group = 100;
  static const char *def_gname = "other";
@@ -53,7 +55,7 @@ diff -up shadow-4.1.4/src/useradd.c.redhat shadow-4.1.4/src/useradd.c
  static uid_t user_id;
  static gid_t user_gid;
  static const char *user_comment = "";
-@@ -996,9 +996,9 @@ static void process_flags (int argc, cha
+@@ -989,9 +989,9 @@ static void process_flags (int argc, cha
  		};
  		while ((c = getopt_long (argc, argv,
  #ifdef WITH_SELINUX
@@ -65,7 +67,7 @@ diff -up shadow-4.1.4/src/useradd.c.redhat shadow-4.1.4/src/useradd.c
  #endif
  		                         long_options, NULL)) != -1) {
  			switch (c) {
-@@ -1148,6 +1148,7 @@ static void process_flags (int argc, cha
+@@ -1141,6 +1141,7 @@ static void process_flags (int argc, cha
  			case 'M':
  				Mflg = true;
  				break;
