@@ -1,12 +1,12 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.1.4.2
-Release: 1%{?dist}
+Release: 2%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: ftp://pkg-shadow.alioth.debian.org/pub/pkg-shadow/shadow-%{version}.tar.bz2
-Source1: shadow-4.0.17-login.defs
-Source2: shadow-4.0.18.1-useradd
+Source1: shadow-utils.login.defs 
+Source2: shadow-utils.useradd
 Patch0: shadow-4.1.4.2-redhat.patch
 Patch1: shadow-4.1.4.1-goodname.patch
 Patch2: shadow-4.1.4.2-leak.patch
@@ -36,9 +36,9 @@ are used for managing group accounts.
 %prep
 %setup -q -n shadow-%{version}
 %patch0 -p1 -b .redhat
-#%patch1 -p1 -b .goodname
-#%patch2 -p1 -b .leak
-#%patch3 -p1 -b .fixes
+%patch1 -p1 -b .goodname
+%patch2 -p1 -b .leak
+%patch3 -p1 -b .fixes
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -180,6 +180,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Wed Nov 18 2009 Peter Vrabec <pvrabec@redhat.com> - 2:4.1.4.2-2
+- apply patches{1,2,3}
+- enable SHA512 in /etc/login.defs
+
 * Mon Sep 07 2009 Peter Vrabec <pvrabec@redhat.com> - 2:4.1.4.2-1
 - upgrade
 

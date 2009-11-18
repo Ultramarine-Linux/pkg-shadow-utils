@@ -53,6 +53,6 @@ UMASK           077
 #
 USERGROUPS_ENAB yes
 
-# Use MD5 or DES to encrypt password? Red Hat use MD5 by default.
-MD5_CRYPT_ENAB yes
+# Use SHA512 to encrypt password.
+ENCRYPT_METHOD SHA512 
 
