@@ -1,10 +1,10 @@
 # Makefile for source rpm: shadow-utils
-# $Id: Makefile,v 1.3 2005/08/05 11:53:21 pvrabec Exp $
+# $Id: Makefile,v 1.4 2007/10/15 19:22:59 notting Exp $
 NAME := shadow-utils
 SPECFILE = $(firstword $(wildcard *.spec))
 
 define find-makefile-common
-for d in common ../common ../../common ; do if [ -f $$d/Makefile.common ] ; then if [ -f $$d/CVS/Root -a -w $$/Makefile.common ] ; then cd $$d ; cvs -Q update ; fi ; echo "$$d/Makefile.common" ; break ; fi ; done
+for d in common ../common ../../common ; do if [ -f $$d/Makefile.common ] ; then if [ -f $$d/CVS/Root -a -w $$d/Makefile.common ] ; then cd $$d ; cvs -Q update ; fi ; echo "$$d/Makefile.common" ; break ; fi ; done
 endef
 
 MAKEFILE_COMMON := $(shell $(find-makefile-common))
