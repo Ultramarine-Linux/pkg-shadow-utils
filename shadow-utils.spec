@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.1.4.2
-Release: 2%{?dist}
+Release: 3%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: ftp://pkg-shadow.alioth.debian.org/pub/pkg-shadow/shadow-%{version}.tar.bz2
@@ -58,7 +58,8 @@ cp -f doc/HOWTO.utf8 doc/HOWTO
         --with-selinux \
         --without-libcrack \
         --without-libpam \
-        --disable-shared
+        --disable-shared \
+	--with-group-name-max-length=32
 make
 
 %install
@@ -180,6 +181,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Fri Mar 26 2010 Peter Vrabec <pvrabec@redhat.com> - 2:4.1.4.2-3
+- max group name length set to 32 characters
+
 * Wed Nov 18 2009 Peter Vrabec <pvrabec@redhat.com> - 2:4.1.4.2-2
 - apply patches{1,2,3}
 - enable SHA512 in /etc/login.defs
