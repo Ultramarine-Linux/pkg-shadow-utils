@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.1.4.2
-Release: 3%{?dist}
+Release: 4%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: ftp://pkg-shadow.alioth.debian.org/pub/pkg-shadow/shadow-%{version}.tar.bz2
@@ -123,14 +123,14 @@ rm $RPM_BUILD_ROOT/%{_mandir}/*/man8/chgpasswd.*
 rm $RPM_BUILD_ROOT/%{_mandir}/man3/getspnam.*
 rm $RPM_BUILD_ROOT/%{_mandir}/*/man3/getspnam.*
 
-%find_lang shadow
 find $RPM_BUILD_ROOT%{_mandir} -depth -type d -empty -delete
+%find_lang shadow
 for dir in $(ls -1d $RPM_BUILD_ROOT%{_mandir}/{??,??_??}) ; do
     dir=$(echo $dir | sed -e "s|^$RPM_BUILD_ROOT||")
     lang=$(basename $dir)
-    echo "%%lang($lang) $dir" >> shadow.lang
-    echo "%%lang($lang) $dir/man*" >> shadow.lang
-#    echo "%%lang($lang) $dir/man*/*" >> shadow.lang
+#   echo "%%lang($lang) $dir" >> shadow.lang
+#   echo "%%lang($lang) $dir/man*" >> shadow.lang
+    echo "%%lang($lang) $dir/man*/*" >> shadow.lang
 done
 
 %clean
@@ -181,6 +181,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Thu Apr 01 2010 Peter Vrabec <pvrabec@redhat.com> - 2:4.1.4.2-4
+- fix man directories ownership (#569418)
+
 * Fri Mar 26 2010 Peter Vrabec <pvrabec@redhat.com> - 2:4.1.4.2-3
 - max group name length set to 32 characters
 
