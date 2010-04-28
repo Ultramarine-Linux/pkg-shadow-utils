@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.1.4.2
-Release: 2%{?dist}
+Release: 3%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: ftp://pkg-shadow.alioth.debian.org/pub/pkg-shadow/shadow-%{version}.tar.bz2
@@ -11,6 +11,8 @@ Patch0: shadow-4.1.4.2-redhat.patch
 Patch1: shadow-4.1.4.1-goodname.patch
 Patch2: shadow-4.1.4.2-leak.patch
 Patch3: shadow-4.1.4.2-fixes.patch
+Patch4: shadow-4.1.4.2-infoParentDir.patch
+Patch5: shadow-4.1.4.2-semange.patch
 License: BSD and GPLv2+
 Group: System Environment/Base
 BuildRequires: libselinux-devel >= 1.25.2-1
@@ -39,6 +41,8 @@ are used for managing group accounts.
 %patch1 -p1 -b .goodname
 %patch2 -p1 -b .leak
 %patch3 -p1 -b .fixes
+%patch4 -p1 -b .infoParentDir
+%patch5 -p1 -b .semange
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -58,7 +62,8 @@ cp -f doc/HOWTO.utf8 doc/HOWTO
         --with-selinux \
         --without-libcrack \
         --without-libpam \
-        --disable-shared
+        --disable-shared \
+	--with-group-name-max-length=32
 make
 
 %install
@@ -180,6 +185,12 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Wed Apr 28 2010 Peter Vrabec <pvrabec@redhat.com> - 2:4.1.4.2-3
+- newusers man page more informative
+- userdel should not need to run semanage
+- max group name length set to 32 characters
+  Resolves: #586330 #586408 #582553
+
 * Wed Nov 18 2009 Peter Vrabec <pvrabec@redhat.com> - 2:4.1.4.2-2
 - apply patches{1,2,3}
 - enable SHA512 in /etc/login.defs
