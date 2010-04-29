@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.1.4.2
-Release: 5%{?dist}
+Release: 6%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: ftp://pkg-shadow.alioth.debian.org/pub/pkg-shadow/shadow-%{version}.tar.bz2
@@ -13,10 +13,12 @@ Patch2: shadow-4.1.4.2-leak.patch
 Patch3: shadow-4.1.4.2-fixes.patch
 Patch4: shadow-4.1.4.2-infoParentDir.patch
 Patch5: shadow-4.1.4.2-semange.patch
+Patch6: shadow-4.1.4.2-acl.patch
 License: BSD and GPLv2+
 Group: System Environment/Base
 BuildRequires: libselinux-devel >= 1.25.2-1
 BuildRequires: audit-libs-devel >= 1.6.5
+BuildRequires: libacl-devel libattr-devel
 #BuildRequires: autoconf, automake, libtool, gettext-devel
 Requires: libselinux >= 1.25.2-1
 Requires: audit-libs >= 1.6.5
@@ -43,6 +45,7 @@ are used for managing group accounts.
 %patch3 -p1 -b .fixes
 %patch4 -p1 -b .infoParentDir
 %patch5 -p1 -b .semange
+%patch6 -p1 -b .acl
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -185,6 +188,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Thu Apr 29 2010 Peter Vrabec <pvrabec@redhat.com> - 2:4.1.4.2-6
+- preserve ACL's on files in /etc/skel 
+  Resolves: #513055 
+
 * Wed Apr 28 2010 Peter Vrabec <pvrabec@redhat.com> - 2:4.1.4.2-5
 - newusers man page more informative
 - userdel should not need to run semanage
