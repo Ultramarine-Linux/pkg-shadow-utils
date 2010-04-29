@@ -18,6 +18,7 @@ License: BSD and GPLv2+
 Group: System Environment/Base
 BuildRequires: libselinux-devel >= 1.25.2-1
 BuildRequires: audit-libs-devel >= 1.6.5
+BuildRequires: libacl-devel libattr-devel
 #BuildRequires: autoconf, automake, libtool, gettext-devel
 Requires: libselinux >= 1.25.2-1
 Requires: audit-libs >= 1.6.5
