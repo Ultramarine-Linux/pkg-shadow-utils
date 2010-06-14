@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.1.4.2
-Release: 6%{?dist}
+Release: 7%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: ftp://pkg-shadow.alioth.debian.org/pub/pkg-shadow/shadow-%{version}.tar.bz2
@@ -14,6 +14,8 @@ Patch3: shadow-4.1.4.2-fixes.patch
 Patch4: shadow-4.1.4.2-infoParentDir.patch
 Patch5: shadow-4.1.4.2-semange.patch
 Patch6: shadow-4.1.4.2-acl.patch
+Patch7: shadow-4.1.4.2-underflow.patch
+Patch8: shadow-4.1.4.2-uflg.patch
 License: BSD and GPLv2+
 Group: System Environment/Base
 BuildRequires: libselinux-devel >= 1.25.2-1
@@ -46,6 +48,8 @@ are used for managing group accounts.
 %patch4 -p1 -b .infoParentDir
 %patch5 -p1 -b .semange
 %patch6 -p1 -b .acl
+%patch7 -p1 -b .underflow
+%patch8 -p1 -b .uflg
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -188,6 +192,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Mon Jun 14 2010 Peter Vrabec <pvrabec@redhat.com> - 2:4.1.4.2-7
+- fix integer underflow in faillog (#603683)
+- use preferred GID for reserved static IDs
+
 * Thu Apr 29 2010 Peter Vrabec <pvrabec@redhat.com> - 2:4.1.4.2-6
 - preserve ACL's on files in /etc/skel 
   Resolves: #513055 
