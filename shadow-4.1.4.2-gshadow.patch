@@ -1,0 +1,49 @@
+diff -up shadow-4.1.4.2/configure.gshadow shadow-4.1.4.2/configure
+--- shadow-4.1.4.2/configure.gshadow	2011-01-05 16:29:33.355695459 +0100
++++ shadow-4.1.4.2/configure	2011-01-05 16:29:58.322687480 +0100
+@@ -18220,7 +18220,7 @@ cat confdefs.h >>conftest.$ac_ext
+ cat >>conftest.$ac_ext <<_ACEOF
+ /* end confdefs.h.  */
+ 
+-				#include <shadow.h>
++				#include <gshadow.h>
+ 				main()
+ 				{
+ 					struct sgrp *sg = sgetsgent("test:x::");
+diff -up shadow-4.1.4.2/lib/defines.h.gshadow shadow-4.1.4.2/lib/defines.h
+--- shadow-4.1.4.2/lib/defines.h.gshadow	2011-01-05 16:29:21.914687787 +0100
++++ shadow-4.1.4.2/lib/defines.h	2011-01-05 16:29:58.323739225 +0100
+@@ -134,6 +134,10 @@ char *strchr (), *strrchr (), *strtok ()
+  * - /usr/include/shadow.h exists, but we use our own gshadow.h.
+  */
+ #include <shadow.h>
++#if defined(HAVE_SHADOWGRP)
++#include <gshadow.h>
++#define sg_name sg_namp
++#endif
+ #if defined(SHADOWGRP) && !defined(GSHADOW)
+ #include "gshadow_.h"
+ #endif
+diff -up shadow-4.1.4.2/lib/gshadow.c.gshadow shadow-4.1.4.2/lib/gshadow.c
+--- shadow-4.1.4.2/lib/gshadow.c.gshadow	2009-06-12 19:50:23.000000000 +0200
++++ shadow-4.1.4.2/lib/gshadow.c	2011-01-05 16:28:55.207685148 +0100
+@@ -223,6 +223,7 @@ void endsgent (void)
+ 		if (NULL == buf) {
+ 			return NULL;
+ 		}
++		buflen = BUFSIZ;
+ 	}
+ 
+ 	if (NULL == fp) {
+@@ -230,9 +231,9 @@ void endsgent (void)
+ 	}
+ 
+ #ifdef	USE_NIS
+-	while (fgetsx (buf, (int) sizeof buf, fp) == buf)
++	while (fgetsx (buf, (int) buflen, fp) == buf)
+ #else
+-	if (fgetsx (buf, (int) sizeof buf, fp) == buf)
++	if (fgetsx (buf, (int) buflen, fp) == buf)
+ #endif
+ 	{
+ 		while (   ((cp = strrchr (buf, '\n')) == NULL)

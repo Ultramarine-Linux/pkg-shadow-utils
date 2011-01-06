@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.1.4.2
-Release: 8%{?dist}
+Release: 9%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: ftp://pkg-shadow.alioth.debian.org/pub/pkg-shadow/shadow-%{version}.tar.bz2
@@ -16,6 +16,7 @@ Patch5: shadow-4.1.4.2-semange.patch
 Patch6: shadow-4.1.4.2-acl.patch
 Patch7: shadow-4.1.4.2-underflow.patch
 Patch8: shadow-4.1.4.2-uflg.patch
+Patch9: shadow-4.1.4.2-gshadow.patch
 License: BSD and GPLv2+
 Group: System Environment/Base
 BuildRequires: libselinux-devel >= 1.25.2-1
@@ -50,6 +51,7 @@ are used for managing group accounts.
 %patch6 -p1 -b .acl
 %patch7 -p1 -b .underflow
 %patch8 -p1 -b .uflg
+%patch9 -p1 -b .gshadow
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -192,6 +194,11 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Wed Jan 05 2011 Peter Vrabec <pvrabec@redhat.com> - 2:4.1.4.2-9
+- fix gshadow functions from shadow utils 
+- make shadow utils use gshadow functions from glibc
+  Resolves: #665780
+
 * Tue Jul 20 2010 Peter Vrabec <pvrabec@redhat.com> - 2:4.1.4.2-8
 - fix pwck/grpck hang
   Resolves: #586322
