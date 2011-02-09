@@ -1,6 +1,6 @@
 diff -up shadow-4.1.4.2/libmisc/find_new_gid.c.redhat shadow-4.1.4.2/libmisc/find_new_gid.c
 --- shadow-4.1.4.2/libmisc/find_new_gid.c.redhat	2009-07-18 01:53:42.000000000 +0200
-+++ shadow-4.1.4.2/libmisc/find_new_gid.c	2009-09-07 16:34:26.640814090 +0200
++++ shadow-4.1.4.2/libmisc/find_new_gid.c	2011-02-09 11:04:06.009400412 +0100
 @@ -58,11 +58,11 @@ int find_new_gid (bool sys_group,
  	assert (gid != NULL);
  
@@ -18,7 +18,7 @@ diff -up shadow-4.1.4.2/libmisc/find_new_gid.c.redhat shadow-4.1.4.2/libmisc/fin
  	used_gids = alloca (sizeof (bool) * (gid_max +1));
 diff -up shadow-4.1.4.2/libmisc/find_new_uid.c.redhat shadow-4.1.4.2/libmisc/find_new_uid.c
 --- shadow-4.1.4.2/libmisc/find_new_uid.c.redhat	2009-07-18 01:53:43.000000000 +0200
-+++ shadow-4.1.4.2/libmisc/find_new_uid.c	2009-09-07 16:34:19.695877000 +0200
++++ shadow-4.1.4.2/libmisc/find_new_uid.c	2011-02-09 11:04:06.009400412 +0100
 @@ -58,11 +58,11 @@ int find_new_uid (bool sys_user,
  	assert (uid != NULL);
  
@@ -34,9 +34,21 @@ diff -up shadow-4.1.4.2/libmisc/find_new_uid.c.redhat shadow-4.1.4.2/libmisc/fin
  		uid_max = (uid_t) getdef_ulong ("SYS_UID_MAX", (unsigned long) uid_max);
  	}
  	used_uids = alloca (sizeof (bool) * (uid_max +1));
+diff -up shadow-4.1.4.2/man/useradd.8.redhat shadow-4.1.4.2/man/useradd.8
+--- shadow-4.1.4.2/man/useradd.8.redhat	2009-07-24 03:16:44.000000000 +0200
++++ shadow-4.1.4.2/man/useradd.8	2011-02-09 11:04:24.851151246 +0100
+@@ -211,7 +211,7 @@ Create the user\'s home directory if it 
+ \fB\-k\fR
+ option) will be copied to the home directory\&.
+ .sp
+-By default, no home directories are created\&.
++The home directories are created by default on RHEL/Fedora systems because of /etc/login.defs (\fBCREATE_HOME\fR) setting\&.
+ .RE
+ .PP
+ \fB\-M\fR
 diff -up shadow-4.1.4.2/src/useradd.c.redhat shadow-4.1.4.2/src/useradd.c
 --- shadow-4.1.4.2/src/useradd.c.redhat	2009-06-06 00:16:58.000000000 +0200
-+++ shadow-4.1.4.2/src/useradd.c	2009-09-07 16:34:01.402878101 +0200
++++ shadow-4.1.4.2/src/useradd.c	2011-02-09 11:04:06.031036886 +0100
 @@ -90,7 +90,7 @@ char *Prog;
  static gid_t def_group = 100;
  static const char *def_gname = "other";

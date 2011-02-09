@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.1.4.2
-Release: 10%{?dist}
+Release: 11%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: ftp://pkg-shadow.alioth.debian.org/pub/pkg-shadow/shadow-%{version}.tar.bz2
@@ -194,6 +194,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Wed Feb 09 2011 Peter Vrabec <pvrabec@redhat.com> - 2:4.1.4.2-11
+- useradd man page (-m option) 
+  Resolves: #523265
+
 * Tue Feb 01 2011 Peter Vrabec <pvrabec@redhat.com> - 2:4.1.4.2-10
 - do not use  gshadow functions from glibc, there is a bug
   in glibc sgetsgent(#674361)
