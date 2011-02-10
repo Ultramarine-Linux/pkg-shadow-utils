@@ -98,6 +98,7 @@ rm $RPM_BUILD_ROOT/%{_bindir}/groups
 rm $RPM_BUILD_ROOT/%{_bindir}/login
 rm $RPM_BUILD_ROOT/%{_bindir}/passwd
 rm $RPM_BUILD_ROOT/%{_bindir}/su
+rm $RPM_BUILD_ROOT/%{_bindir}/faillog
 rm $RPM_BUILD_ROOT/%{_sysconfdir}/login.access
 rm $RPM_BUILD_ROOT/%{_sysconfdir}/limits
 rm $RPM_BUILD_ROOT/%{_sbindir}/logoutd
@@ -135,6 +136,10 @@ rm $RPM_BUILD_ROOT/%{_mandir}/man8/chgpasswd.*
 rm $RPM_BUILD_ROOT/%{_mandir}/*/man8/chgpasswd.*
 rm $RPM_BUILD_ROOT/%{_mandir}/man3/getspnam.*
 rm $RPM_BUILD_ROOT/%{_mandir}/*/man3/getspnam.*
+rm $RPM_BUILD_ROOT/%{_mandir}/man5/faillog.*
+rm $RPM_BUILD_ROOT/%{_mandir}/*/man5/faillog.*
+rm $RPM_BUILD_ROOT/%{_mandir}/man8/faillog.*
+rm $RPM_BUILD_ROOT/%{_mandir}/*/man8/faillog.*
 
 find $RPM_BUILD_ROOT%{_mandir} -depth -type d -empty -delete
 %find_lang shadow
@@ -157,7 +162,6 @@ rm -rf $RPM_BUILD_ROOT
 %attr(0600,root,root)   %config(noreplace) %{_sysconfdir}/default/useradd
 %{_bindir}/sg
 %{_bindir}/chage
-%{_bindir}/faillog
 %{_bindir}/gpasswd
 %{_bindir}/lastlog
 %{_bindir}/newgrp
@@ -179,7 +183,6 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man5/shadow.5*
 %{_mandir}/man5/login.defs.5*
 %{_mandir}/man5/gshadow.5*
-%{_mandir}/man5/faillog.5*
 %{_mandir}/man8/adduser.8*
 %{_mandir}/man8/group*.8*
 %{_mandir}/man8/user*.8*
@@ -189,14 +192,15 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/newusers.8*
 %{_mandir}/man8/*conv.8*
 %{_mandir}/man8/lastlog.8*
-%{_mandir}/man8/faillog.8*
 %{_mandir}/man8/vipw.8*
 %{_mandir}/man8/vigr.8*
 
 %changelog
 * Wed Feb 09 2011 Peter Vrabec <pvrabec@redhat.com> - 2:4.1.4.2-11
 - useradd man page (-m option) 
-  Resolves: #523265
+- create home directory on fs with noacl
+- remove faillog app (pam_tally.so is no longer shipped)
+  Resolves: #523265, #622320
 
 * Tue Feb 01 2011 Peter Vrabec <pvrabec@redhat.com> - 2:4.1.4.2-10
 - do not use  gshadow functions from glibc, there is a bug
