@@ -1,22 +1,24 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
-Version: 4.1.4.2
-Release: 11%{?dist}
+Version: 4.1.4.3
+Release: 1%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: ftp://pkg-shadow.alioth.debian.org/pub/pkg-shadow/shadow-%{version}.tar.bz2
 Source1: shadow-utils.login.defs 
 Source2: shadow-utils.useradd
 Patch0: shadow-4.1.4.2-redhat.patch
-Patch1: shadow-4.1.4.1-goodname.patch
+Patch1: shadow-4.1.4.3-goodname.patch
 Patch2: shadow-4.1.4.2-leak.patch
 Patch3: shadow-4.1.4.2-fixes.patch
 Patch4: shadow-4.1.4.2-infoParentDir.patch
 Patch5: shadow-4.1.4.2-semange.patch
 Patch6: shadow-4.1.4.2-acl.patch
 Patch7: shadow-4.1.4.2-underflow.patch
-Patch8: shadow-4.1.4.2-uflg.patch
+Patch8: shadow-4.1.4.3-uflg.patch
 Patch9: shadow-4.1.4.2-gshadow.patch
+Patch10: shadow-4.1.4.3-nopam.patch
+Patch11: shadow-4.1.4.3-IDs.patch
 License: BSD and GPLv2+
 Group: System Environment/Base
 BuildRequires: libselinux-devel >= 1.25.2-1
@@ -52,6 +54,8 @@ are used for managing group accounts.
 %patch7 -p1 -b .underflow
 %patch8 -p1 -b .uflg
 %patch9 -p1 -b .gshadow
+%patch10 -p1 -b .nopam
+%patch11 -p1 -b .IDs
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -196,6 +200,11 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Fri May 20 2011 Peter Vrabec <pvrabec@redhat.com> - 2:4.1.4.3-1
+- upgrade
+- change UID/GID_MIN to #1000
+- fix find_new_uid/gid for big UID/GID_MAX
+
 * Wed Feb 09 2011 Peter Vrabec <pvrabec@redhat.com> - 2:4.1.4.2-11
 - useradd man page (-m option) 
 - create home directory on fs with noacl
