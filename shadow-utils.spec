@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.1.4.3
-Release: 1%{?dist}
+Release: 2%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: ftp://pkg-shadow.alioth.debian.org/pub/pkg-shadow/shadow-%{version}.tar.bz2
@@ -200,6 +200,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Tue May 31 2011 Peter Vrabec <pvrabec@redhat.com> - 2:4.1.4.3-2
+- fix integer underflow in laslog (#706321)
+
 * Fri May 20 2011 Peter Vrabec <pvrabec@redhat.com> - 2:4.1.4.3-1
 - upgrade
 - change UID/GID_MIN to #1000
