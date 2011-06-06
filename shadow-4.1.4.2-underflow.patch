@@ -52,7 +52,7 @@ diff -up shadow-4.1.4.3/src/lastlog.c.underflow shadow-4.1.4.3/src/lastlog.c
 -
 -	if (offset <= (statbuf.st_size - sizeof (ll))) {
 +	offset = (off_t) pw->pw_uid * sizeof (ll);
-+	if (offset + sizeof (ll) <= statbuf.st_size - sizeof (ll)) {
++	if (offset + sizeof (ll) <= statbuf.st_size) {
  		/* fseeko errors are not really relevant for us. */
  		int err = fseeko (lastlogfile, offset, SEEK_SET);
  		assert (0 == err);
