@@ -1,3 +1,11 @@
+#
+# Please note that the parameters in this configuration file control the
+# behavior of the tools from the shadow-utils component. None of these
+# tools uses the PAM mechanism, and the utilities that use PAM (such as the
+# passwd command) should therefore be configured elsewhere. Refer to
+# /etc/pam.d/system-auth for more information.
+#
+
 # *REQUIRED*
 #   Directory where mailboxes reside, _or_ name of file, relative to the
 #   home directory.  If you _do_ define both, MAIL_DIR takes precedence.

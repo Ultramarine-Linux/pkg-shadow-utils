@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.1.4.3
-Release: 3%{?dist}
+Release: 4%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: ftp://pkg-shadow.alioth.debian.org/pub/pkg-shadow/shadow-%{version}.tar.bz2
@@ -200,6 +200,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Mon Jun 27 2011 Peter Vrabec <pvrabec@redhat.com> - 2:4.1.4.3-4
+- refer to PAM in /etc/login.defs (#629277)
+
 * Mon Jun 06 2011 Peter Vrabec <pvrabec@redhat.com> - 2:4.1.4.3-3
 - fix shadow-4.1.4.2-underflow.patch
 
