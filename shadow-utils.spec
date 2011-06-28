@@ -4,7 +4,7 @@ Version: 4.1.4.3
 Release: 5%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
-Source0: ftp://pkg-shadow.alioth.debian.org/pub/pkg-shadow/shadow-%{version}.tar.bz2
+Source0: http://pkg-shadow.alioth.debian.org/releases/shadow-%{version}.tar.bz2
 Source1: shadow-utils.login.defs 
 Source2: shadow-utils.useradd
 Patch0: shadow-4.1.4.2-redhat.patch
@@ -35,7 +35,7 @@ The shadow-utils package includes the necessary programs for
 converting UNIX password files to the shadow password format, plus
 programs for managing user and group accounts. The pwconv command
 converts passwords to the shadow password format. The pwunconv command
-unconverts shadow passwords and generates an npasswd file (a standard
+unconverts shadow passwords and generates a passwd file (a standard
 UNIX password file). The pwck command checks the integrity of password
 and shadow files. The lastlog command prints out the last login times
 for all users. The useradd, userdel, and usermod commands are used for
