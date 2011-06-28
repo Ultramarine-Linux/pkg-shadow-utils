@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.1.4.3
-Release: 4%{?dist}
+Release: 5%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: ftp://pkg-shadow.alioth.debian.org/pub/pkg-shadow/shadow-%{version}.tar.bz2
@@ -12,7 +12,7 @@ Patch1: shadow-4.1.4.3-goodname.patch
 Patch2: shadow-4.1.4.2-leak.patch
 Patch3: shadow-4.1.4.2-fixes.patch
 Patch4: shadow-4.1.4.2-infoParentDir.patch
-Patch5: shadow-4.1.4.2-semange.patch
+Patch5: shadow-4.1.4.3-semange.patch
 Patch6: shadow-4.1.4.2-acl.patch
 Patch7: shadow-4.1.4.2-underflow.patch
 Patch8: shadow-4.1.4.3-uflg.patch
@@ -200,6 +200,11 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Tue Jun 28 2011 Peter Vrabec <pvrabec@redhat.com> - 2:4.1.4.3-5
+- userdel option to remove Linux login <-> SELinux login mapping (#639900)
+- useradd special exit value if SELinux user mapping is invalid (#639975)
+- usermod special exit value if SELinux user mapping is invalid (#639976)
+
 * Mon Jun 27 2011 Peter Vrabec <pvrabec@redhat.com> - 2:4.1.4.3-4
 - refer to PAM in /etc/login.defs (#629277)
 
