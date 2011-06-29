@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.1.4.3
-Release: 5%{?dist}
+Release: 6%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: http://pkg-shadow.alioth.debian.org/releases/shadow-%{version}.tar.bz2
@@ -19,6 +19,7 @@ Patch8: shadow-4.1.4.3-uflg.patch
 Patch9: shadow-4.1.4.2-gshadow.patch
 Patch10: shadow-4.1.4.3-nopam.patch
 Patch11: shadow-4.1.4.3-IDs.patch
+Patch12: shadow-4.1.4.3-man.patch
 License: BSD and GPLv2+
 Group: System Environment/Base
 BuildRequires: libselinux-devel >= 1.25.2-1
@@ -56,6 +57,7 @@ are used for managing group accounts.
 %patch9 -p1 -b .gshadow
 %patch10 -p1 -b .nopam
 %patch11 -p1 -b .IDs
+%patch12 -p1 -b .man
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -200,6 +202,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Wed Jun 29 2011 Peter Vrabec <pvrabec@redhat.com> - 2:4.1.4.3-6
+- man page fixes (#696213 #674878)
+
 * Tue Jun 28 2011 Peter Vrabec <pvrabec@redhat.com> - 2:4.1.4.3-5
 - userdel option to remove Linux login <-> SELinux login mapping (#639900)
 - useradd special exit value if SELinux user mapping is invalid (#639975)
