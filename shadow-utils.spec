@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.1.4.3
-Release: 6%{?dist}
+Release: 7%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: http://pkg-shadow.alioth.debian.org/releases/shadow-%{version}.tar.bz2
@@ -29,6 +29,8 @@ BuildRequires: libacl-devel libattr-devel
 Requires: libselinux >= 1.25.2-1
 Requires: audit-libs >= 1.6.5
 Requires: setup
+Requires(pre): coreutils
+Requires(post): coreutils
 Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 %description
@@ -157,6 +159,23 @@ for dir in $(ls -1d $RPM_BUILD_ROOT%{_mandir}/{??,??_??}) ; do
     echo "%%lang($lang) $dir/man*/*" >> shadow.lang
 done
 
+# Make sure old configuration files specifying UID_MIN=500 are not overwritten
+# on upgrades.  Remove the scriptlets after upgrades from Fedora 15 are no
+# longer supported.
+%pre
+if [ "$1" -gt 1 ]; then
+   hash=$(md5sum %{_sysconfdir}/login.defs | cut -d ' ' -f 1)
+   if [ "$hash" = 111354806cbbee33a73fa4d538055510 ]; then
+      cp -a %{_sysconfdir}/login.defs{,.rpm-saved-in-pre}
+   fi
+fi
+
+%post
+if [ -e %{_sysconfdir}/login.defs.rpm-saved-in-pre ]; then
+   mv %{_sysconfdir}/login.defs{,.rpmnew}
+   mv %{_sysconfdir}/login.defs{.rpm-saved-in-pre,}
+fi
+
 %clean
 rm -rf $RPM_BUILD_ROOT
 
@@ -202,6 +221,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Fri Jul 22 2011 Miloslav Trmač <mitr@redhat.com> - 2:4.1.4.3-7
+- Make sure /etc/login.defs is not changed on upgrades from Fedora 1[345].
+
 * Wed Jun 29 2011 Peter Vrabec <pvrabec@redhat.com> - 2:4.1.4.3-6
 - man page fixes (#696213 #674878)
 
