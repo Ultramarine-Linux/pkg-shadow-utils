@@ -23,7 +23,7 @@ diff -up shadow-4.1.4.3/man/userdel.8.semange shadow-4.1.4.3/man/userdel.8
 +.PP
 +\fB\-Z\fR, \fB\-\-selinux-user\fR
 +.RS 4
-+Remove SELinux user assigned to the user´s login from SELinux login mapping. Use with caution, all the occurrences of the SELinux user will be removed.
++Remove SELinux user assigned to the user´s login from SELinux login mapping.
 +.RE
  .SH "CONFIGURATION"
  .PP
