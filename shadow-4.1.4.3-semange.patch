@@ -1,6 +1,6 @@
 diff -up shadow-4.1.4.3/man/useradd.8.semange shadow-4.1.4.3/man/useradd.8
---- shadow-4.1.4.3/man/useradd.8.semange	2011-06-28 16:17:06.385374734 +0200
-+++ shadow-4.1.4.3/man/useradd.8	2011-06-28 16:18:19.657899439 +0200
+--- shadow-4.1.4.3/man/useradd.8.semange	2011-08-02 12:57:47.971838218 +0200
++++ shadow-4.1.4.3/man/useradd.8	2011-08-02 12:57:47.985838145 +0200
 @@ -640,6 +640,11 @@ can\*(Aqt create home directory
  .RS 4
  can\*(Aqt create mail spool
@@ -15,7 +15,7 @@ diff -up shadow-4.1.4.3/man/useradd.8.semange shadow-4.1.4.3/man/useradd.8
  
 diff -up shadow-4.1.4.3/man/userdel.8.semange shadow-4.1.4.3/man/userdel.8
 --- shadow-4.1.4.3/man/userdel.8.semange	2011-02-16 00:14:13.000000000 +0100
-+++ shadow-4.1.4.3/man/userdel.8	2011-06-28 16:18:19.657899439 +0200
++++ shadow-4.1.4.3/man/userdel.8	2011-08-02 12:57:47.985838145 +0200
 @@ -76,6 +76,11 @@ variable in the
  login\&.defs
  file\&.
@@ -23,14 +23,14 @@ diff -up shadow-4.1.4.3/man/userdel.8.semange shadow-4.1.4.3/man/userdel.8
 +.PP
 +\fB\-Z\fR, \fB\-\-selinux-user\fR
 +.RS 4
-+Remove SELinux user assigned to the user´s login from SELinux login mapping. Use with caution, all the occurrences of the SELinux user will be removed.
++Remove SELinux user assigned to the user´s login from SELinux login mapping.
 +.RE
  .SH "CONFIGURATION"
  .PP
  The following configuration variables in
 diff -up shadow-4.1.4.3/src/useradd.c.semange shadow-4.1.4.3/src/useradd.c
---- shadow-4.1.4.3/src/useradd.c.semange	2011-06-28 16:17:06.381374760 +0200
-+++ shadow-4.1.4.3/src/useradd.c	2011-06-28 16:18:19.658899432 +0200
+--- shadow-4.1.4.3/src/useradd.c.semange	2011-08-02 12:57:47.968838234 +0200
++++ shadow-4.1.4.3/src/useradd.c	2011-08-02 12:58:17.626684439 +0200
 @@ -164,6 +164,7 @@ static bool home_added = false;
  #define E_GRP_UPDATE	10	/* can't update group file */
  #define E_HOMEDIR	12	/* can't create home directory */
@@ -82,12 +82,9 @@ diff -up shadow-4.1.4.3/src/useradd.c.semange shadow-4.1.4.3/src/useradd.c
  /*
   * create_home - create the user's home directory
   *
-@@ -2022,12 +1994,35 @@ int main (int argc, char **argv)
- 		create_mail ();
- 	}
+@@ -2025,7 +1997,30 @@ int main (int argc, char **argv)
+ 	close_files ();
  
--	close_files ();
--
  #ifdef WITH_SELINUX
 -	selinux_update_mapping ();
 +	if (Zflg && *user_selinux) {
@@ -116,14 +113,10 @@ diff -up shadow-4.1.4.3/src/useradd.c.semange shadow-4.1.4.3/src/useradd.c
 +	}
  #endif
  
-+	close_files ();
-+
  	nscd_flush_cache ("passwd");
- 	nscd_flush_cache ("group");
- 
 diff -up shadow-4.1.4.3/src/userdel.c.semange shadow-4.1.4.3/src/userdel.c
 --- shadow-4.1.4.3/src/userdel.c.semange	2011-02-13 18:58:16.000000000 +0100
-+++ shadow-4.1.4.3/src/userdel.c	2011-06-28 16:18:19.659899426 +0200
++++ shadow-4.1.4.3/src/userdel.c	2011-08-02 12:57:47.988838130 +0200
 @@ -82,6 +82,7 @@ static char *user_home;
  
  static bool fflg = false;
@@ -208,7 +201,7 @@ diff -up shadow-4.1.4.3/src/userdel.c.semange shadow-4.1.4.3/src/userdel.c
  
 diff -up shadow-4.1.4.3/src/usermod.c.semange shadow-4.1.4.3/src/usermod.c
 --- shadow-4.1.4.3/src/usermod.c.semange	2011-02-13 18:58:16.000000000 +0100
-+++ shadow-4.1.4.3/src/usermod.c	2011-06-28 16:18:19.661899414 +0200
++++ shadow-4.1.4.3/src/usermod.c	2011-08-02 12:57:47.989838125 +0200
 @@ -82,6 +82,9 @@
  #define E_GRP_UPDATE	10	/* can't update group file */
  /* #define E_NOSPACE	11	   insufficient space to move home dir */
