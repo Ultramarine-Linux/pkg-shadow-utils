@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.1.4.2
-Release: 12%{?dist}
+Release: 13%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: ftp://pkg-shadow.alioth.debian.org/pub/pkg-shadow/shadow-%{version}.tar.bz2
@@ -196,6 +196,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Tue Aug 02 2011 Peter Vrabec <pvrabec@redhat.com> - 2:4.1.4.2-13
+- fixing semanage issue (#701355)
+
 * Wed Jun 29 2011 Peter Vrabec <pvrabec@redhat.com> - 2:4.1.4.2-12
 - userdel option to remove Linux login <-> SELinux login mapping (#639900)
 - useradd special exit value if SELinux user mapping is invalid (#639975)
