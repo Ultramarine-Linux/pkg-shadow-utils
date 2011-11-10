@@ -1,0 +1,640 @@
+diff -up shadow-4.1.4.3/lib/Makefile.in.libsemanage shadow-4.1.4.3/lib/Makefile.in
+--- shadow-4.1.4.3/lib/Makefile.in.libsemanage	2011-02-15 23:18:15.000000000 +0100
++++ shadow-4.1.4.3/lib/Makefile.in	2011-11-09 14:11:26.455362101 +0100
+@@ -52,7 +52,7 @@ am_libshadow_la_OBJECTS = commonio.lo en
+ 	groupio.lo groupmem.lo gshadow.lo lockpw.lo nscd.lo port.lo \
+ 	pwauth.lo pwio.lo pwmem.lo sgetgrent.lo sgetpwent.lo \
+ 	sgetspent.lo sgroupio.lo shadow.lo shadowio.lo shadowmem.lo \
+-	utent.lo
++	utent.lo selinux.lo
+ libshadow_la_OBJECTS = $(am_libshadow_la_OBJECTS)
+ libshadow_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
+ 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+@@ -202,7 +202,6 @@ libdir = @libdir@
+ libexecdir = @libexecdir@
+ localedir = @localedir@
+ localstatedir = @localstatedir@
+-lt_ECHO = @lt_ECHO@
+ mandir = @mandir@
+ mkdir_p = @mkdir_p@
+ oldincludedir = @oldincludedir@
+@@ -261,7 +260,8 @@ libshadow_la_SOURCES = \
+ 	shadowio.c \
+ 	shadowio.h \
+ 	shadowmem.c \
+-	utent.c
++	utent.c \
++	selinux.c
+ 
+ 
+ # These files are unneeded for some reason, listed in
+@@ -349,6 +349,7 @@ distclean-compile:
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/shadow.Plo@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/shadowio.Plo@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/shadowmem.Plo@am__quote@
++@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/selinux.Plo@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/utent.Plo@am__quote@
+ 
+ .c.o:
+diff -up shadow-4.1.4.3/libmisc/Makefile.in.libsemanage shadow-4.1.4.3/libmisc/Makefile.in
+--- shadow-4.1.4.3/libmisc/Makefile.in.libsemanage	2011-02-15 23:18:16.000000000 +0100
++++ shadow-4.1.4.3/libmisc/Makefile.in	2011-11-09 14:11:26.456362098 +0100
+@@ -64,7 +64,7 @@ am_libmisc_a_OBJECTS = addgrps.$(OBJEXT)
+ 	pam_pass_non_interractive.$(OBJEXT) pwd2spwd.$(OBJEXT) \
+ 	pwdcheck.$(OBJEXT) pwd_init.$(OBJEXT) rlogin.$(OBJEXT) \
+ 	salt.$(OBJEXT) setugid.$(OBJEXT) setupenv.$(OBJEXT) \
+-	shell.$(OBJEXT) system.$(OBJEXT) strtoday.$(OBJEXT) \
++	shell.$(OBJEXT) strtoday.$(OBJEXT) \
+ 	sub.$(OBJEXT) sulog.$(OBJEXT) ttytype.$(OBJEXT) tz.$(OBJEXT) \
+ 	ulimit.$(OBJEXT) user_busy.$(OBJEXT) utmp.$(OBJEXT) \
+ 	valid.$(OBJEXT) xgetpwnam.$(OBJEXT) xgetpwuid.$(OBJEXT) \
+@@ -284,7 +284,6 @@ libmisc_a_SOURCES = \
+ 	setugid.c \
+ 	setupenv.c \
+ 	shell.c \
+-	system.c \
+ 	strtoday.c \
+ 	sub.c \
+ 	sulog.c \
+@@ -394,7 +393,6 @@ distclean-compile:
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/strtoday.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sub.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sulog.Po@am__quote@
+-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/system.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ttytype.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tz.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ulimit.Po@am__quote@
+diff -up shadow-4.1.4.3/libmisc/system.c.libsemanage shadow-4.1.4.3/libmisc/system.c
+--- shadow-4.1.4.3/libmisc/system.c.libsemanage	2011-02-13 18:58:11.000000000 +0100
++++ shadow-4.1.4.3/libmisc/system.c	2011-11-09 14:11:26.457362095 +0100
+@@ -1,72 +0,0 @@
+-/*
+- * Copyright (c) 2009       , Dan Walsh <dwalsh@redhat.com>
+- * All rights reserved.
+- *
+- * Redistribution and use in source and binary forms, with or without
+- * modification, are permitted provided that the following conditions
+- * are met:
+- * 1. Redistributions of source code must retain the above copyright
+- *    notice, this list of conditions and the following disclaimer.
+- * 2. Redistributions in binary form must reproduce the above copyright
+- *    notice, this list of conditions and the following disclaimer in the
+- *    documentation and/or other materials provided with the distribution.
+- * 3. The name of the copyright holders or contributors may not be used to
+- *    endorse or promote products derived from this software without
+- *    specific prior written permission.
+- *
+- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+- * ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+- * PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT
+- * HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+- */
+-#include <config.h>
+-
+-#ident "$Id: system.c 2849 2009-04-30 21:08:49Z nekral-guest $"
+-
+-#include <stdio.h>
+-#include <sys/wait.h>
+-#include <fcntl.h>
+-#include "prototypes.h"
+-#include "defines.h"
+-
+-int safe_system (const char *command,
+-                 const char *argv[],
+-                 const char *env[],
+-                 int ignore_stderr)
+-{
+-	int status = -1;
+-	int fd;
+-	pid_t pid;
+-	
+-	pid = fork();
+-	if (pid < 0) {
+-		return -1;
+-	}
+-
+-	if (pid) {       /* Parent */
+-		if (waitpid (pid, &status, 0) > 0) {
+-			return status;
+-		} else {
+-			return -1;
+-		}
+-	}
+-
+-	fd = open ("/dev/null", O_RDWR);
+-	/* Child */
+-	dup2 (fd, 0);	// Close Stdin
+-	if (ignore_stderr) {
+-		dup2 (fd, 2);	// Close Stderr
+-	}
+-
+-	execve (command, (char *const *) argv, (char *const *) env);
+-	fprintf (stderr, _("Failed to exec '%s'\n"), argv[0]);
+-	exit (EXIT_FAILURE);
+-}
+-
+diff -up shadow-4.1.4.3/lib/prototypes.h.libsemanage shadow-4.1.4.3/lib/prototypes.h
+--- shadow-4.1.4.3/lib/prototypes.h.libsemanage	2011-02-13 18:58:23.000000000 +0100
++++ shadow-4.1.4.3/lib/prototypes.h	2011-11-09 14:11:26.457362095 +0100
+@@ -331,12 +331,6 @@ extern void spw_free (/*@out@*/ /*@only@
+ /* shell.c */
+ extern int shell (const char *file, /*@null@*/const char *arg, char *const envp[]);
+ 
+-/* system.c */
+-extern int safe_system (const char *command,
+-                        const char *argv[],
+-                        const char *env[],
+-                        int ignore_stderr);
+-
+ /* strtoday.c */
+ extern long strtoday (const char *);
+ 
+@@ -403,4 +397,8 @@ extern /*@null@*/ /*@only@*/struct spwd 
+ /* yesno.c */
+ extern bool yes_or_no (bool read_only);
+ 
++/* selinux.c */
++int set_seuser(const char *login_name, const char *seuser_name);
++int del_seuser(const char *login_name);
++
+ #endif				/* _PROTOTYPES_H */
+diff -up shadow-4.1.4.3/lib/selinux.c.libsemanage shadow-4.1.4.3/lib/selinux.c
+--- shadow-4.1.4.3/lib/selinux.c.libsemanage	2011-11-09 14:11:26.458362092 +0100
++++ shadow-4.1.4.3/lib/selinux.c	2011-11-09 14:11:26.458362092 +0100
+@@ -0,0 +1,341 @@
++/*
++   shadow-utils
++
++   su-selinux.c
++
++   Copyright (C) Jakub Hrozek <jhrozek@redhat.com>        2010
++   Copyright (C) Peter Vrabec <pvrabec@redhat.com>        2011
++
++   This program is free software; you can redistribute it and/or modify
++   it under the terms of the GNU General Public License as published by
++   the Free Software Foundation; either version 3 of the License, or
++   (at your option) any later version.
++
++   This program is distributed in the hope that it will be useful,
++   but WITHOUT ANY WARRANTY; without even the implied warranty of
++   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++   GNU General Public License for more details.
++
++   You should have received a copy of the GNU General Public License
++   along with this program.  If not, see <http://www.gnu.org/licenses/>.
++*/
++
++#include <config.h>
++
++#include "defines.h"
++
++#include <stdio.h>
++#include <selinux/selinux.h>
++#include <semanage/semanage.h>
++
++
++#ifndef DEFAULT_SERANGE
++#define DEFAULT_SERANGE "s0"
++#endif
++
++
++static void semanage_error_callback(void *varg,
++                                    semanage_handle_t *handle,
++                                    const char *fmt, ...)
++{
++    int ret;
++    char * message = NULL;
++    va_list ap;
++
++
++    va_start(ap, fmt);
++    ret = vasprintf(&message, fmt, ap);
++    va_end(ap);
++    if (ret < 0) {
++        /* ENOMEM */
++        return;
++    }
++
++    switch (semanage_msg_get_level(handle)) {
++        case SEMANAGE_MSG_ERR:
++        case SEMANAGE_MSG_WARN:
++	    fprintf(stderr, "[libsemanage]: %s\n", message);
++            break;
++        case SEMANAGE_MSG_INFO:
++	    /* nop */
++            break;
++    }
++
++    free(message);
++}
++
++
++static semanage_handle_t *semanage_init(void)
++{
++    int ret;
++    semanage_handle_t *handle = NULL;
++
++    handle = semanage_handle_create();
++    if (!handle) {
++	fprintf(stderr, _("Cannot create SELinux management handle\n"));
++        return NULL;
++    }
++
++    semanage_msg_set_callback(handle, semanage_error_callback, NULL);
++
++    ret = semanage_is_managed(handle);
++    if (ret != 1) {
++	fprintf(stderr, _("SELinux policy not managed\n"));
++        goto fail;
++    }
++
++    ret = semanage_access_check(handle);
++    if (ret < SEMANAGE_CAN_READ) {
++	fprintf(stderr, _("Cannot read SELinux policy store\n"));
++        goto fail;
++    }
++
++    ret = semanage_connect(handle);
++    if (ret != 0) {
++	fprintf(stderr, _("Cannot estabilish SELinux management connection\n"));
++        goto fail;
++    }
++
++    ret = semanage_begin_transaction(handle);
++    if (ret != 0) {
++	fprintf(stderr, _("Cannot begin SELinux transaction\n"));
++        goto fail;
++    }
++
++    return handle;
++fail:
++    semanage_handle_destroy(handle);
++    return NULL;
++}
++
++
++static int semanage_user_mod(semanage_handle_t *handle,
++                             semanage_seuser_key_t *key,
++                             const char *login_name,
++                             const char *seuser_name)
++{
++    int ret;
++    semanage_seuser_t *seuser = NULL;
++
++    semanage_seuser_query(handle, key, &seuser);
++    if (seuser == NULL) {
++	fprintf(stderr, _("Could not query seuser for %s\n"), login_name);
++        ret = 1;
++        goto done;
++    }
++
++    ret = semanage_seuser_set_mlsrange(handle, seuser, DEFAULT_SERANGE);
++    if (ret != 0) {
++	fprintf(stderr, _("Could not set serange for %s\n"), login_name);
++        ret = 1;
++        goto done;
++    }
++
++    ret = semanage_seuser_set_sename(handle, seuser, seuser_name);
++    if (ret != 0) {
++	fprintf(stderr, _("Could not set sename for %s\n"), login_name);
++        ret = 1;
++        goto done;
++    }
++
++    ret = semanage_seuser_modify_local(handle, key, seuser);
++    if (ret != 0) {
++	fprintf(stderr, _("Could not modify login mapping for %s\n"), login_name);
++        ret = 1;
++        goto done;
++    }
++
++    ret = 0;
++done:
++    semanage_seuser_free(seuser);
++    return ret;
++}
++
++
++static int semanage_user_add(semanage_handle_t *handle,
++                             semanage_seuser_key_t *key,
++                             const char *login_name,
++                             const char *seuser_name)
++{
++    int ret;
++    semanage_seuser_t *seuser = NULL;
++
++    ret = semanage_seuser_create(handle, &seuser);
++    if (ret != 0) {
++	fprintf(stderr, _("Cannot create SELinux login mapping for %s\n"), login_name);
++        ret = 1;
++        goto done;
++    }
++
++    ret = semanage_seuser_set_name(handle, seuser, login_name);
++    if (ret != 0) {
++	fprintf(stderr, _("Could not set name for %s\n"), login_name);
++        ret = 1;
++        goto done;
++    }
++
++    ret = semanage_seuser_set_mlsrange(handle, seuser, DEFAULT_SERANGE);
++    if (ret != 0) {
++	fprintf(stderr, _("Could not set serange for %s\n"), login_name);
++        ret = 1;
++        goto done;
++    }
++
++    ret = semanage_seuser_set_sename(handle, seuser, seuser_name);
++    if (ret != 0) {
++	fprintf(stderr, _("Could not set SELinux user for %s\n"), login_name);
++        ret = 1;
++        goto done;
++    }
++
++    ret = semanage_seuser_modify_local(handle, key, seuser);
++    if (ret != 0) {
++	fprintf(stderr, _("Could not add login mapping for %s\n"), login_name);
++        ret = 1;
++        goto done;
++    }
++
++    ret = 0;
++done:
++    semanage_seuser_free(seuser);
++    return ret;
++}
++
++
++int set_seuser(const char *login_name, const char *seuser_name)
++{
++    semanage_handle_t *handle = NULL;
++    semanage_seuser_key_t *key = NULL;
++    int ret;
++    int seuser_exists = 0;
++
++    if (seuser_name == NULL) {
++        /* don't care, just let system pick the defaults */
++        return 0;
++    }
++
++    handle = semanage_init();
++    if (!handle) {
++	fprintf(stderr, _("Cannot init SELinux management\n"));
++        ret = 1;
++        goto done;
++    }
++
++    ret = semanage_seuser_key_create(handle, login_name, &key);
++    if (ret != 0) {
++	fprintf(stderr, _("Cannot create SELinux user key\n"));
++        ret = 1;
++        goto done;
++    }
++
++    ret = semanage_seuser_exists(handle, key, &seuser_exists);
++    if (ret < 0) {
++	fprintf(stderr, _("Cannot verify the SELinux user\n"));
++        ret = 1;
++        goto done;
++    }
++
++    if (seuser_exists) {
++        ret = semanage_user_mod(handle, key, login_name, seuser_name);
++        if (ret != 0) {
++	    fprintf(stderr, _("Cannot modify SELinux user mapping\n"));
++            ret = 1;
++            goto done;
++        }
++    } else {
++        ret = semanage_user_add(handle, key, login_name, seuser_name);
++        if (ret != 0) {
++	    fprintf(stderr, _("Cannot add SELinux user mapping\n"));
++            ret = 1;
++            goto done;
++        }
++    }
++
++    ret = semanage_commit(handle);
++    if (ret < 0) {
++	fprintf(stderr,_("Cannot commit SELinux transaction\n"));
++        ret = 1;
++        goto done;
++    }
++
++    ret = 0;
++
++done:
++    semanage_seuser_key_free(key);
++    semanage_handle_destroy(handle);
++    return ret;
++}
++
++
++
++
++
++int del_seuser(const char *login_name)
++{
++    semanage_handle_t *handle = NULL;
++    semanage_seuser_key_t *key = NULL;
++    int ret;
++    int exists = 0;
++
++    handle = semanage_init();
++    if (!handle) {
++	fprintf(stderr, _("Cannot init SELinux management\n"));
++        ret = 1;
++        goto done;
++    }
++
++    ret = semanage_seuser_key_create(handle, login_name, &key);
++    if (ret != 0) {
++	fprintf(stderr, _("Cannot create SELinux user key\n"));
++        ret = 1;
++        goto done;
++    }
++
++    ret = semanage_seuser_exists(handle, key, &exists);
++    if (ret < 0) {
++	fprintf(stderr, _("Cannot verify the SELinux user\n"));
++        ret = 1;
++        goto done;
++    }
++
++    if (!exists) {
++        fprintf(stderr, _("Login mapping for %s is not defined, OK if default mapping was used\n"), 
++		       login_name);
++        ret = 0;  /* probably default mapping */
++        goto done;
++    }
++
++    ret = semanage_seuser_exists_local(handle, key, &exists);
++    if (ret < 0) {
++	fprintf(stderr, _("Cannot verify the SELinux user\n"));
++        ret = 1;
++        goto done;
++    }
++
++    if (!exists) {
++	fprintf(stderr, _("Login mapping for %s is defined in policy, cannot be deleted\n"), 
++		       login_name);
++        ret = 0; /* Login mapping defined in policy can't be deleted */
++        goto done;
++    }
++
++    ret = semanage_seuser_del_local(handle, key);
++    if (ret != 0) {
++	fprintf(stderr, _("Could not delete login mapping for %s"), login_name);
++        ret = 1;
++        goto done;
++    }
++
++    ret = semanage_commit(handle);
++    if (ret < 0) {
++	fprintf(stderr, _("Cannot commit SELinux transaction\n"));
++        ret = 1;
++        goto done;
++    }
++
++    ret = 0;
++done:
++    semanage_handle_destroy(handle);
++    return ret;
++}
++
+diff -up shadow-4.1.4.3/man/userdel.8.libsemanage shadow-4.1.4.3/man/userdel.8
+--- shadow-4.1.4.3/man/userdel.8.libsemanage	2011-11-09 14:19:27.772753117 +0100
++++ shadow-4.1.4.3/man/userdel.8	2011-11-09 14:21:13.947365740 +0100
+@@ -243,6 +243,11 @@ can\*(Aqt update group file
+ .RS 4
+ can\*(Aqt remove home directory
+ .RE
++.PP
++\fI14\fR
++.RS 4
++can\*(Aqt update SELinux user mapping
++.PP
+ .SH "CAVEATS"
+ .PP
+ 
+diff -up shadow-4.1.4.3/src/Makefile.in.libsemanage shadow-4.1.4.3/src/Makefile.in
+--- shadow-4.1.4.3/src/Makefile.in.libsemanage	2011-11-09 14:11:26.431362175 +0100
++++ shadow-4.1.4.3/src/Makefile.in	2011-11-09 14:11:26.459362089 +0100
+@@ -431,9 +431,9 @@ su_SOURCES = \
+ 
+ su_LDADD = $(LDADD) $(LIBPAM) $(LIBCRYPT_NOPAM) $(LIBSKEY) $(LIBMD)
+ sulogin_LDADD = $(LDADD) $(LIBCRYPT)
+-useradd_LDADD = $(LDADD) $(LIBPAM_SUID) $(LIBAUDIT) $(LIBSELINUX) -lacl
+-userdel_LDADD = $(LDADD) $(LIBPAM_SUID) $(LIBAUDIT) $(LIBSELINUX) -lacl
+-usermod_LDADD = $(LDADD) $(LIBPAM_SUID) $(LIBAUDIT) $(LIBSELINUX) -lacl
++useradd_LDADD = $(LDADD) $(LIBPAM_SUID) $(LIBAUDIT) $(LIBSELINUX) -lacl -lsemanage
++userdel_LDADD = $(LDADD) $(LIBPAM_SUID) $(LIBAUDIT) $(LIBSELINUX) -lacl -lsemanage
++usermod_LDADD = $(LDADD) $(LIBPAM_SUID) $(LIBAUDIT) $(LIBSELINUX) -lacl -lsemanage
+ vipw_LDADD = $(LDADD) $(LIBSELINUX)
+ all: all-am
+ 
+diff -up shadow-4.1.4.3/src/useradd.c.libsemanage shadow-4.1.4.3/src/useradd.c
+--- shadow-4.1.4.3/src/useradd.c.libsemanage	2011-11-09 14:11:26.424362196 +0100
++++ shadow-4.1.4.3/src/useradd.c	2011-11-09 14:11:26.460362086 +0100
+@@ -1999,16 +1999,7 @@ int main (int argc, char **argv)
+ #ifdef WITH_SELINUX
+ 	if (Zflg && *user_selinux) {
+ 		if (is_selinux_enabled () > 0) {
+-			const char *argv[7];
+-
+-			argv[0] = "/usr/sbin/semanage";
+-			argv[1] = "login";
+-			argv[2] = "-a";
+-			argv[3] = "-s";
+-			argv[4] = user_selinux;
+-			argv[5] = user_name;
+-			argv[6] = NULL;
+-			if (safe_system (argv[0], argv, NULL, 0)) {
++			if (set_seuser(user_name, user_selinux)) {
+ 				fprintf (stderr,
+ 					 _("%s: warning: the user name %s to %s SELinux user mapping failed.\n"),
+ 					 Prog, user_name, user_selinux);
+diff -up shadow-4.1.4.3/src/userdel.c.libsemanage shadow-4.1.4.3/src/userdel.c
+--- shadow-4.1.4.3/src/userdel.c.libsemanage	2011-11-09 14:11:26.425362193 +0100
++++ shadow-4.1.4.3/src/userdel.c	2011-11-09 14:18:59.274855167 +0100
+@@ -70,6 +70,7 @@
+ #define E_USER_BUSY	8	/* user currently logged in */
+ #define E_GRP_UPDATE	10	/* can't update group file */
+ #define E_HOMEDIR	12	/* can't remove home directory */
++#define	E_SE_UPDATE	14	/* can't update SELinux user mapping */
+ 
+ /*
+  * Global variables
+@@ -1002,13 +1003,17 @@ int main (int argc, char **argv)
+ #ifdef WITH_SELINUX
+ 	if (Zflg) {
+ 		if (is_selinux_enabled () > 0) {
+-			const char *args[5];
+-			args[0] = "/usr/sbin/semanage";
+-			args[1] = "login";
+-			args[2] = "-d";
+-			args[3] = user_name;
+-			args[4] = NULL;
+-			safe_system (args[0], args, NULL, 1);
++			if (del_seuser(user_name)) {
++				fprintf (stderr,
++					 _("%s: warning: the user name %s to SELinux user mapping removal failed.\n"),
++					 Prog, user_name);
++	#ifdef WITH_AUDIT
++				audit_logger (AUDIT_ADD_USER, Prog,
++					      "removing SELinux user mapping",
++					      user_name, (unsigned int) user_id, 0);
++	#endif
++				fail_exit (E_SE_UPDATE);
++			}
+ 		}
+ 	}
+ #endif
+diff -up shadow-4.1.4.3/src/usermod.c.libsemanage shadow-4.1.4.3/src/usermod.c
+--- shadow-4.1.4.3/src/usermod.c.libsemanage	2011-11-09 14:11:26.426362190 +0100
++++ shadow-4.1.4.3/src/usermod.c	2011-11-09 14:11:26.463362076 +0100
+@@ -1787,28 +1787,16 @@ int main (int argc, char **argv)
+ #ifdef WITH_SELINUX
+ 	if (Zflg && *user_selinux) {
+ 		if (is_selinux_enabled () > 0) {
+-			const char *argv[7];
+-
+-			argv[0] = "/usr/sbin/semanage";
+-			argv[1] = "login";
+-			argv[2] = "-m";
+-			argv[3] = "-s";
+-			argv[4] = user_selinux;
+-			argv[5] = user_name;
+-			argv[6] = NULL;
+-			if (safe_system (argv[0], argv, NULL, 1)) {
+-				argv[2] = "-a";
+-				if (safe_system (argv[0], argv, NULL, 0)) {
+-					fprintf (stderr,
+-						 _("%s: warning: the user name %s to %s SELinux user mapping failed.\n"),
+-						 Prog, user_name, user_selinux);
++			if (set_seuser(user_name, user_selinux)) {
++				fprintf (stderr,
++					 _("%s: warning: the user name %s to %s SELinux user mapping failed.\n"),
++					 Prog, user_name, user_selinux);
+ 	#ifdef WITH_AUDIT
+-					audit_logger (AUDIT_USER_CHAUTHTOK, Prog,
+-						      "modifying User mapping ",
+-						      user_name, (unsigned int) user_id, 0);
++				audit_logger (AUDIT_USER_CHAUTHTOK, Prog,
++					      "modifying User mapping ",
++					      user_name, (unsigned int) user_id, 0);
+ 	#endif
+-					fail_exit (E_SE_UPDATE);
+-				}
++				fail_exit (E_SE_UPDATE);
+ 			}
+ 		}
+ 	}

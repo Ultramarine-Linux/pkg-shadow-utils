@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.1.4.3
-Release: 8%{?dist}
+Release: 10%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: http://pkg-shadow.alioth.debian.org/releases/shadow-%{version}.tar.bz2
@@ -19,11 +19,15 @@ Patch8: shadow-4.1.4.3-uflg.patch
 Patch9: shadow-4.1.4.2-gshadow.patch
 Patch10: shadow-4.1.4.3-nopam.patch
 Patch11: shadow-4.1.4.3-IDs.patch
+#696213 #674878 #739147
 Patch12: shadow-4.1.4.3-man.patch
+#749205
+Patch13: shadow-4.1.4.3-libsemanage.patch
 License: BSD and GPLv2+
 Group: System Environment/Base
 BuildRequires: libselinux-devel >= 1.25.2-1
 BuildRequires: audit-libs-devel >= 1.6.5
+BuildRequires: libsemanage-devel
 BuildRequires: libacl-devel libattr-devel
 #BuildRequires: autoconf, automake, libtool, gettext-devel
 Requires: libselinux >= 1.25.2-1
@@ -60,6 +64,7 @@ are used for managing group accounts.
 %patch10 -p1 -b .nopam
 %patch11 -p1 -b .IDs
 %patch12 -p1 -b .man
+%patch13 -p1 -b .libsemanage
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -221,6 +226,13 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Wed Nov 09 2011 Peter Vrabec <pvrabec@redhat.com> - 2:4.1.4.3-10
+- replace semanage call by library call
+- useradd man page (#739147)
+
+* Tue Aug 02 2011 Peter Vrabec <pvrabec@redhat.com> - 2:4.1.4.3-9
+- man page adjustment (userdel -Z)
+
 * Tue Aug 02 2011 Peter Vrabec <pvrabec@redhat.com> - 2:4.1.4.3-8
 - fixing semanage issue (#701355)
 
