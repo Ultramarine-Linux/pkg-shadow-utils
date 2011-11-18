@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.1.4.3
-Release: 10%{?dist}
+Release: 11%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: http://pkg-shadow.alioth.debian.org/releases/shadow-%{version}.tar.bz2
@@ -23,6 +23,7 @@ Patch11: shadow-4.1.4.3-IDs.patch
 Patch12: shadow-4.1.4.3-man.patch
 #749205
 Patch13: shadow-4.1.4.3-libsemanage.patch
+Patch14: shadow-4.1.4.3-selinux.patch
 License: BSD and GPLv2+
 Group: System Environment/Base
 BuildRequires: libselinux-devel >= 1.25.2-1
@@ -65,6 +66,7 @@ are used for managing group accounts.
 %patch11 -p1 -b .IDs
 %patch12 -p1 -b .man
 %patch13 -p1 -b .libsemanage
+%patch14 -p1 -b .selinux
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -226,6 +228,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Wed Nov 16 2011 Peter Vrabec <pvrabec@redhat.com> - 2:4.1.4.3-11
+- free memory associated with SELinux security contexts 
+
 * Wed Nov 09 2011 Peter Vrabec <pvrabec@redhat.com> - 2:4.1.4.3-10
 - replace semanage call by library call
 - useradd man page (#739147)
