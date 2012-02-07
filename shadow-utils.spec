@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.1.4.3
-Release: 13%{?dist}
+Release: 14%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: http://pkg-shadow.alioth.debian.org/releases/shadow-%{version}.tar.bz2
@@ -79,6 +79,16 @@ cp -f doc/HOWTO.utf8 doc/HOWTO
 #autoconf
 
 %build
+
+%ifarch sparc64
+#sparc64 need big PIE
+export CFLAGS="$RPM_OPT_FLAGS -fPIE"
+export LDFLAGS="-pie -Wl,-z,relro -Wl,-z,now"
+%else
+export CFLAGS="$RPM_OPT_FLAGS -fpie"
+export LDFLAGS="-pie -Wl,-z,relro -Wl,-z,now"
+%endif
+
 %configure \
         --enable-shadowgrp \
         --with-audit \
@@ -228,6 +238,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Tue Feb 07 2012 Peter Vrabec <pvrabec@redhat.com> - 2:4.1.4.3-14
+- compile with PIE and RELRO flags (#784349)
+
 * Sat Jan 14 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2:4.1.4.3-13
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_17_Mass_Rebuild
 
