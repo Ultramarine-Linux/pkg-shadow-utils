@@ -1,29 +1,18 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
-Version: 4.1.4.3
-Release: 14%{?dist}
+Version: 4.1.5
+Release: 1%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: http://pkg-shadow.alioth.debian.org/releases/shadow-%{version}.tar.bz2
 Source1: shadow-utils.login.defs 
 Source2: shadow-utils.useradd
-Patch0: shadow-4.1.4.2-redhat.patch
-Patch1: shadow-4.1.4.3-goodname.patch
-Patch2: shadow-4.1.4.2-leak.patch
-Patch3: shadow-4.1.4.2-fixes.patch
-Patch4: shadow-4.1.4.2-infoParentDir.patch
-Patch5: shadow-4.1.4.3-semange.patch
-Patch6: shadow-4.1.4.2-acl.patch
-Patch7: shadow-4.1.4.2-underflow.patch
-Patch8: shadow-4.1.4.3-uflg.patch
-Patch9: shadow-4.1.4.2-gshadow.patch
-Patch10: shadow-4.1.4.3-nopam.patch
-Patch11: shadow-4.1.4.3-IDs.patch
-#696213 #674878 #739147
-Patch12: shadow-4.1.4.3-man.patch
-#749205
-Patch13: shadow-4.1.4.3-libsemanage.patch
-Patch14: shadow-4.1.4.3-selinux.patch
+Patch0: shadow-4.1.5-redhat.patch
+Patch1: shadow-4.1.5-goodname.patch
+Patch2: shadow-4.1.4.2-infoParentDir.patch
+Patch3: shadow-4.1.5-uflg.patch
+Patch4: shadow-4.1.5-man.patch
+Patch5: shadow-4.1.5-grremove.patch
 License: BSD and GPLv2+
 Group: System Environment/Base
 BuildRequires: libselinux-devel >= 1.25.2-1
@@ -54,19 +43,11 @@ are used for managing group accounts.
 %setup -q -n shadow-%{version}
 %patch0 -p1 -b .redhat
 %patch1 -p1 -b .goodname
-%patch2 -p1 -b .leak
-%patch3 -p1 -b .fixes
-%patch4 -p1 -b .infoParentDir
-%patch5 -p1 -b .semange
-%patch6 -p1 -b .acl
-%patch7 -p1 -b .underflow
-%patch8 -p1 -b .uflg
-%patch9 -p1 -b .gshadow
-%patch10 -p1 -b .nopam
-%patch11 -p1 -b .IDs
-%patch12 -p1 -b .man
-%patch13 -p1 -b .libsemanage
-%patch14 -p1 -b .selinux
+%patch2 -p1 -b .infoParentDir
+%patch3 -p1 -b .uflg
+%patch4 -p1 -b .man
+%patch5 -p1 -b .grremove
+
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -176,23 +157,6 @@ for dir in $(ls -1d $RPM_BUILD_ROOT%{_mandir}/{??,??_??}) ; do
     echo "%%lang($lang) $dir/man*/*" >> shadow.lang
 done
 
-# Make sure old configuration files specifying UID_MIN=500 are not overwritten
-# on upgrades.  Remove the scriptlets after upgrades from Fedora 15 are no
-# longer supported.
-%pre
-if [ "$1" -gt 1 ]; then
-   hash=$(md5sum %{_sysconfdir}/login.defs | cut -d ' ' -f 1)
-   if [ "$hash" = 111354806cbbee33a73fa4d538055510 ]; then
-      cp -a %{_sysconfdir}/login.defs{,.rpm-saved-in-pre}
-   fi
-fi
-
-%post
-if [ -e %{_sysconfdir}/login.defs.rpm-saved-in-pre ]; then
-   mv %{_sysconfdir}/login.defs{,.rpmnew}
-   mv %{_sysconfdir}/login.defs{.rpm-saved-in-pre,}
-fi
-
 %clean
 rm -rf $RPM_BUILD_ROOT
 
@@ -238,6 +202,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Mon Mar 19 2012 Peter Vrabec <pvrabec@redhat.com> - 2:4.1.5-1
+- upgrade
+
 * Tue Feb 07 2012 Peter Vrabec <pvrabec@redhat.com> - 2:4.1.4.3-14
 - compile with PIE and RELRO flags (#784349)
 
