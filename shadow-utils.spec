@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.1.5
-Release: 1%{?dist}
+Release: 2%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: http://pkg-shadow.alioth.debian.org/releases/shadow-%{version}.tar.bz2
@@ -13,6 +13,7 @@ Patch2: shadow-4.1.4.2-infoParentDir.patch
 Patch3: shadow-4.1.5-uflg.patch
 Patch4: shadow-4.1.5-man.patch
 Patch5: shadow-4.1.5-grremove.patch
+Patch6: shadow-4.1.5-selinux.patch
 License: BSD and GPLv2+
 Group: System Environment/Base
 BuildRequires: libselinux-devel >= 1.25.2-1
@@ -47,6 +48,7 @@ are used for managing group accounts.
 %patch3 -p1 -b .uflg
 %patch4 -p1 -b .man
 %patch5 -p1 -b .grremove
+%patch6 -p1 -b .selinux
 
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
@@ -202,6 +204,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Wed Mar 22 2012 Peter Vrabec <pvrabec@redhat.com> - 2:4.1.5-2
+- fix selinux context handling
+- reset selinux context on files copied from skel
+
 * Mon Mar 19 2012 Peter Vrabec <pvrabec@redhat.com> - 2:4.1.5-1
 - upgrade
 
