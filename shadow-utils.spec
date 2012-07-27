@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.1.5
-Release: 3%{?dist}
+Release: 4%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: http://pkg-shadow.alioth.debian.org/releases/shadow-%{version}.tar.bz2
@@ -27,6 +27,7 @@ Requires: audit-libs >= 1.6.5
 Requires: setup
 Requires(pre): coreutils
 Requires(post): coreutils
+Conflicts:  man-pages-pl < 0.24-14
 Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 %description
@@ -206,6 +207,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Fri Jul 27 2012 Peter Vrabec <pvrabec@redhat.com> - 2:4.1.5-4
+- conflict with man-pages-pl (#843020)
+
 * Mon Jun 18 2012 Peter Vrabec <pvrabec@redhat.com> - 2:4.1.5-3
 - pwconv/grpconv skipped 2nd of consecutive failures (#832995)
 
