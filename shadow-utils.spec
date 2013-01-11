@@ -211,11 +211,11 @@ rm -rf $RPM_BUILD_ROOT
 - new upstream version
 - use the original file permissions when creating backup (#853102)
 
-* Wed Jul 25 2012 Peter Vrabec <pvrabec@redhat.com> - 2:4.1.5-5
-- make /etc/default/useradd world-readable (#835137)
-
 * Fri Jul 27 2012 Peter Vrabec <pvrabec@redhat.com> - 2:4.1.5-4
 - conflict with man-pages-pl (#843020)
+
+* Wed Jul 25 2012 Peter Vrabec <pvrabec@redhat.com> - 2:4.1.5-5
+- make /etc/default/useradd world-readable (#835137)
 
 * Sat Jul 21 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2:4.1.5-4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_18_Mass_Rebuild
