@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.1.5.1
-Release: 1%{?dist}
+Release: 2%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: http://pkg-shadow.alioth.debian.org/releases/shadow-%{version}.tar.bz2
@@ -165,7 +165,6 @@ rm -rf $RPM_BUILD_ROOT
 %files -f shadow.lang
 %defattr(-,root,root)
 %doc NEWS doc/HOWTO README
-%dir %{_sysconfdir}/default
 %attr(0644,root,root)   %config(noreplace) %{_sysconfdir}/login.defs
 %attr(0644,root,root)   %config(noreplace) %{_sysconfdir}/default/useradd
 %{_bindir}/sg
@@ -204,6 +203,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Fri Jan 11 2013 Tomas Mraz <tmraz@redhat.com> - 2:4.1.5.1-2
+- /etc/default is owned by glibc-common now (#894194)
+
 * Wed Sep 19 2012 Tomas Mraz <tmraz@redhat.com> - 2:4.1.5.1-1
 - new upstream version
 - use the original file permissions when creating backup (#853102)
