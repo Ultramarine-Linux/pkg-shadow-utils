@@ -1,20 +1,20 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
-Version: 4.1.5
-Release: 4%{?dist}
+Version: 4.1.5.1
+Release: 2%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: http://pkg-shadow.alioth.debian.org/releases/shadow-%{version}.tar.bz2
-Source1: shadow-utils.login.defs 
+Source3: http://pkg-shadow.alioth.debian.org/releases/shadow-%{version}.tar.bz2.sig
+Source1: shadow-utils.login.defs
 Source2: shadow-utils.useradd
 Patch0: shadow-4.1.5-redhat.patch
-Patch1: shadow-4.1.5-goodname.patch
-Patch2: shadow-4.1.4.2-infoParentDir.patch
+Patch1: shadow-4.1.5.1-goodname.patch
+Patch2: shadow-4.1.5.1-info-parent-dir.patch
 Patch3: shadow-4.1.5-uflg.patch
-Patch4: shadow-4.1.5-man.patch
-Patch5: shadow-4.1.5-grremove.patch
-Patch6: shadow-4.1.5-selinux.patch
+Patch6: shadow-4.1.5.1-selinux.patch
 Patch7: shadow-4.1.5-2ndskip.patch
+Patch8: shadow-4.1.5.1-backup-mode.patch
 License: BSD and GPLv2+
 Group: System Environment/Base
 BuildRequires: libselinux-devel >= 1.25.2-1
@@ -46,13 +46,11 @@ are used for managing group accounts.
 %setup -q -n shadow-%{version}
 %patch0 -p1 -b .redhat
 %patch1 -p1 -b .goodname
-%patch2 -p1 -b .infoParentDir
+%patch2 -p1 -b .info-parent-dir
 %patch3 -p1 -b .uflg
-%patch4 -p1 -b .man
-%patch5 -p1 -b .grremove
 %patch6 -p1 -b .selinux
 %patch7 -p1 -b .2ndskip
-
+%patch8 -p1 -b .backup-mode
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -168,9 +166,8 @@ rm -rf $RPM_BUILD_ROOT
 %files -f shadow.lang
 %defattr(-,root,root)
 %doc NEWS doc/HOWTO README
-%dir %{_sysconfdir}/default
 %attr(0644,root,root)   %config(noreplace) %{_sysconfdir}/login.defs
-%attr(0600,root,root)   %config(noreplace) %{_sysconfdir}/default/useradd
+%attr(0644,root,root)   %config(noreplace) %{_sysconfdir}/default/useradd
 %{_bindir}/sg
 %{_bindir}/chage
 %{_bindir}/gpasswd
@@ -207,8 +204,21 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Fri Jan 11 2013 Tomas Mraz <tmraz@redhat.com> - 2:4.1.5.1-2
+- /etc/default is owned by glibc-common now (#894194)
+
+* Wed Sep 19 2012 Tomas Mraz <tmraz@redhat.com> - 2:4.1.5.1-1
+- new upstream version
+- use the original file permissions when creating backup (#853102)
+
+* Wed Jul 25 2012 Peter Vrabec <pvrabec@redhat.com> - 2:4.1.5-5
+- make /etc/default/useradd world-readable (#835137)
+
 * Fri Jul 27 2012 Peter Vrabec <pvrabec@redhat.com> - 2:4.1.5-4
 - conflict with man-pages-pl (#843020)
+
+* Sat Jul 21 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2:4.1.5-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_18_Mass_Rebuild
 
 * Mon Jun 18 2012 Peter Vrabec <pvrabec@redhat.com> - 2:4.1.5-3
 - pwconv/grpconv skipped 2nd of consecutive failures (#832995)
@@ -230,7 +240,7 @@ rm -rf $RPM_BUILD_ROOT
 - fix leaks in .IDs patch (#734340)
 
 * Wed Nov 16 2011 Peter Vrabec <pvrabec@redhat.com> - 2:4.1.4.3-11
-- free memory associated with SELinux security contexts 
+- free memory associated with SELinux security contexts
 
 * Wed Nov 09 2011 Peter Vrabec <pvrabec@redhat.com> - 2:4.1.4.3-10
 - replace semanage call by library call
@@ -268,7 +278,7 @@ rm -rf $RPM_BUILD_ROOT
 - fix find_new_uid/gid for big UID/GID_MAX
 
 * Wed Feb 09 2011 Peter Vrabec <pvrabec@redhat.com> - 2:4.1.4.2-11
-- useradd man page (-m option) 
+- useradd man page (-m option)
 - create home directory on fs with noacl
 - remove faillog app (pam_tally.so is no longer shipped)
   Resolves: #523265, #622320
@@ -279,7 +289,7 @@ rm -rf $RPM_BUILD_ROOT
   Resolves: #674234
 
 * Wed Jan 05 2011 Peter Vrabec <pvrabec@redhat.com> - 2:4.1.4.2-9
-- fix gshadow functions from shadow utils 
+- fix gshadow functions from shadow utils
 - make shadow utils use gshadow functions from glibc
   Resolves: #665780
 
@@ -292,8 +302,8 @@ rm -rf $RPM_BUILD_ROOT
 - use preferred GID for reserved static IDs
 
 * Thu Apr 29 2010 Peter Vrabec <pvrabec@redhat.com> - 2:4.1.4.2-6
-- preserve ACL's on files in /etc/skel 
-  Resolves: #513055 
+- preserve ACL's on files in /etc/skel
+  Resolves: #513055
 
 * Wed Apr 28 2010 Peter Vrabec <pvrabec@redhat.com> - 2:4.1.4.2-5
 - newusers man page more informative
@@ -445,7 +455,7 @@ rm -rf $RPM_BUILD_ROOT
 
 * Wed Feb 28 2007 Peter Vrabec <pvrabec@redhat.com> 2:4.0.18.1-10
 - spec file fixes to meet fedora standarts.
-- fix useless call of restorecon(). (#222159) 
+- fix useless call of restorecon(). (#222159)
 
 * Sun Jan 14 2007 Peter Vrabec <pvrabec@redhat.com> 2:4.0.18.1-9
 - fix append option in usermod (#222540).
@@ -472,7 +482,7 @@ rm -rf $RPM_BUILD_ROOT
 * Fri Nov 03 2006 Peter Vrabec <pvrabec@redhat.com> 2:4.0.18.1-2
 - improve audit logging (#211659)
 - improve "-l" option. Do not reset faillog if it's used (#213450).
- 
+
 * Wed Nov 01 2006 Peter Vrabec <pvrabec@redhat.com> 2:4.0.18.1-1
 - upgrade
 
@@ -480,7 +490,7 @@ rm -rf $RPM_BUILD_ROOT
 - add dist-tag
 
 * Wed Oct 04 2006 Peter Vrabec <pvrabec@redhat.com> 2:4.0.17-6
-- fix regression. Permissions on user* group* binaries 
+- fix regression. Permissions on user* group* binaries
   should be 0750, because of CAPP/LSPP certification
 - fix groupdel man page
 
@@ -565,7 +575,7 @@ rm -rf $RPM_BUILD_ROOT
 - audit support
 
 * Sat Aug 27 2005 Peter Vrabec <pvrabec@redhat.com> 2:4.0.12-1
-- upgrade 
+- upgrade
 
 * Sat Aug 13 2005 Dan Walsh <dwalsh@redhat.com> 2:4.0.11.1-5
 - Change to use new selinux api for selinux_check_passwd_access
@@ -579,11 +589,11 @@ rm -rf $RPM_BUILD_ROOT
 - fix useradd man page(#97131)
 
 * Mon Aug 08 2005 Peter Vrabec <pvrabec@redhat.com> 2:4.0.11.1-2
-- do not copy files from skel directory if home directory 
+- do not copy files from skel directory if home directory
   already exist (#89591,#80242)
 
 * Fri Aug 05 2005 Peter Vrabec <pvrabec@redhat.com> 2:4.0.11.1-1
-- upgrade 
+- upgrade
 
 * Mon May 23 2005 Peter Vrabec <pvrabec@redhat.com> 2:4.0.7-9
 - remove vigr binary
@@ -598,13 +608,13 @@ rm -rf $RPM_BUILD_ROOT
 - fix chage -l option (#109499, #137498)
 
 * Mon Apr 04 2005 Peter Vrabec <pvrabec@redhat.com> 2:4.0.7-5
-- fix memory leak, and CPU spinning when grp_update() and 
+- fix memory leak, and CPU spinning when grp_update() and
   duplicate group entries in /etc/group (#151484)
 
 * Mon Mar 29 2005 Peter Vrabec <pvrabec@redhat.com>  2:4.0.7-4
 - use newgrp binary
 - newgrp don't ask for password if user's default GID = group ID,
-  ask for password if there is some in /etc/gshadow 
+  ask for password if there is some in /etc/gshadow
   and in /etc/group is 'x' (#149997)
 
 * Mon Mar 14 2005 Peter Vrabec <pvrabec@redhat.com>
@@ -894,7 +904,7 @@ rm -rf $RPM_BUILD_ROOT
 * Tue Mar 23 1999 Preston Brown <pbrown@redhat.com>
 - edit out unused CHFN fields from login.defs.
 
-* Sun Mar 21 1999 Cristian Gafton <gafton@redhat.com> 
+* Sun Mar 21 1999 Cristian Gafton <gafton@redhat.com>
 - auto rebuild in the new build environment (release 7)
 
 * Wed Jan 13 1999 Bill Nottingham <notting@redhat.com>

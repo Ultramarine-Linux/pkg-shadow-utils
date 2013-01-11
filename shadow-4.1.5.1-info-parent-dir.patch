@@ -1,7 +1,7 @@
-diff -up shadow-4.1.4.2/man/newusers.8.infoParentDir shadow-4.1.4.2/man/newusers.8
---- shadow-4.1.4.2/man/newusers.8.infoParentDir	2010-04-28 13:44:04.634870854 +0200
-+++ shadow-4.1.4.2/man/newusers.8	2010-04-28 13:46:07.190866220 +0200
-@@ -88,7 +88,7 @@ This field is copied in the GECOS field 
+diff -up shadow-4.1.5.1/man/man8/newusers.8.info-parent-dir shadow-4.1.5.1/man/man8/newusers.8
+--- shadow-4.1.5.1/man/man8/newusers.8.info-parent-dir	2012-05-25 13:59:09.000000000 +0200
++++ shadow-4.1.5.1/man/man8/newusers.8	2012-09-19 18:47:17.203525237 +0200
+@@ -99,7 +99,7 @@ This field is copied in the GECOS field
  .RS 4
  This field is used to define the home directory of the user\&.
  .sp
@@ -10,10 +10,10 @@ diff -up shadow-4.1.4.2/man/newusers.8.infoParentDir shadow-4.1.4.2/man/newusers
  .sp
  If the home directory of an existing user is changed,
  \fBnewusers\fR
-diff -up shadow-4.1.4.2/man/newusers.8.xml.infoParentDir shadow-4.1.4.2/man/newusers.8.xml
---- shadow-4.1.4.2/man/newusers.8.xml.infoParentDir	2010-04-28 13:48:01.419238133 +0200
-+++ shadow-4.1.4.2/man/newusers.8.xml	2010-04-28 13:55:40.499663030 +0200
-@@ -192,7 +192,15 @@
+diff -up shadow-4.1.5.1/man/newusers.8.xml.info-parent-dir shadow-4.1.5.1/man/newusers.8.xml
+--- shadow-4.1.5.1/man/newusers.8.xml.info-parent-dir	2012-05-25 13:45:28.000000000 +0200
++++ shadow-4.1.5.1/man/newusers.8.xml	2012-09-19 18:46:35.651613365 +0200
+@@ -216,7 +216,15 @@
  	  <para>
  	    If this field does not specify an existing directory, the
  	    specified directory is created, with ownership set to the
