@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.1.5.1
-Release: 2%{?dist}
+Release: 3%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: http://pkg-shadow.alioth.debian.org/releases/shadow-%{version}.tar.bz2
@@ -15,6 +15,7 @@ Patch3: shadow-4.1.5-uflg.patch
 Patch6: shadow-4.1.5.1-selinux.patch
 Patch7: shadow-4.1.5-2ndskip.patch
 Patch8: shadow-4.1.5.1-backup-mode.patch
+Patch9: shadow-4.1.5.1-merge-group.patch
 License: BSD and GPLv2+
 Group: System Environment/Base
 BuildRequires: libselinux-devel >= 1.25.2-1
@@ -50,6 +51,7 @@ are used for managing group accounts.
 %patch6 -p1 -b .selinux
 %patch7 -p1 -b .2ndskip
 %patch8 -p1 -b .backup-mode
+%patch9 -p1 -b .merge-group
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -203,6 +205,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Tue Jan 29 2013 Tomas Mraz <tmraz@redhat.com> - 2:4.1.5.1-3
+- fix bugs in merge_group_entries()
+
 * Fri Jan 11 2013 Tomas Mraz <tmraz@redhat.com> - 2:4.1.5.1-2
 - /etc/default is owned by glibc-common now (#894194)
 
