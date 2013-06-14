@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.1.5.1
-Release: 5%{?dist}
+Release: 6%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: http://pkg-shadow.alioth.debian.org/releases/shadow-%{version}.tar.bz2
@@ -18,6 +18,10 @@ Patch8: shadow-4.1.5.1-backup-mode.patch
 Patch9: shadow-4.1.5.1-merge-group.patch
 Patch10: shadow-4.1.5.1-orig-context.patch
 Patch11: shadow-4.1.5.1-logmsg.patch
+Patch12: shadow-4.1.5.1-errmsg.patch
+Patch13: shadow-4.1.5.1-audit-owner.patch
+Patch14: shadow-4.1.5.1-default-range.patch
+
 License: BSD and GPLv2+
 Group: System Environment/Base
 BuildRequires: libselinux-devel >= 1.25.2-1
@@ -56,6 +60,9 @@ are used for managing group accounts.
 %patch9 -p1 -b .merge-group
 %patch10 -p1 -b .orig-context
 %patch11 -p1 -b .logmsg
+%patch12 -p1 -b .errmsg
+%patch13 -p1 -b .audit-owner
+%patch14 -p1 -b .default-range
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -209,6 +216,12 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Fri Jun 14 2013 Tomas Mraz <tmraz@redhat.com> - 2:4.1.5.1-6
+- report error to stdout when SELinux context for home directory
+  cannot be determined (#973647)
+- audit the changing home directory owner (#885797)
+- do not set the default SELinux MLS range (#852676)
+
 * Tue Mar 19 2013 Tomas Mraz <tmraz@redhat.com> - 2:4.1.5.1-5
 - improve the failure syslog message in useradd (#830617)
 
