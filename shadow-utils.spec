@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.1.5.1
-Release: 6%{?dist}
+Release: 7%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: http://pkg-shadow.alioth.debian.org/releases/shadow-%{version}.tar.bz2
@@ -21,6 +21,7 @@ Patch11: shadow-4.1.5.1-logmsg.patch
 Patch12: shadow-4.1.5.1-errmsg.patch
 Patch13: shadow-4.1.5.1-audit-owner.patch
 Patch14: shadow-4.1.5.1-default-range.patch
+Patch15: shadow-4.1.5.1-manfix.patch
 
 License: BSD and GPLv2+
 Group: System Environment/Base
@@ -63,6 +64,7 @@ are used for managing group accounts.
 %patch12 -p1 -b .errmsg
 %patch13 -p1 -b .audit-owner
 %patch14 -p1 -b .default-range
+%patch15 -p1 -b .manfix
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -216,6 +218,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Fri Jul 19 2013 Tomas Mraz <tmraz@redhat.com> - 2:4.1.5.1-7
+- fix useradd man page bugs
+
 * Fri Jun 14 2013 Tomas Mraz <tmraz@redhat.com> - 2:4.1.5.1-6
 - report error to stdout when SELinux context for home directory
   cannot be determined (#973647)
