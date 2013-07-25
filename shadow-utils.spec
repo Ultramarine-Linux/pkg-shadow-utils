@@ -258,7 +258,7 @@ rm -rf $RPM_BUILD_ROOT
 * Mon Jun 18 2012 Peter Vrabec <pvrabec@redhat.com> - 2:4.1.5-3
 - pwconv/grpconv skipped 2nd of consecutive failures (#832995)
 
-* Wed Mar 22 2012 Peter Vrabec <pvrabec@redhat.com> - 2:4.1.5-2
+* Thu Mar 22 2012 Peter Vrabec <pvrabec@redhat.com> - 2:4.1.5-2
 - fix selinux context handling
 - reset selinux context on files copied from skel
 
@@ -471,11 +471,11 @@ rm -rf $RPM_BUILD_ROOT
 * Tue Jun 26 2007 Peter Vrabec <pvrabec@redhat.com> 2:4.0.18.1-16
 - fix "CAVEATS" section of groupadd man page (#245590)
 
-* Tue Jun 06 2007 Peter Vrabec <pvrabec@redhat.com> 2:4.0.18.1-15
+* Wed Jun 06 2007 Peter Vrabec <pvrabec@redhat.com> 2:4.0.18.1-15
 - fix infinitive loop if there are duplicate entries
   in /etc/group (#240915)
 
-* Tue Jun 06 2007 Peter Vrabec <pvrabec@redhat.com> 2:4.0.18.1-14
+* Wed Jun 06 2007 Peter Vrabec <pvrabec@redhat.com> 2:4.0.18.1-14
 - do not run find_new_uid() twice and use getpwuid() to check
   UID uniqueness (#236871)
 
@@ -646,7 +646,7 @@ rm -rf $RPM_BUILD_ROOT
 - fix memory leak, and CPU spinning when grp_update() and
   duplicate group entries in /etc/group (#151484)
 
-* Mon Mar 29 2005 Peter Vrabec <pvrabec@redhat.com>  2:4.0.7-4
+* Tue Mar 29 2005 Peter Vrabec <pvrabec@redhat.com>  2:4.0.7-4
 - use newgrp binary
 - newgrp don't ask for password if user's default GID = group ID,
   ask for password if there is some in /etc/gshadow
@@ -756,7 +756,7 @@ rm -rf $RPM_BUILD_ROOT
 * Thu Sep 4 2003 Dan Walsh <dwalsh@redhat.com> 4.0.3-11.sel
 - build with SELinux support
 
-* Fri Jul 28 2003 Dan Walsh <dwalsh@redhat.com> 4.0.3-10
+* Mon Jul 28 2003 Dan Walsh <dwalsh@redhat.com> 4.0.3-10
 - Add SELinux support
 
 * Wed Jun 04 2003 Elliot Lee <sopwith@redhat.com>
@@ -980,7 +980,7 @@ rm -rf $RPM_BUILD_ROOT
 * Thu Nov 06 1997 Cristian Gafton <gafton@redhat.com>
 - added forgot lastlog command to the spec file
 
-* Mon Oct 26 1997 Cristian Gafton <gafton@redhat.com>
+* Mon Oct 27 1997 Cristian Gafton <gafton@redhat.com>
 - obsoletes adduser
 
 * Thu Oct 23 1997 Cristian Gafton <gafton@redhat.com>
