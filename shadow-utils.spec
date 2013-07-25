@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.1.5.1
-Release: 7%{?dist}
+Release: 8%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: http://pkg-shadow.alioth.debian.org/releases/shadow-%{version}.tar.bz2
@@ -22,6 +22,7 @@ Patch12: shadow-4.1.5.1-errmsg.patch
 Patch13: shadow-4.1.5.1-audit-owner.patch
 Patch14: shadow-4.1.5.1-default-range.patch
 Patch15: shadow-4.1.5.1-manfix.patch
+Patch16: shadow-4.1.5.1-crypt-null.patch
 
 License: BSD and GPLv2+
 Group: System Environment/Base
@@ -65,6 +66,7 @@ are used for managing group accounts.
 %patch13 -p1 -b .audit-owner
 %patch14 -p1 -b .default-range
 %patch15 -p1 -b .manfix
+%patch16 -p1 -b .crypt-null
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -183,10 +185,10 @@ rm -rf $RPM_BUILD_ROOT
 %attr(0644,root,root)   %config(noreplace) %{_sysconfdir}/login.defs
 %attr(0644,root,root)   %config(noreplace) %{_sysconfdir}/default/useradd
 %{_bindir}/sg
-%{_bindir}/chage
-%{_bindir}/gpasswd
+%attr(4755,root,root) %{_bindir}/chage
+%attr(4755,root,root) %{_bindir}/gpasswd
 %{_bindir}/lastlog
-%{_bindir}/newgrp
+%attr(4755,root,root) %{_bindir}/newgrp
 %{_sbindir}/adduser
 %attr(0750,root,root)   %{_sbindir}/user*
 %attr(0750,root,root)   %{_sbindir}/group*
@@ -218,6 +220,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Thu Jul 25 2013 Tomas Mraz <tmraz@redhat.com> - 2:4.1.5.1-8
+- slightly more meaningful error messages if crypt() returns NULL (#988184)
+- explicit suid permissions
+
 * Fri Jul 19 2013 Tomas Mraz <tmraz@redhat.com> - 2:4.1.5.1-7
 - fix useradd man page bugs
 
