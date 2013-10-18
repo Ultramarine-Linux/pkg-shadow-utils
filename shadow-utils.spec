@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.1.5.1
-Release: 8%{?dist}
+Release: 9%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: http://pkg-shadow.alioth.debian.org/releases/shadow-%{version}.tar.bz2
@@ -97,7 +97,7 @@ export LDFLAGS="-pie -Wl,-z,relro -Wl,-z,now"
         --without-libcrack \
         --without-libpam \
         --disable-shared \
-	--with-group-name-max-length=32
+        --with-group-name-max-length=32
 make
 
 %install
@@ -220,6 +220,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Fri Oct 18 2013 Tomas Mraz <tmraz@redhat.com> - 2:4.1.5.1-9
+- document that the directory where user's home is created must exist
+
 * Thu Jul 25 2013 Tomas Mraz <tmraz@redhat.com> - 2:4.1.5.1-8
 - slightly more meaningful error messages if crypt() returns NULL (#988184)
 - explicit suid permissions

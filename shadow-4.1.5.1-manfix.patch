@@ -1,6 +1,33 @@
+diff -up shadow-4.1.5.1/man/man8/useradd.8.manfix shadow-4.1.5.1/man/man8/useradd.8
+--- shadow-4.1.5.1/man/man8/useradd.8.manfix	2013-07-25 10:39:00.000000000 +0200
++++ shadow-4.1.5.1/man/man8/useradd.8	2013-10-18 16:29:41.003281715 +0200
+@@ -85,7 +85,7 @@ by default\&.
+ Any text string\&. It is generally a short description of the login, and is currently used as the field for the user\*(Aqs full name\&.
+ .RE
+ .PP
+-\fB\-d\fR, \fB\-\-home\fR \fIHOME_DIR\fR
++\fB\-d\fR, \fB\-\-home\-dir\fR \fIHOME_DIR\fR
+ .RS 4
+ The new user will be created using
+ \fIHOME_DIR\fR
+@@ -220,9 +220,13 @@ option) will be copied to the home direc
+ By default, if this option is not specified and
+ \fBCREATE_HOME\fR
+ is not enabled, no home directories are created\&.
++.sp
++The directory where the user\*(Aqs home directory is created must
++exist and have proper SELinux context and permissions\&. Otherwise
++the user\*(Aqs home directory cannot be created or accessed\&.
+ .RE
+ .PP
+-\fB\-M\fR
++\fB\-M\fR, \fB\-\-no\-create\-home\fR
+ .RS 4
+ Do not create the user\*(Aqs home directory, even if the system wide setting from
+ /etc/login\&.defs
 diff -up shadow-4.1.5.1/man/useradd.8.xml.manfix shadow-4.1.5.1/man/useradd.8.xml
---- shadow-4.1.5.1/man/useradd.8.xml.manfix	2013-06-14 15:25:44.000000000 +0200
-+++ shadow-4.1.5.1/man/useradd.8.xml	2013-07-19 07:33:53.768619759 +0200
+--- shadow-4.1.5.1/man/useradd.8.xml.manfix	2013-07-25 10:39:00.115637664 +0200
++++ shadow-4.1.5.1/man/useradd.8.xml	2013-10-18 16:22:13.151437562 +0200
 @@ -161,7 +161,7 @@
        </varlistentry>
        <varlistentry>
@@ -10,7 +37,16 @@ diff -up shadow-4.1.5.1/man/useradd.8.xml.manfix shadow-4.1.5.1/man/useradd.8.xm
  	  <replaceable>HOME_DIR</replaceable>
  	</term>
  	<listitem>
-@@ -362,7 +362,7 @@
+@@ -358,11 +358,16 @@
+ 	    <option>CREATE_HOME</option> is not enabled, no home
+ 	    directories are created.
+ 	  </para>
++	  <para>
++	    The directory where the user's home directory is created must
++	    exist and have proper SELinux context and permissions. Otherwise
++	    the user's home directory cannot be created or accessed.
++	  </para>
+ 	</listitem>
        </varlistentry>
        <varlistentry>
  	<term>
