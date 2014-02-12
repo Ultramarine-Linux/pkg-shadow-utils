@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.1.5.1
-Release: 9%{?dist}
+Release: 10%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: http://pkg-shadow.alioth.debian.org/releases/shadow-%{version}.tar.bz2
@@ -23,6 +23,7 @@ Patch13: shadow-4.1.5.1-audit-owner.patch
 Patch14: shadow-4.1.5.1-default-range.patch
 Patch15: shadow-4.1.5.1-manfix.patch
 Patch16: shadow-4.1.5.1-crypt-null.patch
+Patch17: shadow-4.1.5.1-userdel-helpfix.patch
 
 License: BSD and GPLv2+
 Group: System Environment/Base
@@ -67,6 +68,7 @@ are used for managing group accounts.
 %patch14 -p1 -b .default-range
 %patch15 -p1 -b .manfix
 %patch16 -p1 -b .crypt-null
+%patch17 -p1 -b .userdel
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -220,6 +222,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Wed Feb 12 2014 Tomas Mraz <tmraz@redhat.com> - 2:4.1.5.1-10
+- clean up login.defs manpage
+- properly document userdel -f behavior
+
 * Fri Oct 18 2013 Tomas Mraz <tmraz@redhat.com> - 2:4.1.5.1-9
 - document that the directory where user's home is created must exist
 
