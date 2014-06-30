@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.1.5.1
-Release: 11%{?dist}
+Release: 12%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: http://pkg-shadow.alioth.debian.org/releases/shadow-%{version}.tar.bz2
@@ -24,6 +24,7 @@ Patch14: shadow-4.1.5.1-default-range.patch
 Patch15: shadow-4.1.5.1-manfix.patch
 Patch16: shadow-4.1.5.1-crypt-null.patch
 Patch17: shadow-4.1.5.1-userdel-helpfix.patch
+Patch18: shadow-4.1.5.1-group-alloc.patch
 
 License: BSD and GPLv2+
 Group: System Environment/Base
@@ -69,6 +70,7 @@ are used for managing group accounts.
 %patch15 -p1 -b .manfix
 %patch16 -p1 -b .crypt-null
 %patch17 -p1 -b .userdel
+%patch18 -p1 -b .group-alloc
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -222,6 +224,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Mon Jun 30 2014 Tomas Mraz <tmraz@redhat.com> - 2:4.1.5.1-12
+- improve group allocation algorithm - patch by Stephen Gallager (#1089738)
+
 * Sun Jun 08 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2:4.1.5.1-11
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_21_Mass_Rebuild
 
