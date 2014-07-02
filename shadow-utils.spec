@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.1.5.1
-Release: 12%{?dist}
+Release: 13%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: http://pkg-shadow.alioth.debian.org/releases/shadow-%{version}.tar.bz2
@@ -224,6 +224,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Mon Jun 30 2014 Tomas Mraz <tmraz@redhat.com> - 2:4.1.5.1-13
+- ignore getgrgid() errors for now
+
 * Mon Jun 30 2014 Tomas Mraz <tmraz@redhat.com> - 2:4.1.5.1-12
 - improve group allocation algorithm - patch by Stephen Gallager (#1089738)
 

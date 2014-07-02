@@ -158,9 +158,9 @@ index 05f5622edb79069d9a43d3f9c69a463b6b71141a..25900dd12874e46e5efdfcf7c895f6b8
 +		/* getgrgid() was NULL, check whether this was
 +		 * due to an error, so we can report it.
 +		 */
-+		if (errno != 0) {
++		/* ignore errors for now * if (errno != 0) {
 +			return errno;
-+		}
++		} */
 +	}
 +
 +	/* If we've made it here, the GID must be available */
@@ -228,7 +228,7 @@ index 05f5622edb79069d9a43d3f9c69a463b6b71141a..25900dd12874e46e5efdfcf7c895f6b8
 +			/*
 +			 * Make sure the GID isn't queued for use already
 +			 */
-+			if (gr_locate_gid (preferred_gid) == NULL) {
++			if (gr_locate_gid (*preferred_gid) == NULL) {
 +				*gid = *preferred_gid;
 +				return 0;
 +			}
