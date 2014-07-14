@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.1.5.1
-Release: 14%{?dist}
+Release: 15%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: http://pkg-shadow.alioth.debian.org/releases/shadow-%{version}.tar.bz2
@@ -25,9 +25,6 @@ Patch15: shadow-4.1.5.1-manfix.patch
 Patch16: shadow-4.1.5.1-crypt-null.patch
 Patch17: shadow-4.1.5.1-userdel-helpfix.patch
 Patch18: shadow-4.1.5.1-group-alloc.patch
-# This is needed for Fedora Atomic project and might be dropped if less
-# hackish way to create system users and groups is designed.
-Patch19: shadow-4.1.5.1-usr-lib.patch
 
 License: BSD and GPLv2+
 Group: System Environment/Base
@@ -74,7 +71,6 @@ are used for managing group accounts.
 %patch16 -p1 -b .crypt-null
 %patch17 -p1 -b .userdel
 %patch18 -p1 -b .group-alloc
-%patch19 -p1 -b .usr-lib
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -228,6 +224,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Mon Jul 14 2014 Tomas Mraz <tmraz@redhat.com> - 2:4.1.5.1-15
+- revert the last change as it is not really needed
+
 * Thu Jul 10 2014 Tomas Mraz <tmraz@redhat.com> - 2:4.1.5.1-14
 - put system users and groups into /usr/lib/{passwd,group} if
   the files exist and SHADOW_USE_USRLIB environment variable is set
