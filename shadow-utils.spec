@@ -77,7 +77,7 @@ are used for managing group accounts.
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
 
-cp -a %{SOURCE4} %{SOURCE5}
+cp -a %{SOURCE4} %{SOURCE5} .
 
 #rm po/*.gmo
 #rm po/stamp-po
