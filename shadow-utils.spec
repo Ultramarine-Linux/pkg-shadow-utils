@@ -1,13 +1,15 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.1.5.1
-Release: 15%{?dist}
+Release: 16%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: http://pkg-shadow.alioth.debian.org/releases/shadow-%{version}.tar.bz2
 Source3: http://pkg-shadow.alioth.debian.org/releases/shadow-%{version}.tar.bz2.sig
 Source1: shadow-utils.login.defs
 Source2: shadow-utils.useradd
+Source4: shadow-bsd.txt
+Source5: https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
 Patch0: shadow-4.1.5-redhat.patch
 Patch1: shadow-4.1.5.1-goodname.patch
 Patch2: shadow-4.1.5.1-info-parent-dir.patch
@@ -74,6 +76,8 @@ are used for managing group accounts.
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
+
+cp -a %{SOURCE4} %{SOURCE5}
 
 #rm po/*.gmo
 #rm po/stamp-po
@@ -186,6 +190,8 @@ rm -rf $RPM_BUILD_ROOT
 %files -f shadow.lang
 %defattr(-,root,root)
 %doc NEWS doc/HOWTO README
+%{!?_licensedir:%global license %%doc}
+%license gpl-2.0.txt shadow-bsd.txt
 %attr(0644,root,root)   %config(noreplace) %{_sysconfdir}/login.defs
 %attr(0644,root,root)   %config(noreplace) %{_sysconfdir}/default/useradd
 %{_bindir}/sg
@@ -224,6 +230,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Tue Aug  5 2014 Tom Callaway <spot@fedoraproject.org> - 2:4.1.5.1-16
+- fix license handling
+
 * Mon Jul 14 2014 Tomas Mraz <tmraz@redhat.com> - 2:4.1.5.1-15
 - revert the last change as it is not really needed
 
