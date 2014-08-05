@@ -8,8 +8,8 @@ Source0: http://pkg-shadow.alioth.debian.org/releases/shadow-%{version}.tar.bz2
 Source3: http://pkg-shadow.alioth.debian.org/releases/shadow-%{version}.tar.bz2.sig
 Source1: shadow-utils.login.defs
 Source2: shadow-utils.useradd
-Source3: shadow-bsd.txt
-Source4: https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
+Source4: shadow-bsd.txt
+Source5: https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
 Patch0: shadow-4.1.5-redhat.patch
 Patch1: shadow-4.1.5.1-goodname.patch
 Patch2: shadow-4.1.5.1-info-parent-dir.patch
@@ -77,7 +77,7 @@ are used for managing group accounts.
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
 
-cp -a %{SOURCE3} %{SOURCE4}
+cp -a %{SOURCE4} %{SOURCE5}
 
 #rm po/*.gmo
 #rm po/stamp-po
