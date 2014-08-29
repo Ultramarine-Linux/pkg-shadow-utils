@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.1.5.1
-Release: 17%{?dist}
+Release: 18%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: http://pkg-shadow.alioth.debian.org/releases/shadow-%{version}.tar.bz2
@@ -27,6 +27,9 @@ Patch15: shadow-4.1.5.1-manfix.patch
 Patch16: shadow-4.1.5.1-crypt-null.patch
 Patch17: shadow-4.1.5.1-userdel-helpfix.patch
 Patch18: shadow-4.1.5.1-group-alloc.patch
+Patch19: shadow-4.1.5.1-date-parsing.patch
+Patch20: shadow-4.1.5.1-ingroup.patch
+Patch21: shadow-4.1.5.1-move-home.patch
 
 License: BSD and GPLv2+
 Group: System Environment/Base
@@ -73,6 +76,9 @@ are used for managing group accounts.
 %patch16 -p1 -b .crypt-null
 %patch17 -p1 -b .userdel
 %patch18 -p1 -b .group-alloc
+%patch19 -p1 -b .date-parsing
+%patch20 -p1 -b .ingroup
+%patch21 -p1 -b .move-home
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -230,6 +236,13 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Fri Aug 29 2014 Tomas Mraz <tmraz@redhat.com> - 2:4.1.5.1-18
+- label the newly created home dir correctly (#1077809)
+- mention that chage -d 0 forces password change (#1135010)
+- improve date parsing and error detecting in chage
+- avoid full group database scanning in newgrp in most common case
+- report error if usermod asked for moving homedir and it does not exist
+
 * Mon Aug 18 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2:4.1.5.1-17
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_21_22_Mass_Rebuild
 

@@ -1,6 +1,19 @@
+diff -up shadow-4.1.5.1/man/chage.1.xml.manfix shadow-4.1.5.1/man/chage.1.xml
+--- shadow-4.1.5.1/man/chage.1.xml.manfix	2012-05-25 13:45:27.000000000 +0200
++++ shadow-4.1.5.1/man/chage.1.xml	2014-08-29 13:36:57.713167654 +0200
+@@ -102,6 +102,9 @@
+ 	    Set the number of days since January 1st, 1970 when the password
+ 	    was last changed. The date may also be expressed in the format
+ 	    YYYY-MM-DD (or the format more commonly used in your area).
++	    If the <replaceable>LAST_DAY</replaceable> is set to
++	    <emphasis>0</emphasis> the user is forced to change his password
++	    on the next log on.
+ 	  </para>
+ 	</listitem>
+       </varlistentry>
 diff -up shadow-4.1.5.1/man/login.defs.5.xml.manfix shadow-4.1.5.1/man/login.defs.5.xml
 --- shadow-4.1.5.1/man/login.defs.5.xml.manfix	2012-05-25 13:45:28.000000000 +0200
-+++ shadow-4.1.5.1/man/login.defs.5.xml	2014-02-12 11:18:36.126334872 +0100
++++ shadow-4.1.5.1/man/login.defs.5.xml	2014-08-29 13:31:38.364812323 +0200
 @@ -160,6 +160,17 @@
        long numeric parameters is machine-dependent.
      </para>
@@ -19,9 +32,25 @@ diff -up shadow-4.1.5.1/man/login.defs.5.xml.manfix shadow-4.1.5.1/man/login.def
      <para>The following configuration items are provided:</para>
  
      <variablelist remap='IP'>
+diff -up shadow-4.1.5.1/man/man1/chage.1.manfix shadow-4.1.5.1/man/man1/chage.1
+--- shadow-4.1.5.1/man/man1/chage.1.manfix	2012-05-25 13:58:18.000000000 +0200
++++ shadow-4.1.5.1/man/man1/chage.1	2014-08-29 13:36:31.303559366 +0200
+@@ -45,7 +45,11 @@ command are:
+ .PP
+ \fB\-d\fR, \fB\-\-lastday\fR \fILAST_DAY\fR
+ .RS 4
+-Set the number of days since January 1st, 1970 when the password was last changed\&. The date may also be expressed in the format YYYY\-MM\-DD (or the format more commonly used in your area)\&.
++Set the number of days since January 1st, 1970 when the password was last changed\&. The date may also be expressed in the format YYYY\-MM\-DD (or the format more commonly used in your area)\&. If the
++\fILAST_DAY\fR
++is set to
++\fB0\fR
++the user is forced to change his password on the next log on\&.
+ .RE
+ .PP
+ \fB\-E\fR, \fB\-\-expiredate\fR \fIEXPIRE_DATE\fR
 diff -up shadow-4.1.5.1/man/man5/login.defs.5.manfix shadow-4.1.5.1/man/man5/login.defs.5
 --- shadow-4.1.5.1/man/man5/login.defs.5.manfix	2012-05-25 13:59:03.000000000 +0200
-+++ shadow-4.1.5.1/man/man5/login.defs.5	2014-02-12 11:26:27.159851843 +0100
++++ shadow-4.1.5.1/man/man5/login.defs.5	2014-08-29 13:31:38.364812323 +0200
 @@ -46,6 +46,14 @@ value\&. Numbers (both regular and long)
  \fI0\fR) or hexadecimal values (precede the value with
  \fI0x\fR)\&. The maximum value of the regular and long numeric parameters is machine\-dependent\&.
@@ -141,8 +170,8 @@ diff -up shadow-4.1.5.1/man/man5/login.defs.5.manfix shadow-4.1.5.1/man/man5/log
  .RS 4
  CREATE_HOME GID_MAX GID_MIN MAIL_DIR MAX_MEMBERS_PER_GROUP PASS_MAX_DAYS PASS_MIN_DAYS PASS_WARN_AGE SYS_GID_MAX SYS_GID_MIN SYS_UID_MAX SYS_UID_MIN UID_MAX UID_MIN UMASK
 diff -up shadow-4.1.5.1/man/man8/useradd.8.manfix shadow-4.1.5.1/man/man8/useradd.8
---- shadow-4.1.5.1/man/man8/useradd.8.manfix	2013-11-27 10:25:34.740049650 +0100
-+++ shadow-4.1.5.1/man/man8/useradd.8	2013-11-27 10:25:34.758050045 +0100
+--- shadow-4.1.5.1/man/man8/useradd.8.manfix	2014-08-29 13:31:38.347811932 +0200
++++ shadow-4.1.5.1/man/man8/useradd.8	2014-08-29 13:31:38.364812323 +0200
 @@ -85,7 +85,7 @@ by default\&.
  Any text string\&. It is generally a short description of the login, and is currently used as the field for the user\*(Aqs full name\&.
  .RE
@@ -167,9 +196,30 @@ diff -up shadow-4.1.5.1/man/man8/useradd.8.manfix shadow-4.1.5.1/man/man8/userad
  .RS 4
  Do not create the user\*(Aqs home directory, even if the system wide setting from
  /etc/login\&.defs
+diff -up shadow-4.1.5.1/man/man8/usermod.8.manfix shadow-4.1.5.1/man/man8/usermod.8
+--- shadow-4.1.5.1/man/man8/usermod.8.manfix	2012-05-25 13:59:33.000000000 +0200
++++ shadow-4.1.5.1/man/man8/usermod.8	2014-08-29 13:35:27.343086211 +0200
+@@ -63,7 +63,7 @@ The user\*(Aqs new login directory\&.
+ .sp
+ If the
+ \fB\-m\fR
+-option is given, the contents of the current home directory will be moved to the new home directory, which is created if it does not already exist\&.
++option is given, the contents of the current home directory will be moved to the new home directory, which is created if it does not already exist\&. If the current home directory does not exist the new home directory will not be created\&.
+ .RE
+ .PP
+ \fB\-e\fR, \fB\-\-expiredate\fR \fIEXPIRE_DATE\fR
+@@ -143,7 +143,7 @@ Move the content of the user\*(Aqs home
+ This option is only valid in combination with the
+ \fB\-d\fR
+ (or
+-\fB\-\-home\fR) option\&.
++\fB\-\-home\fR) option\&. If the current home directory does not exist the new home directory will not be created\&.
+ .sp
+ 
+ \fBusermod\fR
 diff -up shadow-4.1.5.1/man/useradd.8.xml.manfix shadow-4.1.5.1/man/useradd.8.xml
---- shadow-4.1.5.1/man/useradd.8.xml.manfix	2013-11-27 10:25:34.740049650 +0100
-+++ shadow-4.1.5.1/man/useradd.8.xml	2013-11-27 10:25:34.759050067 +0100
+--- shadow-4.1.5.1/man/useradd.8.xml.manfix	2014-08-29 13:31:38.347811932 +0200
++++ shadow-4.1.5.1/man/useradd.8.xml	2014-08-29 13:31:38.364812323 +0200
 @@ -161,7 +161,7 @@
        </varlistentry>
        <varlistentry>
@@ -197,3 +247,26 @@ diff -up shadow-4.1.5.1/man/useradd.8.xml.manfix shadow-4.1.5.1/man/useradd.8.xm
  	</term>
  	<listitem>
  	  <para>
+diff -up shadow-4.1.5.1/man/usermod.8.xml.manfix shadow-4.1.5.1/man/usermod.8.xml
+--- shadow-4.1.5.1/man/usermod.8.xml.manfix	2012-05-25 13:45:29.000000000 +0200
++++ shadow-4.1.5.1/man/usermod.8.xml	2014-08-29 13:33:40.814632618 +0200
+@@ -132,7 +132,8 @@
+ 	    If the <option>-m</option>
+ 	    option is given, the contents of the current home directory will
+ 	    be moved to the new home directory, which is created if it does
+-	    not already exist.
++	    not already exist. If the current home directory does not exist
++	    the new home directory will not be created.
+ 	  </para>
+ 	</listitem>
+       </varlistentry>
+@@ -261,7 +262,8 @@
+ 	<listitem>
+ 	  <para>
+ 	    Move the content of the user's home directory to the new
+-	    location.
++	    location. If the current home directory does not exist
++	    the new home directory will not be created.
+ 	  </para>
+ 	  <para>
+ 	    This option is only valid in combination with the
