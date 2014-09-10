@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.1.5.1
-Release: 19%{?dist}
+Release: 20%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: http://pkg-shadow.alioth.debian.org/releases/shadow-%{version}.tar.bz2
@@ -236,6 +236,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Wed Sep 10 2014 Tomas Mraz <tmraz@redhat.com> - 2:4.1.5.1-20
+- discard obsolete matchpathcon cache after semanage_commit()
+
 * Tue Sep  9 2014 Tomas Mraz <tmraz@redhat.com> - 2:4.1.5.1-19
 - disallow all-numeric user and group names (#1139318)
 

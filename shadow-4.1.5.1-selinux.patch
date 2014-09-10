@@ -1,6 +1,30 @@
+diff -up shadow-4.1.5.1/lib/semanage.c.selinux shadow-4.1.5.1/lib/semanage.c
+--- shadow-4.1.5.1/lib/semanage.c.selinux	2012-01-08 17:35:44.000000000 +0100
++++ shadow-4.1.5.1/lib/semanage.c	2014-09-10 10:11:55.417506128 +0200
+@@ -294,6 +294,9 @@ int set_seuser (const char *login_name,
+ 
+ 	ret = 0;
+ 
++        /* drop obsolete matchpathcon cache */
++        matchpathcon_fini();
++
+ done:
+ 	semanage_seuser_key_free (key);
+ 	semanage_handle_destroy (handle);
+@@ -369,6 +372,10 @@ int del_seuser (const char *login_name)
+ 	}
+ 
+ 	ret = 0;
++
++        /* drop obsolete matchpathcon cache */
++        matchpathcon_fini();
++
+ done:
+ 	semanage_handle_destroy (handle);
+ 	return ret;
 diff -up shadow-4.1.5.1/src/useradd.c.selinux shadow-4.1.5.1/src/useradd.c
---- shadow-4.1.5.1/src/useradd.c.selinux	2014-08-28 16:36:09.889422103 +0200
-+++ shadow-4.1.5.1/src/useradd.c	2014-08-28 17:28:04.828166192 +0200
+--- shadow-4.1.5.1/src/useradd.c.selinux	2014-09-10 10:10:18.791280619 +0200
++++ shadow-4.1.5.1/src/useradd.c	2014-09-10 10:10:18.798280781 +0200
 @@ -1850,6 +1850,7 @@ static void create_mail (void)
   */
  int main (int argc, char **argv)
