@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.1.5.1
-Release: 20%{?dist}
+Release: 21%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: http://pkg-shadow.alioth.debian.org/releases/shadow-%{version}.tar.bz2
@@ -26,10 +26,11 @@ Patch14: shadow-4.1.5.1-default-range.patch
 Patch15: shadow-4.1.5.1-manfix.patch
 Patch16: shadow-4.1.5.1-crypt-null.patch
 Patch17: shadow-4.1.5.1-userdel-helpfix.patch
-Patch18: shadow-4.1.5.1-group-alloc.patch
+Patch18: shadow-4.1.5.1-id-alloc.patch
 Patch19: shadow-4.1.5.1-date-parsing.patch
 Patch20: shadow-4.1.5.1-ingroup.patch
 Patch21: shadow-4.1.5.1-move-home.patch
+Patch22: shadow-4.1.5.1-audit-update.patch
 
 License: BSD and GPLv2+
 Group: System Environment/Base
@@ -75,10 +76,11 @@ are used for managing group accounts.
 %patch15 -p1 -b .manfix
 %patch16 -p1 -b .crypt-null
 %patch17 -p1 -b .userdel
-%patch18 -p1 -b .group-alloc
+%patch18 -p1 -b .id-alloc
 %patch19 -p1 -b .date-parsing
 %patch20 -p1 -b .ingroup
 %patch21 -p1 -b .move-home
+%patch22 -p1 -b .audit-update
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -236,6 +238,11 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Fri Oct 17 2014 Tomáš Mráz <tmraz@redhat.com> - 2:4.1.5.1-21
+- update auditing to cover more events and fix some incorrect audit
+  records - patch by Steve Grubb (#1151580)
+- apply the same new allocation algorithm to uids as for gids
+
 * Wed Sep 10 2014 Tomas Mraz <tmraz@redhat.com> - 2:4.1.5.1-20
 - discard obsolete matchpathcon cache after semanage_commit()
 
