@@ -1006,7 +1006,7 @@ diff -urp shadow-4.1.5.1.orig/src/groupmod.c shadow-4.1.5.1/src/groupmod.c
 +			511 - strlen(info_passwd.audit_msg));
 +		free(nv_pair);
 +	}
-+	snprintf(nv, sizeof(nv), " gid=%lu", group_id);
++	snprintf(nv, sizeof(nv), " gid=%lu", (unsigned long)group_id);
 +	strncat(info_group.audit_msg, nv, 511 - strlen(info_group.audit_msg));
 +	strncat(info_passwd.audit_msg, nv, 511 - strlen(info_passwd.audit_msg));
 +	
@@ -1073,7 +1073,7 @@ diff -urp shadow-4.1.5.1.orig/src/groupmod.c shadow-4.1.5.1/src/groupmod.c
  #endif
  	}
  	if (gflg) {
-+		snprintf(nv, sizeof(nv), " new_gid=%lu", group_newid);
++		snprintf(nv, sizeof(nv), " new_gid=%lu", (unsigned long)group_newid);
 +		strncat(info_group.audit_msg, nv,
 +				511 - strlen(info_group.audit_msg));
 +		strncat(info_passwd.audit_msg, nv,
