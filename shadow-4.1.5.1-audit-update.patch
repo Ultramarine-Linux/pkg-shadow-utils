@@ -2111,7 +2111,7 @@ diff -urp shadow-4.1.5.1.orig/src/usermod.c shadow-4.1.5.1/src/usermod.c
 -			              "changing admin name in shadow group",
 -			              user_name, AUDIT_NO_ID, 1);
 +			audit_logger_with_group (AUDIT_GRP_MGMT, Prog,
-+			              "update-admin-name-in-group",
++			              "update-admin-name-in-shadow-group",
 +			              user_name, AUDIT_NO_ID, nsgrp->sg_name,
 +			              SHADOW_AUDIT_SUCCESS);
  #endif
@@ -2125,7 +2125,7 @@ diff -urp shadow-4.1.5.1.orig/src/usermod.c shadow-4.1.5.1/src/usermod.c
 -					              "changing member in shadow group",
 -					              user_name, AUDIT_NO_ID, 1);
 +					audit_logger_with_group (AUDIT_USER_MGMT, Prog,
-+					              "update-member-in-group",
++					              "update-member-in-shadow-group",
 +					              user_name, AUDIT_NO_ID,
 +					              nsgrp->sg_name, 1);
  #endif
@@ -2139,7 +2139,7 @@ diff -urp shadow-4.1.5.1.orig/src/usermod.c shadow-4.1.5.1/src/usermod.c
 -				              "removing user from shadow group",
 -				              user_name, AUDIT_NO_ID, 1);
 +				audit_logger_with_group (AUDIT_USER_MGMT, Prog,
-+				              "delete-user-from-group",
++				              "delete-user-from-shadow-group",
 +				              user_name, AUDIT_NO_ID,
 +				              nsgrp->sg_name, 1);
  #endif
@@ -2153,7 +2153,7 @@ diff -urp shadow-4.1.5.1.orig/src/usermod.c shadow-4.1.5.1/src/usermod.c
 -			              "adding user to shadow group",
 -			              user_newname, AUDIT_NO_ID, 1);
 +			audit_logger_with_group (AUDIT_USER_MGMT, Prog,
-+			              "add-user-to-group",
++			              "add-user-to-shadow-group",
 +			              user_newname, AUDIT_NO_ID,
 +			              nsgrp->sg_name, 1);
  #endif

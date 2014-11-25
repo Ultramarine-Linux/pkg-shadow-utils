@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.1.5.1
-Release: 21%{?dist}
+Release: 22%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: http://pkg-shadow.alioth.debian.org/releases/shadow-%{version}.tar.bz2
@@ -238,6 +238,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Tue Nov 25 2014 Tomáš Mráz <tmraz@redhat.com> - 2:4.1.5.1-22
+- small adjustments to the audit patch
+
 * Fri Oct 17 2014 Tomáš Mráz <tmraz@redhat.com> - 2:4.1.5.1-21
 - update auditing to cover more events and fix some incorrect audit
   records - patch by Steve Grubb (#1151580)
