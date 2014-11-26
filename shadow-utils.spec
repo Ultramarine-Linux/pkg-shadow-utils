@@ -1,11 +1,11 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
-Version: 4.1.5.1
-Release: 22%{?dist}
+Version: 4.2.1
+Release: 1%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
-Source0: http://pkg-shadow.alioth.debian.org/releases/shadow-%{version}.tar.bz2
-Source3: http://pkg-shadow.alioth.debian.org/releases/shadow-%{version}.tar.bz2.sig
+Source0: http://pkg-shadow.alioth.debian.org/releases/shadow-%{version}.tar.xz
+Source3: http://pkg-shadow.alioth.debian.org/releases/shadow-%{version}.tar.xz.sig
 Source1: shadow-utils.login.defs
 Source2: shadow-utils.useradd
 Source4: shadow-bsd.txt
@@ -17,20 +17,19 @@ Patch3: shadow-4.1.5-uflg.patch
 Patch6: shadow-4.1.5.1-selinux.patch
 Patch7: shadow-4.1.5-2ndskip.patch
 Patch8: shadow-4.1.5.1-backup-mode.patch
-Patch9: shadow-4.1.5.1-merge-group.patch
+Patch9: shadow-4.2.1-merge-group.patch
 Patch10: shadow-4.1.5.1-orig-context.patch
 Patch11: shadow-4.1.5.1-logmsg.patch
 Patch12: shadow-4.1.5.1-errmsg.patch
 Patch13: shadow-4.1.5.1-audit-owner.patch
 Patch14: shadow-4.1.5.1-default-range.patch
-Patch15: shadow-4.1.5.1-manfix.patch
-Patch16: shadow-4.1.5.1-crypt-null.patch
+Patch15: shadow-4.2.1-manfix.patch
 Patch17: shadow-4.1.5.1-userdel-helpfix.patch
 Patch18: shadow-4.1.5.1-id-alloc.patch
-Patch19: shadow-4.1.5.1-date-parsing.patch
+Patch19: shadow-4.2.1-date-parsing.patch
 Patch20: shadow-4.1.5.1-ingroup.patch
 Patch21: shadow-4.1.5.1-move-home.patch
-Patch22: shadow-4.1.5.1-audit-update.patch
+Patch22: shadow-4.2.1-audit-update.patch
 
 License: BSD and GPLv2+
 Group: System Environment/Base
@@ -38,6 +37,7 @@ BuildRequires: libselinux-devel >= 1.25.2-1
 BuildRequires: audit-libs-devel >= 1.6.5
 BuildRequires: libsemanage-devel
 BuildRequires: libacl-devel libattr-devel
+BuildRequires: bison flex gnome-doc-utils
 #BuildRequires: autoconf, automake, libtool, gettext-devel
 Requires: libselinux >= 1.25.2-1
 Requires: audit-libs >= 1.6.5
@@ -74,7 +74,6 @@ are used for managing group accounts.
 %patch13 -p1 -b .audit-owner
 %patch14 -p1 -b .default-range
 %patch15 -p1 -b .manfix
-%patch16 -p1 -b .crypt-null
 %patch17 -p1 -b .userdel
 %patch18 -p1 -b .id-alloc
 %patch19 -p1 -b .date-parsing
@@ -86,6 +85,8 @@ iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
 
 cp -a %{SOURCE4} %{SOURCE5} .
+
+rm libmisc/getdate.c
 
 #rm po/*.gmo
 #rm po/stamp-po
@@ -107,6 +108,7 @@ export LDFLAGS="-pie -Wl,-z,relro -Wl,-z,now"
 
 %configure \
         --enable-shadowgrp \
+        --enable-man \
         --with-audit \
         --with-sha-crypt \
         --with-selinux \
@@ -207,6 +209,8 @@ rm -rf $RPM_BUILD_ROOT
 %attr(4755,root,root) %{_bindir}/gpasswd
 %{_bindir}/lastlog
 %attr(4755,root,root) %{_bindir}/newgrp
+%attr(4755,root,root) %{_bindir}/newgidmap
+%attr(4755,root,root) %{_bindir}/newuidmap
 %{_sbindir}/adduser
 %attr(0750,root,root)   %{_sbindir}/user*
 %attr(0750,root,root)   %{_sbindir}/group*
@@ -221,10 +225,14 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man1/gpasswd.1*
 %{_mandir}/man1/sg.1*
 %{_mandir}/man1/newgrp.1*
+%{_mandir}/man1/newgidmap.1*
+%{_mandir}/man1/newuidmap.1*
 %{_mandir}/man3/shadow.3*
 %{_mandir}/man5/shadow.5*
 %{_mandir}/man5/login.defs.5*
 %{_mandir}/man5/gshadow.5*
+%{_mandir}/man5/subuid.5*
+%{_mandir}/man5/subgid.5*
 %{_mandir}/man8/adduser.8*
 %{_mandir}/man8/group*.8*
 %{_mandir}/man8/user*.8*
@@ -238,6 +246,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Wed Nov 26 2014 Tomáš Mráz <tmraz@redhat.com> - 2:4.2.1-1
+- new upstream release with support for subordinate uids and gids
+
 * Tue Nov 25 2014 Tomáš Mráz <tmraz@redhat.com> - 2:4.1.5.1-22
 - small adjustments to the audit patch
 

@@ -72,41 +72,6 @@ diff -up shadow-4.1.5.1/man/groupadd.8.xml.goodname shadow-4.1.5.1/man/groupadd.
         Groupnames may only be up to &GROUP_NAME_MAX_LENGTH; characters long.
       </para>
       <para>
-diff -up shadow-4.1.5.1/man/man8/groupadd.8.goodname shadow-4.1.5.1/man/man8/groupadd.8
---- shadow-4.1.5.1/man/man8/groupadd.8.goodname	2012-05-25 13:58:40.000000000 +0200
-+++ shadow-4.1.5.1/man/man8/groupadd.8	2014-09-09 17:28:46.330300342 +0200
-@@ -190,9 +190,7 @@ Shadow password suite configuration\&.
- .RE
- .SH "CAVEATS"
- .PP
--Groupnames must start with a lower case letter or an underscore, followed by lower case letters, digits, underscores, or dashes\&. They can end with a dollar sign\&. In regular expression terms: [a\-z_][a\-z0\-9_\-]*[$]?
--.PP
--Groupnames may only be up to 16 characters long\&.
-+Groupnames may only be up to 32 characters long\&.
- .PP
- You may not add a NIS or LDAP group\&. This must be performed on the corresponding server\&.
- .PP
-diff -up shadow-4.1.5.1/man/man8/useradd.8.goodname shadow-4.1.5.1/man/man8/useradd.8
---- shadow-4.1.5.1/man/man8/useradd.8.goodname	2012-05-25 13:59:28.000000000 +0200
-+++ shadow-4.1.5.1/man/man8/useradd.8	2014-09-09 17:28:46.330300342 +0200
-@@ -224,7 +224,7 @@ is not enabled, no home directories are
- .PP
- \fB\-M\fR
- .RS 4
--Do no create the user\*(Aqs home directory, even if the system wide setting from
-+Do not create the user\*(Aqs home directory, even if the system wide setting from
- /etc/login\&.defs
- (\fBCREATE_HOME\fR) is set to
- \fIyes\fR\&.
-@@ -430,8 +430,6 @@ Similarly, if the username already exist
- \fBuseradd\fR
- will deny the user account creation request\&.
- .PP
--Usernames must start with a lower case letter or an underscore, followed by lower case letters, digits, underscores, or dashes\&. They can end with a dollar sign\&. In regular expression terms: [a\-z_][a\-z0\-9_\-]*[$]?
--.PP
- Usernames may only be up to 32 characters long\&.
- .SH "CONFIGURATION"
- .PP
 diff -up shadow-4.1.5.1/man/useradd.8.xml.goodname shadow-4.1.5.1/man/useradd.8.xml
 --- shadow-4.1.5.1/man/useradd.8.xml.goodname	2012-05-25 13:45:29.000000000 +0200
 +++ shadow-4.1.5.1/man/useradd.8.xml	2014-09-09 17:28:46.330300342 +0200
