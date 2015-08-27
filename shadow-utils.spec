@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.2.1
-Release: 2%{?dist}
+Release: 3%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: http://pkg-shadow.alioth.debian.org/releases/shadow-%{version}.tar.xz
@@ -30,6 +30,9 @@ Patch19: shadow-4.2.1-date-parsing.patch
 Patch20: shadow-4.1.5.1-ingroup.patch
 Patch21: shadow-4.1.5.1-move-home.patch
 Patch22: shadow-4.2.1-audit-update.patch
+Patch23: shadow-4.2.1-usermod-unlock.patch
+Patch24: shadow-4.2.1-no-lock-dos.patch
+Patch25: shadow-4.2.1-defs-chroot.patch
 
 License: BSD and GPLv2+
 Group: System Environment/Base
@@ -80,6 +83,9 @@ are used for managing group accounts.
 %patch20 -p1 -b .ingroup
 %patch21 -p1 -b .move-home
 %patch22 -p1 -b .audit-update
+%patch23 -p1 -b .unlock
+%patch24 -p1 -b .no-lock-dos
+%patch25 -p1 -b .defs-chroot
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -246,6 +252,12 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Thu Aug 27 2015 Tomáš Mráz <tmraz@redhat.com> - 2:4.2.1-3
+- unlock also passwords locked with passwd -l
+- prevent breaking user entry by entering a password containing colon
+- fix possible DoS when locking the database files for update
+- properly use login.defs from the chroot in useradd
+
 * Fri Jun 19 2015 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2:4.2.1-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_23_Mass_Rebuild
 
