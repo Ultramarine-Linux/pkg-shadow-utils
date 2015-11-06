@@ -1,3 +1,30 @@
+diff -up shadow-4.2.1/man/groupmems.8.xml.manfix shadow-4.2.1/man/groupmems.8.xml
+--- shadow-4.2.1/man/groupmems.8.xml.manfix	2014-03-01 19:59:51.000000000 +0100
++++ shadow-4.2.1/man/groupmems.8.xml	2015-11-06 14:21:03.013060324 +0100
+@@ -179,20 +179,10 @@
+   <refsect1 id='setup'>
+     <title>SETUP</title>
+     <para>
+-      The <command>groupmems</command> executable should be in mode
+-      <literal>2770</literal> as user <emphasis>root</emphasis> and in group
+-      <emphasis>groups</emphasis>. The system administrator can add users to
+-      group <emphasis>groups</emphasis> to allow or disallow them using the
+-      <command>groupmems</command> utility to manage their own group
+-      membership list.
++      In this operating system the <command>groupmems</command> executable
++      is not setuid and regular users cannot use it to manipulate
++      the membership of their own group.
+     </para>
+-
+-    <programlisting>
+-	$ groupadd -r groups
+-	$ chmod 2770 groupmems
+-	$ chown root.groups groupmems
+-	$ groupmems -g groups -a gk4
+-    </programlisting>
+   </refsect1>
+ 
+   <refsect1 id='configuration'>
 diff -up shadow-4.2.1/man/chage.1.xml.manfix shadow-4.2.1/man/chage.1.xml
 --- shadow-4.2.1/man/chage.1.xml.manfix	2014-03-01 19:59:51.000000000 +0100
 +++ shadow-4.2.1/man/chage.1.xml	2014-11-26 15:34:51.256978960 +0100
@@ -32,6 +59,20 @@ diff -up shadow-4.2.1/man/login.defs.5.xml.manfix shadow-4.2.1/man/login.defs.5.
      <para>The following configuration items are provided:</para>
  
      <variablelist remap='IP'>
+diff -up shadow-4.2.1/man/shadow.5.xml.manfix shadow-4.2.1/man/shadow.5.xml
+--- shadow-4.2.1/man/shadow.5.xml.manfix	2014-03-01 19:59:51.000000000 +0100
++++ shadow-4.2.1/man/shadow.5.xml	2015-10-27 16:54:29.304231353 +0100
+@@ -208,8 +208,8 @@
+ 	  </para>
+ 	  <para>
+ 	    After expiration of the password and this expiration period is
+-	    elapsed, no login is possible using the current user's
+-	    password.  The user should contact her administrator.
++	    elapsed, no login is possible for the user.
++	    The user should contact her administrator.
+ 	  </para>
+ 	  <para>
+ 	    An empty field means that there are no enforcement of an
 diff -up shadow-4.2.1/man/useradd.8.xml.manfix shadow-4.2.1/man/useradd.8.xml
 --- shadow-4.2.1/man/useradd.8.xml.manfix	2014-11-26 15:34:51.234978891 +0100
 +++ shadow-4.2.1/man/useradd.8.xml	2014-11-26 15:34:51.257978963 +0100

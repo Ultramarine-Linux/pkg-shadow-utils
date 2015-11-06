@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.2.1
-Release: 3%{?dist}
+Release: 4%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: http://pkg-shadow.alioth.debian.org/releases/shadow-%{version}.tar.xz
@@ -252,6 +252,11 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Fri Nov  6 2015 Tomáš Mráz <tmraz@redhat.com> - 2:4.2.1-4
+- document that groupmems is not setuid root
+- document that expiration of the password after inactivity period
+  locks the user account completely
+
 * Thu Aug 27 2015 Tomáš Mráz <tmraz@redhat.com> - 2:4.2.1-3
 - unlock also passwords locked with passwd -l
 - prevent breaking user entry by entering a password containing colon
