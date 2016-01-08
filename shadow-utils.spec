@@ -252,7 +252,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
-* Fri Jan  8 2015 Tomáš Mráz <tmraz@redhat.com> - 2:4.2.1-5
+* Fri Jan  8 2016 Tomáš Mráz <tmraz@redhat.com> - 2:4.2.1-5
 - do not use obscure permissions for binaries
 - remove unused commands from login.defs(5) cross-reference
 
