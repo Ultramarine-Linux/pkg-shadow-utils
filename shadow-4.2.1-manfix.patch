@@ -38,9 +38,23 @@ diff -up shadow-4.2.1/man/chage.1.xml.manfix shadow-4.2.1/man/chage.1.xml
  	  </para>
  	</listitem>
        </varlistentry>
+diff -up shadow-4.2.1/man/ja/man5/login.defs.5.manfix shadow-4.2.1/man/ja/man5/login.defs.5
+--- shadow-4.2.1/man/ja/man5/login.defs.5.manfix	2014-03-01 19:59:51.000000000 +0100
++++ shadow-4.2.1/man/ja/man5/login.defs.5	2016-01-08 09:58:29.591702354 +0100
+@@ -147,10 +147,6 @@ 以下の参照表は、
+ shadow パスワード機能のどのプログラムが
+ どのパラメータを使用するかを示したものである。
+ .na
+-.IP chfn 12
+-CHFN_AUTH CHFN_RESTRICT
+-.IP chsh 12
+-CHFN_AUTH
+ .IP groupadd 12
+ GID_MAX GID_MIN
+ .IP newusers 12
 diff -up shadow-4.2.1/man/login.defs.5.xml.manfix shadow-4.2.1/man/login.defs.5.xml
 --- shadow-4.2.1/man/login.defs.5.xml.manfix	2014-03-13 06:52:55.000000000 +0100
-+++ shadow-4.2.1/man/login.defs.5.xml	2014-11-26 15:34:51.257978963 +0100
++++ shadow-4.2.1/man/login.defs.5.xml	2016-01-08 09:59:35.854169787 +0100
 @@ -162,6 +162,17 @@
        long numeric parameters is machine-dependent.
      </para>
@@ -59,6 +73,134 @@ diff -up shadow-4.2.1/man/login.defs.5.xml.manfix shadow-4.2.1/man/login.defs.5.
      <para>The following configuration items are provided:</para>
  
      <variablelist remap='IP'>
+@@ -252,26 +263,6 @@
+ 	</listitem>
+       </varlistentry>
+       <varlistentry>
+-	<term>chfn</term>
+-	<listitem>
+-	  <para>
+-	    <phrase condition="no_pam">CHFN_AUTH</phrase>
+-	    CHFN_RESTRICT
+-	    <phrase condition="no_pam">LOGIN_STRING</phrase>
+-	  </para>
+-	</listitem>
+-      </varlistentry>
+-      <varlistentry>
+-	<term>chgpasswd</term>
+-	<listitem>
+-	  <para>
+-	    ENCRYPT_METHOD MAX_MEMBERS_PER_GROUP MD5_CRYPT_ENAB
+-	    <phrase condition="sha_crypt">SHA_CRYPT_MAX_ROUNDS
+-	    SHA_CRYPT_MIN_ROUNDS</phrase>
+-	  </para>
+-	</listitem>
+-      </varlistentry>
+-      <varlistentry>
+ 	<term>chpasswd</term>
+ 	<listitem>
+ 	  <para>
+@@ -282,14 +273,6 @@
+ 	  </para>
+ 	</listitem>
+       </varlistentry>
+-      <varlistentry condition="no_pam">
+-	<term>chsh</term>
+-	<listitem>
+-	  <para>
+-	    CHSH_AUTH LOGIN_STRING
+-	  </para>
+-	</listitem>
+-      </varlistentry>
+       <!-- expiry: no variables (CONSOLE_GROUPS linked, but not used) -->
+       <!-- faillog: no variables -->
+       <varlistentry>
+@@ -350,34 +333,6 @@
+       </varlistentry>
+       <!-- id: no variables -->
+       <!-- lastlog: no variables -->
+-      <varlistentry>
+-	<term>login</term>
+-	<listitem>
+-	  <para>
+-	    <phrase condition="no_pam">CONSOLE</phrase>
+-	    CONSOLE_GROUPS DEFAULT_HOME
+-	    <phrase condition="no_pam">ENV_HZ ENV_PATH ENV_SUPATH
+-	    ENV_TZ ENVIRON_FILE</phrase>
+-	    ERASECHAR FAIL_DELAY
+-	    <phrase condition="no_pam">FAILLOG_ENAB</phrase>
+-	    FAKE_SHELL
+-	    <phrase condition="no_pam">FTMP_FILE</phrase>
+-	    HUSHLOGIN_FILE
+-	    <phrase condition="no_pam">ISSUE_FILE</phrase>
+-	    KILLCHAR
+-	    <phrase condition="no_pam">LASTLOG_ENAB</phrase>
+-	    LOGIN_RETRIES
+-	    <phrase condition="no_pam">LOGIN_STRING</phrase>
+-	    LOGIN_TIMEOUT LOG_OK_LOGINS LOG_UNKFAIL_ENAB
+-	    <phrase condition="no_pam">MAIL_CHECK_ENAB MAIL_DIR MAIL_FILE
+-	    MOTD_FILE NOLOGINS_FILE PORTTIME_CHECKS_ENAB
+-	    QUOTAS_ENAB</phrase>
+-	    TTYGROUP TTYPERM TTYTYPE_FILE
+-	    <phrase condition="no_pam">ULIMIT UMASK</phrase>
+-	    USERGROUPS_ENAB
+-	  </para>
+-	</listitem>
+-      </varlistentry>
+       <!-- logoutd: no variables -->
+       <varlistentry>
+ 	<term>newgrp / sg</term>
+@@ -405,17 +360,6 @@
+ 	</listitem>
+       </varlistentry>
+       <!-- nologin: no variables -->
+-      <varlistentry condition="no_pam">
+-	<term>passwd</term>
+-	<listitem>
+-	  <para>
+-	    ENCRYPT_METHOD MD5_CRYPT_ENAB OBSCURE_CHECKS_ENAB
+-	    PASS_ALWAYS_WARN PASS_CHANGE_TRIES PASS_MAX_LEN PASS_MIN_LEN
+-	    <phrase condition="sha_crypt">SHA_CRYPT_MAX_ROUNDS
+-	    SHA_CRYPT_MIN_ROUNDS</phrase>
+-	  </para>
+-	</listitem>
+-      </varlistentry>
+       <varlistentry>
+ 	<term>pwck</term>
+ 	<listitem>
+@@ -442,32 +386,6 @@
+ 	  </para>
+ 	</listitem>
+       </varlistentry>
+-      <varlistentry>
+-	<term>su</term>
+-	<listitem>
+-	  <para>
+-	    <phrase condition="no_pam">CONSOLE</phrase>
+-	    CONSOLE_GROUPS DEFAULT_HOME
+-	    <phrase condition="no_pam">ENV_HZ ENVIRON_FILE</phrase>
+-	    ENV_PATH ENV_SUPATH
+-	    <phrase condition="no_pam">ENV_TZ LOGIN_STRING MAIL_CHECK_ENAB
+-	    MAIL_DIR MAIL_FILE QUOTAS_ENAB</phrase>
+-	    SULOG_FILE SU_NAME
+-	    <phrase condition="no_pam">SU_WHEEL_ONLY</phrase>
+-	    SYSLOG_SU_ENAB
+-	    <phrase condition="no_pam">USERGROUPS_ENAB</phrase>
+-	  </para>
+-	</listitem>
+-      </varlistentry>
+-      <varlistentry>
+-	<term>sulogin</term>
+-	<listitem>
+-	  <para>
+-	    ENV_HZ
+-	    <phrase condition="no_pam">ENV_TZ</phrase>
+-	  </para>
+-	</listitem>
+-      </varlistentry>
+       <varlistentry>
+ 	<term>useradd</term>
+ 	<listitem>
 diff -up shadow-4.2.1/man/shadow.5.xml.manfix shadow-4.2.1/man/shadow.5.xml
 --- shadow-4.2.1/man/shadow.5.xml.manfix	2014-03-01 19:59:51.000000000 +0100
 +++ shadow-4.2.1/man/shadow.5.xml	2015-10-27 16:54:29.304231353 +0100

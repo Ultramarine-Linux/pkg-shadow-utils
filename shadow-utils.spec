@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.2.1
-Release: 4%{?dist}
+Release: 5%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: http://pkg-shadow.alioth.debian.org/releases/shadow-%{version}.tar.xz
@@ -218,8 +218,8 @@ rm -rf $RPM_BUILD_ROOT
 %attr(4755,root,root) %{_bindir}/newgidmap
 %attr(4755,root,root) %{_bindir}/newuidmap
 %{_sbindir}/adduser
-%attr(0750,root,root)   %{_sbindir}/user*
-%attr(0750,root,root)   %{_sbindir}/group*
+%attr(0755,root,root)   %{_sbindir}/user*
+%attr(0755,root,root)   %{_sbindir}/group*
 %{_sbindir}/grpck
 %{_sbindir}/pwck
 %{_sbindir}/*conv
@@ -252,6 +252,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Fri Jan  8 2015 Tomáš Mráz <tmraz@redhat.com> - 2:4.2.1-5
+- do not use obscure permissions for binaries
+- remove unused commands from login.defs(5) cross-reference
+
 * Fri Nov  6 2015 Tomáš Mráz <tmraz@redhat.com> - 2:4.2.1-4
 - document that groupmems is not setuid root
 - document that expiration of the password after inactivity period
