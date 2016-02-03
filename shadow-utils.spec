@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.2.1
-Release: 5%{?dist}
+Release: 6%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: http://pkg-shadow.alioth.debian.org/releases/shadow-%{version}.tar.xz
@@ -33,6 +33,7 @@ Patch22: shadow-4.2.1-audit-update.patch
 Patch23: shadow-4.2.1-usermod-unlock.patch
 Patch24: shadow-4.2.1-no-lock-dos.patch
 Patch25: shadow-4.2.1-defs-chroot.patch
+Patch26: shadow-4.2.1-lastlog-unexpire.patch
 
 License: BSD and GPLv2+
 Group: System Environment/Base
@@ -86,6 +87,7 @@ are used for managing group accounts.
 %patch23 -p1 -b .unlock
 %patch24 -p1 -b .no-lock-dos
 %patch25 -p1 -b .defs-chroot
+%patch26 -p1 -b .unexpire
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -252,6 +254,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Wed Feb  3 2016 Tomáš Mráz <tmraz@redhat.com> - 2:4.2.1-6
+- add possibility to clear or set lastlog record for user via lastlog
+
 * Fri Jan  8 2016 Tomáš Mráz <tmraz@redhat.com> - 2:4.2.1-5
 - do not use obscure permissions for binaries
 - remove unused commands from login.defs(5) cross-reference
