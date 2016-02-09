@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.2.1
-Release: 6%{?dist}
+Release: 7%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: http://pkg-shadow.alioth.debian.org/releases/shadow-%{version}.tar.xz
@@ -254,6 +254,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Tue Feb  9 2016 Tomáš Mráz <tmraz@redhat.com> - 2:4.2.1-7
+- usermod: properly return error during password manipulation
+
 * Wed Feb  3 2016 Tomáš Mráz <tmraz@redhat.com> - 2:4.2.1-6
 - add possibility to clear or set lastlog record for user via lastlog
 
