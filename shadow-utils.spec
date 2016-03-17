@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.2.1
-Release: 7%{?dist}
+Release: 8%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: http://pkg-shadow.alioth.debian.org/releases/shadow-%{version}.tar.xz
@@ -34,6 +34,7 @@ Patch23: shadow-4.2.1-usermod-unlock.patch
 Patch24: shadow-4.2.1-no-lock-dos.patch
 Patch25: shadow-4.2.1-defs-chroot.patch
 Patch26: shadow-4.2.1-lastlog-unexpire.patch
+Patch27: shadow-4.2.1-user-busy.patch
 
 License: BSD and GPLv2+
 Group: System Environment/Base
@@ -88,6 +89,7 @@ are used for managing group accounts.
 %patch24 -p1 -b .no-lock-dos
 %patch25 -p1 -b .defs-chroot
 %patch26 -p1 -b .unexpire
+%patch27 -p1 -b .user-busy
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -254,6 +256,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Thu Mar 17 2016 Tomáš Mráz <tmraz@redhat.com> - 2:4.2.1-8
+- userdel: fix userdel -f with /etc/subuid present (#1316168)
+
 * Tue Feb  9 2016 Tomáš Mráz <tmraz@redhat.com> - 2:4.2.1-7
 - usermod: properly return error during password manipulation
 

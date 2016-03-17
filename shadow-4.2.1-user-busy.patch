@@ -1,0 +1,48 @@
+From d2fa8c5d4b0b19445562daf78d3a62421fe8d6b8 Mon Sep 17 00:00:00 2001
+From: Bastian Blank <bastian.blank@credativ.de>
+Date: Tue, 17 Nov 2015 10:52:24 -0600
+Subject: [PATCH] Fix user busy errors at userdel
+
+From: Bastian Blank <bastian.blank@credativ.de>
+Acked-by: Serge Hallyn <serge.hallyn@ubuntu.com>
+---
+ libmisc/user_busy.c | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/libmisc/user_busy.c b/libmisc/user_busy.c
+index db7174a..0db32c3 100644
+--- a/libmisc/user_busy.c
++++ b/libmisc/user_busy.c
+@@ -175,6 +175,9 @@ static int user_busy_processes (const char *name, uid_t uid)
+ 	if (stat ("/", &sbroot) != 0) {
+ 		perror ("stat (\"/\")");
+ 		(void) closedir (proc);
++#ifdef ENABLE_SUBIDS
++		sub_uid_close();
++#endif
+ 		return 0;
+ 	}
+ 
+@@ -212,6 +215,9 @@ static int user_busy_processes (const char *name, uid_t uid)
+ 
+ 		if (check_status (name, tmp_d_name, uid) != 0) {
+ 			(void) closedir (proc);
++#ifdef ENABLE_SUBIDS
++			sub_uid_close();
++#endif
+ 			fprintf (stderr,
+ 			         _("%s: user %s is currently used by process %d\n"),
+ 			         Prog, name, pid);
+@@ -232,6 +238,9 @@ static int user_busy_processes (const char *name, uid_t uid)
+ 				}
+ 				if (check_status (name, task_path+6, uid) != 0) {
+ 					(void) closedir (proc);
++#ifdef ENABLE_SUBIDS
++					sub_uid_close();
++#endif
+ 					fprintf (stderr,
+ 					         _("%s: user %s is currently used by process %d\n"),
+ 					         Prog, name, pid);
+-- 
+2.5.0
+
