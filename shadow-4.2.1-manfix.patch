@@ -73,7 +73,7 @@ diff -up shadow-4.2.1/man/login.defs.5.xml.manfix shadow-4.2.1/man/login.defs.5.
      <para>The following configuration items are provided:</para>
  
      <variablelist remap='IP'>
-@@ -252,26 +263,6 @@
+@@ -252,16 +263,6 @@
  	</listitem>
        </varlistentry>
        <varlistentry>
@@ -87,20 +87,10 @@ diff -up shadow-4.2.1/man/login.defs.5.xml.manfix shadow-4.2.1/man/login.defs.5.
 -	</listitem>
 -      </varlistentry>
 -      <varlistentry>
--	<term>chgpasswd</term>
--	<listitem>
--	  <para>
--	    ENCRYPT_METHOD MAX_MEMBERS_PER_GROUP MD5_CRYPT_ENAB
--	    <phrase condition="sha_crypt">SHA_CRYPT_MAX_ROUNDS
--	    SHA_CRYPT_MIN_ROUNDS</phrase>
--	  </para>
--	</listitem>
--      </varlistentry>
--      <varlistentry>
- 	<term>chpasswd</term>
+ 	<term>chgpasswd</term>
  	<listitem>
  	  <para>
-@@ -282,14 +273,6 @@
+@@ -282,14 +283,6 @@
  	  </para>
  	</listitem>
        </varlistentry>
@@ -115,7 +105,7 @@ diff -up shadow-4.2.1/man/login.defs.5.xml.manfix shadow-4.2.1/man/login.defs.5.
        <!-- expiry: no variables (CONSOLE_GROUPS linked, but not used) -->
        <!-- faillog: no variables -->
        <varlistentry>
-@@ -350,34 +333,6 @@
+@@ -350,34 +342,6 @@
        </varlistentry>
        <!-- id: no variables -->
        <!-- lastlog: no variables -->
@@ -150,7 +140,7 @@ diff -up shadow-4.2.1/man/login.defs.5.xml.manfix shadow-4.2.1/man/login.defs.5.
        <!-- logoutd: no variables -->
        <varlistentry>
  	<term>newgrp / sg</term>
-@@ -405,17 +360,6 @@
+@@ -405,17 +370,6 @@
  	</listitem>
        </varlistentry>
        <!-- nologin: no variables -->
@@ -168,7 +158,7 @@ diff -up shadow-4.2.1/man/login.defs.5.xml.manfix shadow-4.2.1/man/login.defs.5.
        <varlistentry>
  	<term>pwck</term>
  	<listitem>
-@@ -442,32 +386,6 @@
+@@ -442,32 +396,6 @@
  	  </para>
  	</listitem>
        </varlistentry>

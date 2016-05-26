@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.2.1
-Release: 8%{?dist}
+Release: 9%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: http://pkg-shadow.alioth.debian.org/releases/shadow-%{version}.tar.xz
@@ -35,6 +35,7 @@ Patch24: shadow-4.2.1-no-lock-dos.patch
 Patch25: shadow-4.2.1-defs-chroot.patch
 Patch26: shadow-4.2.1-lastlog-unexpire.patch
 Patch27: shadow-4.2.1-user-busy.patch
+Patch28: shadow-4.2.1-selinux-perms.patch
 
 License: BSD and GPLv2+
 Group: System Environment/Base
@@ -90,6 +91,7 @@ are used for managing group accounts.
 %patch25 -p1 -b .defs-chroot
 %patch26 -p1 -b .unexpire
 %patch27 -p1 -b .user-busy
+%patch28 -p1 -b .selinux-perms
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -156,7 +158,6 @@ rm $RPM_BUILD_ROOT/%{_sysconfdir}/login.access
 rm $RPM_BUILD_ROOT/%{_sysconfdir}/limits
 rm $RPM_BUILD_ROOT/%{_sbindir}/logoutd
 rm $RPM_BUILD_ROOT/%{_sbindir}/nologin
-rm $RPM_BUILD_ROOT/%{_sbindir}/chgpasswd
 rm $RPM_BUILD_ROOT/%{_mandir}/man1/chfn.*
 rm $RPM_BUILD_ROOT/%{_mandir}/*/man1/chfn.*
 rm $RPM_BUILD_ROOT/%{_mandir}/man1/chsh.*
@@ -185,8 +186,6 @@ rm $RPM_BUILD_ROOT/%{_mandir}/man8/logoutd.*
 rm $RPM_BUILD_ROOT/%{_mandir}/*/man8/logoutd.*
 rm $RPM_BUILD_ROOT/%{_mandir}/man8/nologin.*
 rm $RPM_BUILD_ROOT/%{_mandir}/*/man8/nologin.*
-rm $RPM_BUILD_ROOT/%{_mandir}/man8/chgpasswd.*
-rm $RPM_BUILD_ROOT/%{_mandir}/*/man8/chgpasswd.*
 rm $RPM_BUILD_ROOT/%{_mandir}/man3/getspnam.*
 rm $RPM_BUILD_ROOT/%{_mandir}/*/man3/getspnam.*
 rm $RPM_BUILD_ROOT/%{_mandir}/man5/faillog.*
@@ -228,6 +227,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_sbindir}/pwck
 %{_sbindir}/*conv
 %{_sbindir}/chpasswd
+%{_sbindir}/chgpasswd
 %{_sbindir}/newusers
 %{_sbindir}/vipw
 %{_sbindir}/vigr
@@ -249,6 +249,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/pwck.8*
 %{_mandir}/man8/grpck.8*
 %{_mandir}/man8/chpasswd.8*
+%{_mandir}/man8/chgpasswd.8*
 %{_mandir}/man8/newusers.8*
 %{_mandir}/man8/*conv.8*
 %{_mandir}/man8/lastlog.8*
@@ -256,6 +257,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Thu May 26 2016 Tomáš Mráz <tmraz@redhat.com> - 2:4.2.1-9
+- chgpasswd: do not remove it
+- chpasswd, chgpasswd: add selinux_check_access call (#1336902)
+
 * Thu Mar 17 2016 Tomáš Mráz <tmraz@redhat.com> - 2:4.2.1-8
 - userdel: fix userdel -f with /etc/subuid present (#1316168)
 
