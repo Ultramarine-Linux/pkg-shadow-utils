@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.2.1
-Release: 9%{?dist}
+Release: 10%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: http://pkg-shadow.alioth.debian.org/releases/shadow-%{version}.tar.xz
@@ -257,6 +257,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Mon May 30 2016 Tomáš Mráz <tmraz@redhat.com> - 2:4.2.1-10
+- chpasswd, chgpasswd: open audit when starting
+
 * Thu May 26 2016 Tomáš Mráz <tmraz@redhat.com> - 2:4.2.1-9
 - chgpasswd: do not remove it
 - chpasswd, chgpasswd: add selinux_check_access call (#1336902)
