@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.2.1
-Release: 10%{?dist}
+Release: 11%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: http://pkg-shadow.alioth.debian.org/releases/shadow-%{version}.tar.xz
@@ -36,6 +36,7 @@ Patch25: shadow-4.2.1-defs-chroot.patch
 Patch26: shadow-4.2.1-lastlog-unexpire.patch
 Patch27: shadow-4.2.1-user-busy.patch
 Patch28: shadow-4.2.1-selinux-perms.patch
+Patch29: shadow-4.2.1-null-tm.patch
 
 License: BSD and GPLv2+
 Group: System Environment/Base
@@ -92,6 +93,7 @@ are used for managing group accounts.
 %patch26 -p1 -b .unexpire
 %patch27 -p1 -b .user-busy
 %patch28 -p1 -b .selinux-perms
+%patch29 -p1 -b .null-tm
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -257,6 +259,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Tue Jun 14 2016 Tomáš Mráz <tmraz@redhat.com> - 2:4.2.1-11
+- guard for localtime() and gmtime() failure
+
 * Mon May 30 2016 Tomáš Mráz <tmraz@redhat.com> - 2:4.2.1-10
 - chpasswd, chgpasswd: open audit when starting
 
