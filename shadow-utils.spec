@@ -40,8 +40,8 @@ Group: System Environment/Base
 BuildRequires: libselinux-devel >= 1.25.2-1
 BuildRequires: audit-libs-devel >= 1.6.5
 BuildRequires: libsemanage-devel
-BuildRequires: libacl-devel libattr-devel
-BuildRequires: bison flex gnome-doc-utils
+BuildRequires: libacl-devel, libattr-devel
+BuildRequires: bison, flex, gnome-doc-utils, docbook-style-xsl, docbook-dtds
 BuildRequires: autoconf, automake, libtool, gettext-devel
 Requires: libselinux >= 1.25.2-1
 Requires: audit-libs >= 1.6.5
