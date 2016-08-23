@@ -1,6 +1,6 @@
-diff -up shadow-4.2.1/src/chgpasswd.c.selinux-perms shadow-4.2.1/src/chgpasswd.c
---- shadow-4.2.1/src/chgpasswd.c.selinux-perms	2014-03-01 19:59:51.000000000 +0100
-+++ shadow-4.2.1/src/chgpasswd.c	2016-05-30 11:57:53.635841186 +0200
+diff -up shadow-4.3.1/src/chgpasswd.c.selinux-perms shadow-4.3.1/src/chgpasswd.c
+--- shadow-4.3.1/src/chgpasswd.c.selinux-perms	2016-08-15 06:00:59.000000000 +0200
++++ shadow-4.3.1/src/chgpasswd.c	2016-08-22 17:25:46.825011776 +0200
 @@ -39,6 +39,13 @@
  #include <pwd.h>
  #include <stdio.h>
@@ -147,9 +147,9 @@ diff -up shadow-4.2.1/src/chgpasswd.c.selinux-perms shadow-4.2.1/src/chgpasswd.c
  		/* 
  		 * The updated group file entry is then put back and will
  		 * be written to the group file later, after all the
-diff -up shadow-4.2.1/src/chpasswd.c.selinux-perms shadow-4.2.1/src/chpasswd.c
---- shadow-4.2.1/src/chpasswd.c.selinux-perms	2014-03-01 19:59:51.000000000 +0100
-+++ shadow-4.2.1/src/chpasswd.c	2016-05-30 11:58:23.034484807 +0200
+diff -up shadow-4.3.1/src/chpasswd.c.selinux-perms shadow-4.3.1/src/chpasswd.c
+--- shadow-4.3.1/src/chpasswd.c.selinux-perms	2016-08-15 06:00:59.000000000 +0200
++++ shadow-4.3.1/src/chpasswd.c	2016-08-22 17:25:46.825011776 +0200
 @@ -39,6 +39,13 @@
  #include <pwd.h>
  #include <stdio.h>
@@ -257,10 +257,10 @@ diff -up shadow-4.2.1/src/chpasswd.c.selinux-perms shadow-4.2.1/src/chpasswd.c
  		/* 
  		 * The updated password file entry is then put back and will
  		 * be written to the password file later, after all the
-diff -up shadow-4.2.1/src/Makefile.am.selinux-perms shadow-4.2.1/src/Makefile.am
---- shadow-4.2.1/src/Makefile.am.selinux-perms	2016-05-27 16:04:00.896475284 +0200
-+++ shadow-4.2.1/src/Makefile.am	2016-05-27 16:04:00.899475353 +0200
-@@ -84,9 +84,9 @@ chage_LDADD    = $(LDADD) $(LIBPAM_SUID)
+diff -up shadow-4.3.1/src/Makefile.am.selinux-perms shadow-4.3.1/src/Makefile.am
+--- shadow-4.3.1/src/Makefile.am.selinux-perms	2016-08-15 06:00:59.000000000 +0200
++++ shadow-4.3.1/src/Makefile.am	2016-08-22 17:25:46.825011776 +0200
+@@ -87,9 +87,9 @@ chage_LDADD    = $(LDADD) $(LIBPAM_SUID)
  newuidmap_LDADD    = $(LDADD) $(LIBSELINUX)
  newgidmap_LDADD    = $(LDADD) $(LIBSELINUX)
  chfn_LDADD     = $(LDADD) $(LIBPAM) $(LIBSELINUX) $(LIBCRYPT_NOPAM) $(LIBSKEY) $(LIBMD)
@@ -270,20 +270,5 @@ diff -up shadow-4.2.1/src/Makefile.am.selinux-perms shadow-4.2.1/src/Makefile.am
 -chpasswd_LDADD = $(LDADD) $(LIBPAM) $(LIBSELINUX) $(LIBCRYPT)
 +chpasswd_LDADD = $(LDADD) $(LIBPAM) $(LIBSELINUX) $(LIBAUDIT) $(LIBCRYPT)
  gpasswd_LDADD  = $(LDADD) $(LIBAUDIT) $(LIBSELINUX) $(LIBCRYPT)
- groupadd_LDADD = $(LDADD) $(LIBPAM_SUID) $(LIBAUDIT) $(LIBSELINUX)
- groupdel_LDADD = $(LDADD) $(LIBPAM_SUID) $(LIBAUDIT) $(LIBSELINUX)
-diff -up shadow-4.2.1/src/Makefile.in.selinux-perms shadow-4.2.1/src/Makefile.in
---- shadow-4.2.1/src/Makefile.in.selinux-perms	2016-05-27 16:04:00.896475284 +0200
-+++ shadow-4.2.1/src/Makefile.in	2016-05-27 16:04:00.899475353 +0200
-@@ -521,9 +521,9 @@ chage_LDADD = $(LDADD) $(LIBPAM_SUID) $(
- newuidmap_LDADD = $(LDADD) $(LIBSELINUX)
- newgidmap_LDADD = $(LDADD) $(LIBSELINUX)
- chfn_LDADD = $(LDADD) $(LIBPAM) $(LIBSELINUX) $(LIBCRYPT_NOPAM) $(LIBSKEY) $(LIBMD)
--chgpasswd_LDADD = $(LDADD) $(LIBPAM_SUID) $(LIBSELINUX) $(LIBCRYPT)
-+chgpasswd_LDADD = $(LDADD) $(LIBPAM_SUID) $(LIBSELINUX) $(LIBAUDIT) $(LIBCRYPT)
- chsh_LDADD = $(LDADD) $(LIBPAM) $(LIBSELINUX) $(LIBCRYPT_NOPAM) $(LIBSKEY) $(LIBMD)
--chpasswd_LDADD = $(LDADD) $(LIBPAM) $(LIBSELINUX) $(LIBCRYPT)
-+chpasswd_LDADD = $(LDADD) $(LIBPAM) $(LIBSELINUX) $(LIBAUDIT) $(LIBCRYPT)
- gpasswd_LDADD = $(LDADD) $(LIBAUDIT) $(LIBSELINUX) $(LIBCRYPT)
  groupadd_LDADD = $(LDADD) $(LIBPAM_SUID) $(LIBAUDIT) $(LIBSELINUX)
  groupdel_LDADD = $(LDADD) $(LIBPAM_SUID) $(LIBAUDIT) $(LIBSELINUX)
