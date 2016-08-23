@@ -42,7 +42,7 @@ BuildRequires: audit-libs-devel >= 1.6.5
 BuildRequires: libsemanage-devel
 BuildRequires: libacl-devel libattr-devel
 BuildRequires: bison flex gnome-doc-utils
-#BuildRequires: autoconf, automake, libtool, gettext-devel
+BuildRequires: autoconf, automake, libtool, gettext-devel
 Requires: libselinux >= 1.25.2-1
 Requires: audit-libs >= 1.6.5
 Requires: setup
