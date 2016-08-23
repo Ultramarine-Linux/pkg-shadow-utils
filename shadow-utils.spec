@@ -1,11 +1,10 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
-Version: 4.2.1
-Release: 11%{?dist}
+Version: 4.3.1
+Release: 1%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
-Source0: http://pkg-shadow.alioth.debian.org/releases/shadow-%{version}.tar.xz
-Source3: http://pkg-shadow.alioth.debian.org/releases/shadow-%{version}.tar.xz.sig
+Source0: https://github.com/shadow-maint/shadow/archive/%{version}.tar.gz#/shadow-%{version}.tar.gz
 Source1: shadow-utils.login.defs
 Source2: shadow-utils.useradd
 Source4: shadow-bsd.txt
@@ -23,19 +22,17 @@ Patch11: shadow-4.1.5.1-logmsg.patch
 Patch12: shadow-4.1.5.1-errmsg.patch
 Patch13: shadow-4.1.5.1-audit-owner.patch
 Patch14: shadow-4.1.5.1-default-range.patch
-Patch15: shadow-4.2.1-manfix.patch
+Patch15: shadow-4.3.1-manfix.patch
 Patch17: shadow-4.1.5.1-userdel-helpfix.patch
 Patch18: shadow-4.1.5.1-id-alloc.patch
 Patch19: shadow-4.2.1-date-parsing.patch
 Patch20: shadow-4.1.5.1-ingroup.patch
 Patch21: shadow-4.1.5.1-move-home.patch
-Patch22: shadow-4.2.1-audit-update.patch
+Patch22: shadow-4.3.1-audit-update.patch
 Patch23: shadow-4.2.1-usermod-unlock.patch
 Patch24: shadow-4.2.1-no-lock-dos.patch
-Patch25: shadow-4.2.1-defs-chroot.patch
-Patch26: shadow-4.2.1-lastlog-unexpire.patch
-Patch27: shadow-4.2.1-user-busy.patch
-Patch28: shadow-4.2.1-selinux-perms.patch
+Patch25: shadow-4.3.1-defs-chroot.patch
+Patch28: shadow-4.3.1-selinux-perms.patch
 Patch29: shadow-4.2.1-null-tm.patch
 
 License: BSD and GPLv2+
@@ -90,8 +87,6 @@ are used for managing group accounts.
 %patch23 -p1 -b .unlock
 %patch24 -p1 -b .no-lock-dos
 %patch25 -p1 -b .defs-chroot
-%patch26 -p1 -b .unexpire
-%patch27 -p1 -b .user-busy
 %patch28 -p1 -b .selinux-perms
 %patch29 -p1 -b .null-tm
 
@@ -100,16 +95,9 @@ cp -f doc/HOWTO.utf8 doc/HOWTO
 
 cp -a %{SOURCE4} %{SOURCE5} .
 
-rm libmisc/getdate.c
-
-#rm po/*.gmo
-#rm po/stamp-po
-#aclocal
-#libtoolize --force
-#automake -a
-#autoconf
-
 %build
+
+./autogen.sh
 
 %ifarch sparc64
 #sparc64 need big PIE
@@ -259,6 +247,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Tue Aug 23 2016 Tomáš Mráz <tmraz@redhat.com> - 2:4.3.1-1
+- new upstream release fixing low impact security issue
+
 * Tue Jun 14 2016 Tomáš Mráz <tmraz@redhat.com> - 2:4.2.1-11
 - guard for localtime() and gmtime() failure
 
