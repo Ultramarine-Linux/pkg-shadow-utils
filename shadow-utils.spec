@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.3.1
-Release: 1%{?dist}
+Release: 2%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: https://github.com/shadow-maint/shadow/archive/%{version}.tar.gz#/shadow-%{version}.tar.gz
@@ -34,6 +34,7 @@ Patch24: shadow-4.2.1-no-lock-dos.patch
 Patch25: shadow-4.3.1-defs-chroot.patch
 Patch28: shadow-4.3.1-selinux-perms.patch
 Patch29: shadow-4.2.1-null-tm.patch
+Patch30: shadow-4.3.1-process-defaults.patch
 
 License: BSD and GPLv2+
 Group: System Environment/Base
@@ -89,6 +90,7 @@ are used for managing group accounts.
 %patch25 -p1 -b .defs-chroot
 %patch28 -p1 -b .selinux-perms
 %patch29 -p1 -b .null-tm
+%patch30 -p1 -b .process-defaults
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -247,6 +249,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Thu Aug 25 2016 Tomáš Mráz <tmraz@redhat.com> - 2:4.3.1-2
+- fix regression in useradd - not processing defaults properly (#1369979)
+
 * Tue Aug 23 2016 Tomáš Mráz <tmraz@redhat.com> - 2:4.3.1-1
 - new upstream release fixing low impact security issue
 
