@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.3.1
-Release: 2%{?dist}
+Release: 3%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: https://github.com/shadow-maint/shadow/archive/%{version}.tar.gz#/shadow-%{version}.tar.gz
@@ -249,6 +249,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Sat Feb 11 2017 Fedora Release Engineering <releng@fedoraproject.org> - 2:4.3.1-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_26_Mass_Rebuild
+
 * Thu Aug 25 2016 Tomáš Mráz <tmraz@redhat.com> - 2:4.3.1-2
 - fix regression in useradd - not processing defaults properly (#1369979)
 
