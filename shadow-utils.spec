@@ -1,40 +1,33 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
-Version: 4.3.1
-Release: 3%{?dist}
+Version: 4.5
+Release: 1%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
-Source0: https://github.com/shadow-maint/shadow/archive/%{version}.tar.gz#/shadow-%{version}.tar.gz
-Source1: shadow-utils.login.defs
+Source0: https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz
+Source1: https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz.asc
 Source2: shadow-utils.useradd
+Source3: shadow-utils.login.defs
 Source4: shadow-bsd.txt
 Source5: https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
 Patch0: shadow-4.1.5-redhat.patch
 Patch1: shadow-4.1.5.1-goodname.patch
 Patch2: shadow-4.1.5.1-info-parent-dir.patch
-Patch3: shadow-4.1.5-uflg.patch
-Patch6: shadow-4.1.5.1-selinux.patch
+Patch6: shadow-4.5-selinux.patch
 Patch7: shadow-4.1.5-2ndskip.patch
-Patch8: shadow-4.1.5.1-backup-mode.patch
-Patch9: shadow-4.2.1-merge-group.patch
-Patch10: shadow-4.1.5.1-orig-context.patch
+Patch10: shadow-4.5-orig-context.patch
 Patch11: shadow-4.1.5.1-logmsg.patch
-Patch12: shadow-4.1.5.1-errmsg.patch
-Patch13: shadow-4.1.5.1-audit-owner.patch
 Patch14: shadow-4.1.5.1-default-range.patch
 Patch15: shadow-4.3.1-manfix.patch
 Patch17: shadow-4.1.5.1-userdel-helpfix.patch
-Patch18: shadow-4.1.5.1-id-alloc.patch
 Patch19: shadow-4.2.1-date-parsing.patch
 Patch20: shadow-4.1.5.1-ingroup.patch
 Patch21: shadow-4.1.5.1-move-home.patch
 Patch22: shadow-4.3.1-audit-update.patch
-Patch23: shadow-4.2.1-usermod-unlock.patch
+Patch23: shadow-4.5-usermod-unlock.patch
 Patch24: shadow-4.2.1-no-lock-dos.patch
-Patch25: shadow-4.3.1-defs-chroot.patch
 Patch28: shadow-4.3.1-selinux-perms.patch
 Patch29: shadow-4.2.1-null-tm.patch
-Patch30: shadow-4.3.1-process-defaults.patch
 
 License: BSD and GPLv2+
 Group: System Environment/Base
@@ -68,29 +61,21 @@ are used for managing group accounts.
 %patch0 -p1 -b .redhat
 %patch1 -p1 -b .goodname
 %patch2 -p1 -b .info-parent-dir
-%patch3 -p1 -b .uflg
 %patch6 -p1 -b .selinux
 %patch7 -p1 -b .2ndskip
-%patch8 -p1 -b .backup-mode
-%patch9 -p1 -b .merge-group
 %patch10 -p1 -b .orig-context
 %patch11 -p1 -b .logmsg
-%patch12 -p1 -b .errmsg
-%patch13 -p1 -b .audit-owner
 %patch14 -p1 -b .default-range
 %patch15 -p1 -b .manfix
 %patch17 -p1 -b .userdel
-%patch18 -p1 -b .id-alloc
 %patch19 -p1 -b .date-parsing
 %patch20 -p1 -b .ingroup
 %patch21 -p1 -b .move-home
 %patch22 -p1 -b .audit-update
 %patch23 -p1 -b .unlock
 %patch24 -p1 -b .no-lock-dos
-%patch25 -p1 -b .defs-chroot
 %patch28 -p1 -b .selinux-perms
 %patch29 -p1 -b .null-tm
-%patch30 -p1 -b .process-defaults
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -98,9 +83,6 @@ cp -f doc/HOWTO.utf8 doc/HOWTO
 cp -a %{SOURCE4} %{SOURCE5} .
 
 %build
-
-./autogen.sh
-
 %ifarch sparc64
 #sparc64 need big PIE
 export CFLAGS="$RPM_OPT_FLAGS -fPIE"
@@ -110,6 +92,7 @@ export CFLAGS="$RPM_OPT_FLAGS -fpie"
 export LDFLAGS="-pie -Wl,-z,relro -Wl,-z,now"
 %endif
 
+autoreconf
 %configure \
         --enable-shadowgrp \
         --enable-man \
@@ -126,7 +109,7 @@ make
 rm -rf $RPM_BUILD_ROOT
 make install DESTDIR=$RPM_BUILD_ROOT gnulocaledir=$RPM_BUILD_ROOT/%{_datadir}/locale MKINSTALLDIRS=`pwd`/mkinstalldirs
 install -d -m 755 $RPM_BUILD_ROOT/%{_sysconfdir}/default
-install -p -c -m 0644 %{SOURCE1} $RPM_BUILD_ROOT/%{_sysconfdir}/login.defs
+install -p -c -m 0644 %{SOURCE3} $RPM_BUILD_ROOT/%{_sysconfdir}/login.defs
 install -p -c -m 0600 %{SOURCE2} $RPM_BUILD_ROOT/%{_sysconfdir}/default/useradd
 
 
@@ -249,6 +232,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Fri Jul 21 2017 Tomáš Mráz <tmraz@redhat.com> - 2:4.5-1
+- update to current upstream release 4.5
+
 * Sat Feb 11 2017 Fedora Release Engineering <releng@fedoraproject.org> - 2:4.3.1-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_26_Mass_Rebuild
 

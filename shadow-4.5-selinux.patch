@@ -1,0 +1,115 @@
+diff -up shadow-4.5/lib/semanage.c.selinux shadow-4.5/lib/semanage.c
+--- shadow-4.5/lib/semanage.c.selinux	2014-09-01 16:36:40.000000000 +0200
++++ shadow-4.5/lib/semanage.c	2017-07-20 16:40:49.680297319 +0200
+@@ -294,6 +294,9 @@ int set_seuser (const char *login_name,
+ 
+ 	ret = 0;
+ 
++        /* drop obsolete matchpathcon cache */
++        matchpathcon_fini();
++
+ done:
+ 	semanage_seuser_key_free (key);
+ 	semanage_handle_destroy (handle);
+@@ -369,6 +372,10 @@ int del_seuser (const char *login_name)
+ 	}
+ 
+ 	ret = 0;
++
++        /* drop obsolete matchpathcon cache */
++        matchpathcon_fini();
++
+ done:
+ 	semanage_handle_destroy (handle);
+ 	return ret;
+diff -up shadow-4.5/src/useradd.c.selinux shadow-4.5/src/useradd.c
+--- shadow-4.5/src/useradd.c.selinux	2017-07-20 16:40:49.677297246 +0200
++++ shadow-4.5/src/useradd.c	2017-07-20 16:44:58.195275331 +0200
+@@ -2042,6 +2042,7 @@ static void create_mail (void)
+  */
+ int main (int argc, char **argv)
+ {
++	int rv = E_SUCCESS;
+ #ifdef ACCT_TOOLS_SETUID
+ #ifdef USE_PAM
+ 	pam_handle_t *pamh = NULL;
+@@ -2262,27 +2263,11 @@ int main (int argc, char **argv)
+ 
+ 	usr_update ();
+ 
+-	if (mflg) {
+-		create_home ();
+-		if (home_added) {
+-			copy_tree (def_template, user_home, false, false,
+-			           (uid_t)-1, user_id, (gid_t)-1, user_gid);
+-		} else {
+-			fprintf (stderr,
+-			         _("%s: warning: the home directory already exists.\n"
+-			           "Not copying any file from skel directory into it.\n"),
+-			         Prog);
+-		}
+-
+-	}
+-
+-	/* Do not create mail directory for system accounts */
+-	if (!rflg) {
+-		create_mail ();
+-	}
+-
+ 	close_files ();
+ 
++	nscd_flush_cache ("passwd");
++	nscd_flush_cache ("group");
++
+ 	/*
+ 	 * tallylog_reset needs to be able to lookup
+ 	 * a valid existing user name,
+@@ -2293,8 +2278,9 @@ int main (int argc, char **argv)
+ 	}
+ 
+ #ifdef WITH_SELINUX
+-	if (Zflg) {
+-		if (set_seuser (user_name, user_selinux) != 0) {
++	if (Zflg && *user_selinux) {
++		if (is_selinux_enabled () > 0) {
++		    if (set_seuser (user_name, user_selinux) != 0) {
+ 			fprintf (stderr,
+ 			         _("%s: warning: the user name %s to %s SELinux user mapping failed.\n"),
+ 			         Prog, user_name, user_selinux);
+@@ -2303,14 +2289,31 @@ int main (int argc, char **argv)
+ 			              "adding SELinux user mapping",
+ 			              user_name, (unsigned int) user_id, 0);
+ #endif				/* WITH_AUDIT */
+-			fail_exit (E_SE_UPDATE);
++			rv = E_SE_UPDATE;
++		    }
+ 		}
+ 	}
+-#endif				/* WITH_SELINUX */
++#endif
+ 
+-	nscd_flush_cache ("passwd");
+-	nscd_flush_cache ("group");
++	if (mflg) {
++		create_home ();
++		if (home_added) {
++			copy_tree (def_template, user_home, false, true,
++			           (uid_t)-1, user_id, (gid_t)-1, user_gid);
++		} else {
++			fprintf (stderr,
++			         _("%s: warning: the home directory already exists.\n"
++			           "Not copying any file from skel directory into it.\n"),
++			         Prog);
++		}
++
++	}
++
++	/* Do not create mail directory for system accounts */
++	if (!rflg) {
++		create_mail ();
++	}
+ 
+-	return E_SUCCESS;
++	return rv;
+ }
+ 
