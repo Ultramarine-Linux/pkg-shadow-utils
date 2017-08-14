@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.5
-Release: 3%{?dist}
+Release: 4%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz
@@ -28,6 +28,7 @@ Patch23: shadow-4.5-usermod-unlock.patch
 Patch24: shadow-4.2.1-no-lock-dos.patch
 Patch28: shadow-4.3.1-selinux-perms.patch
 Patch29: shadow-4.2.1-null-tm.patch
+Patch30: shadow-4.1.5.1-newgrp-grouplist.patch
 
 License: BSD and GPLv2+
 Group: System Environment/Base
@@ -76,6 +77,7 @@ are used for managing group accounts.
 %patch24 -p1 -b .no-lock-dos
 %patch28 -p1 -b .selinux-perms
 %patch29 -p1 -b .null-tm
+%patch30 -p1 -b .grouplist
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -232,6 +234,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Mon Aug 14 2017 Tomáš Mráz <tmraz@redhat.com> - 2:4.5-4
+- allow switching to secondary group without checking the membership
+  explicitly (patch from upstream)
+
 * Thu Aug 03 2017 Fedora Release Engineering <releng@fedoraproject.org> - 2:4.5-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_27_Binutils_Mass_Rebuild
 
