@@ -78,28 +78,7 @@ diff -up shadow-4.5/man/groupadd.8.xml.goodname shadow-4.5/man/groupadd.8.xml
 diff -up shadow-4.5/man/useradd.8.xml.goodname shadow-4.5/man/useradd.8.xml
 --- shadow-4.5/man/useradd.8.xml.goodname	2016-08-15 04:48:14.000000000 +0200
 +++ shadow-4.5/man/useradd.8.xml	2017-08-14 10:27:24.667391382 +0200
-@@ -347,6 +347,11 @@
- 	    <option>CREATE_HOME</option> is not enabled, no home
- 	    directories are created.
- 	  </para>
-+	  <para>
-+	    The directory where the user's home directory is created must
-+	    exist and have proper SELinux context and permissions. Otherwise
-+	    the user's home directory cannot be created or accessed.
-+	  </para>
- 	</listitem>
-       </varlistentry>
-       <varlistentry>
-@@ -355,7 +360,7 @@
- 	</term>
- 	<listitem>
- 	  <para>
--	    Do no create the user's home directory, even if the system
-+	    Do not create the user's home directory, even if the system
- 	    wide setting from <filename>/etc/login.defs</filename>
- 	    (<option>CREATE_HOME</option>) is set to
- 	    <replaceable>yes</replaceable>.
-@@ -633,12 +638,6 @@
+@@ -633,12 +633,6 @@
      </para>
  
      <para>
