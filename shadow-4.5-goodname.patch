@@ -1,7 +1,7 @@
-diff -up shadow-4.1.5.1/libmisc/chkname.c.goodname shadow-4.1.5.1/libmisc/chkname.c
---- shadow-4.1.5.1/libmisc/chkname.c.goodname	2009-07-13 00:24:45.000000000 +0200
-+++ shadow-4.1.5.1/libmisc/chkname.c	2014-09-09 17:35:17.207303124 +0200
-@@ -47,27 +47,42 @@
+diff -up shadow-4.5/libmisc/chkname.c.goodname shadow-4.5/libmisc/chkname.c
+--- shadow-4.5/libmisc/chkname.c.goodname	2014-09-01 16:36:40.000000000 +0200
++++ shadow-4.5/libmisc/chkname.c	2017-09-15 17:06:29.917939977 +0200
+@@ -47,27 +47,46 @@
  #include "chkname.h"
  
  static bool is_valid_name (const char *name)
@@ -18,16 +18,18 @@ diff -up shadow-4.1.5.1/libmisc/chkname.c.goodname shadow-4.1.5.1/libmisc/chknam
 +         * as a non-POSIX, extension, allow "$" as the last char for
 +         * sake of Samba 3.x "add machine script"
 +         *
-+         * Also do not allow fully numeric names.
++         * Also do not allow fully numeric names or just "." or "..".
 +         */
 +	int numeric;
 +
-+	if ( ('\0' == *name) ||
-+             !((*name >= 'a' && *name <= 'z') ||
-+               (*name >= 'A' && *name <= 'Z') ||
-+               (*name >= '0' && *name <= '9') ||
-+               (*name == '_') || (*name == '.') 
-+	      )) {
++	if ('\0' == *name ||
++	    ('.' == *name && (('.' == name[1] && '\0' == name[2]) ||
++			      '\0' == name[1])) ||
++	    !((*name >= 'a' && *name <= 'z') ||
++	      (*name >= 'A' && *name <= 'Z') ||
++	      (*name >= '0' && *name <= '9') ||
++	      *name == '_' ||
++	      *name == '.')) {
  		return false;
  	}
  
@@ -39,13 +41,14 @@ diff -up shadow-4.1.5.1/libmisc/chkname.c.goodname shadow-4.1.5.1/libmisc/chknam
 -		      ('_' == *name) ||
 -		      ('-' == *name) ||
 -		      ( ('$' == *name) && ('\0' == *(name + 1)) )
--		     )) {
-+                if (!(  (*name >= 'a' && *name <= 'z') ||
-+                        (*name >= 'A' && *name <= 'Z') ||
-+                        (*name >= '0' && *name <= '9') ||
-+                        (*name == '_') || (*name == '.') || (*name == '-') ||
-+                        (*name == '$' && *(name + 1) == '\0') 
-+                     )) {
++		if (!((*name >= 'a' && *name <= 'z') ||
++		      (*name >= 'A' && *name <= 'Z') ||
++		      (*name >= '0' && *name <= '9') ||
++		      *name == '_' ||
++		      *name == '.' ||
++		      *name == '-' ||
++		      (*name == '$' && name[1] == '\0')
+ 		     )) {
  			return false;
  		}
 +		numeric &= isdigit(*name);
@@ -56,10 +59,10 @@ diff -up shadow-4.1.5.1/libmisc/chkname.c.goodname shadow-4.1.5.1/libmisc/chknam
  }
  
  bool is_valid_user_name (const char *name)
-diff -up shadow-4.1.5.1/man/groupadd.8.xml.goodname shadow-4.1.5.1/man/groupadd.8.xml
---- shadow-4.1.5.1/man/groupadd.8.xml.goodname	2012-05-25 13:45:27.000000000 +0200
-+++ shadow-4.1.5.1/man/groupadd.8.xml	2014-09-09 17:28:46.330300342 +0200
-@@ -259,12 +259,6 @@
+diff -up shadow-4.5/man/groupadd.8.xml.goodname shadow-4.5/man/groupadd.8.xml
+--- shadow-4.5/man/groupadd.8.xml.goodname	2014-09-01 16:36:40.000000000 +0200
++++ shadow-4.5/man/groupadd.8.xml	2017-08-14 10:27:24.657391521 +0200
+@@ -256,12 +256,6 @@
     <refsect1 id='caveats'>
       <title>CAVEATS</title>
       <para>
@@ -72,10 +75,22 @@ diff -up shadow-4.1.5.1/man/groupadd.8.xml.goodname shadow-4.1.5.1/man/groupadd.
         Groupnames may only be up to &GROUP_NAME_MAX_LENGTH; characters long.
       </para>
       <para>
-diff -up shadow-4.1.5.1/man/useradd.8.xml.goodname shadow-4.1.5.1/man/useradd.8.xml
---- shadow-4.1.5.1/man/useradd.8.xml.goodname	2012-05-25 13:45:29.000000000 +0200
-+++ shadow-4.1.5.1/man/useradd.8.xml	2014-09-09 17:28:46.330300342 +0200
-@@ -366,7 +366,7 @@
+diff -up shadow-4.5/man/useradd.8.xml.goodname shadow-4.5/man/useradd.8.xml
+--- shadow-4.5/man/useradd.8.xml.goodname	2016-08-15 04:48:14.000000000 +0200
++++ shadow-4.5/man/useradd.8.xml	2017-08-14 10:27:24.667391382 +0200
+@@ -347,6 +347,11 @@
+ 	    <option>CREATE_HOME</option> is not enabled, no home
+ 	    directories are created.
+ 	  </para>
++	  <para>
++	    The directory where the user's home directory is created must
++	    exist and have proper SELinux context and permissions. Otherwise
++	    the user's home directory cannot be created or accessed.
++	  </para>
+ 	</listitem>
+       </varlistentry>
+       <varlistentry>
+@@ -355,7 +360,7 @@
  	</term>
  	<listitem>
  	  <para>
@@ -84,7 +99,7 @@ diff -up shadow-4.1.5.1/man/useradd.8.xml.goodname shadow-4.1.5.1/man/useradd.8.
  	    wide setting from <filename>/etc/login.defs</filename>
  	    (<option>CREATE_HOME</option>) is set to
  	    <replaceable>yes</replaceable>.
-@@ -654,12 +654,6 @@
+@@ -633,12 +638,6 @@
      </para>
  
      <para>

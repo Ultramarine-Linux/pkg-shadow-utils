@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.5
-Release: 4%{?dist}
+Release: 5%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz
@@ -11,7 +11,7 @@ Source3: shadow-utils.login.defs
 Source4: shadow-bsd.txt
 Source5: https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
 Patch0: shadow-4.1.5-redhat.patch
-Patch1: shadow-4.1.5.1-goodname.patch
+Patch1: shadow-4.5-goodname.patch
 Patch2: shadow-4.1.5.1-info-parent-dir.patch
 Patch6: shadow-4.5-selinux.patch
 Patch7: shadow-4.1.5-2ndskip.patch
@@ -234,6 +234,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Fri Sep 15 2017 Tomáš Mráz <tmraz@redhat.com> - 2:4.5-5
+- do not allow "." and ".." user names
+
 * Mon Aug 14 2017 Tomáš Mráz <tmraz@redhat.com> - 2:4.5-4
 - allow switching to secondary group without checking the membership
   explicitly (patch from upstream)
