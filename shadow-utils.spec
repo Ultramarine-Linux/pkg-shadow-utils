@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.5
-Release: 5%{?dist}
+Release: 6%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz
@@ -29,6 +29,7 @@ Patch24: shadow-4.2.1-no-lock-dos.patch
 Patch28: shadow-4.3.1-selinux-perms.patch
 Patch29: shadow-4.2.1-null-tm.patch
 Patch30: shadow-4.1.5.1-newgrp-grouplist.patch
+Patch31: shadow-4.5-userdel-chroot.patch
 
 License: BSD and GPLv2+
 Group: System Environment/Base
@@ -78,6 +79,7 @@ are used for managing group accounts.
 %patch28 -p1 -b .selinux-perms
 %patch29 -p1 -b .null-tm
 %patch30 -p1 -b .grouplist
+%patch31 -p1 -b .userdel-chroot
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -116,7 +118,6 @@ install -p -c -m 0600 %{SOURCE2} $RPM_BUILD_ROOT/%{_sysconfdir}/default/useradd
 
 
 ln -s useradd $RPM_BUILD_ROOT%{_sbindir}/adduser
-#ln -s %{_mandir}/man8/useradd.8 $RPM_BUILD_ROOT/%{_mandir}/man8/adduser.8
 ln -s useradd.8 $RPM_BUILD_ROOT/%{_mandir}/man8/adduser.8
 for subdir in $RPM_BUILD_ROOT/%{_mandir}/{??,??_??,??_??.*}/man* ; do
         test -d $subdir && test -e $subdir/useradd.8 && echo ".so man8/useradd.8" > $subdir/adduser.8
@@ -234,6 +235,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Thu Nov  2 2017 Tomáš Mráz <tmraz@redhat.com> - 2:4.5-6
+- fix userdel in chroot (#1316168)
+- add useful chage -E example to chage manpage
+
 * Fri Sep 15 2017 Tomáš Mráz <tmraz@redhat.com> - 2:4.5-5
 - do not allow "." and ".." user names
 

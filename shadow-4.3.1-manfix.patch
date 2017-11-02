@@ -38,6 +38,20 @@ diff -up shadow-4.3.1/man/chage.1.xml.manfix shadow-4.3.1/man/chage.1.xml
  	  </para>
  	</listitem>
        </varlistentry>
+@@ -119,6 +122,13 @@
+ 	    system again.
+ 	  </para>
+ 	  <para>
++	    For example the following can be used to set an account to expire
++	    in 180 days:
++	  </para>
++	  <programlisting>
++	    chage -E $(date -d +180days +%Y-%m-%d)
++	  </programlisting>
++	  <para>
+ 	    Passing the number <emphasis remap='I'>-1</emphasis> as the
+ 	    <replaceable>EXPIRE_DATE</replaceable> will remove an account
+ 	    expiration date.
 diff -up shadow-4.3.1/man/ja/man5/login.defs.5.manfix shadow-4.3.1/man/ja/man5/login.defs.5
 --- shadow-4.3.1/man/ja/man5/login.defs.5.manfix	2016-08-15 06:00:59.000000000 +0200
 +++ shadow-4.3.1/man/ja/man5/login.defs.5	2016-08-22 17:08:48.486332066 +0200
