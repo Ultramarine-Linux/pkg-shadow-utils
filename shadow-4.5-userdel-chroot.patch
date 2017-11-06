@@ -1,6 +1,6 @@
 diff -up shadow-4.5/lib/selinux.c.userdel-chroot shadow-4.5/lib/selinux.c
---- shadow-4.5/lib/selinux.c.userdel-chroot	2017-11-02 10:19:11.886588281 +0100
-+++ shadow-4.5/lib/selinux.c	2017-11-02 11:38:32.029906306 +0100
+--- shadow-4.5/lib/selinux.c.userdel-chroot	2017-11-06 13:40:41.396131526 +0100
++++ shadow-4.5/lib/selinux.c	2017-11-06 13:40:41.418132035 +0100
 @@ -75,7 +75,7 @@ int set_selinux_file_context (const char
  	}
  	return 0;
@@ -20,8 +20,8 @@ diff -up shadow-4.5/lib/selinux.c.userdel-chroot shadow-4.5/lib/selinux.c
  		}
  	}
 diff -up shadow-4.5/src/userdel.c.userdel-chroot shadow-4.5/src/userdel.c
---- shadow-4.5/src/userdel.c.userdel-chroot	2017-11-02 10:19:11.899588578 +0100
-+++ shadow-4.5/src/userdel.c	2017-11-02 11:16:07.437048450 +0100
+--- shadow-4.5/src/userdel.c.userdel-chroot	2017-11-06 13:40:41.410131850 +0100
++++ shadow-4.5/src/userdel.c	2017-11-06 15:26:56.567954410 +0100
 @@ -96,6 +96,7 @@ static char *user_home;
  static bool fflg = false;
  static bool rflg = false;
@@ -38,48 +38,30 @@ diff -up shadow-4.5/src/userdel.c.userdel-chroot shadow-4.5/src/userdel.c
  				break;
  #ifdef WITH_SELINUX             
  			case 'Z':
-@@ -1031,9 +1033,11 @@ int main (int argc, char **argv)
- 	 * Start with a quick check to see if the user exists.
+@@ -1032,9 +1034,12 @@ int main (int argc, char **argv)
  	 */
  	user_name = argv[argc - 1];
-+	open_files ();
-+
  	{
 -		struct passwd *pwd;
 -		pwd = getpwnam (user_name); /* local, no need for xgetpwnam */
 +		const struct passwd *pwd;
++
++		pw_open(O_RDONLY);
 +		pwd = pw_locate (user_name); /* we care only about local users */
  		if (NULL == pwd) {
++			pw_close();
  			fprintf (stderr, _("%s: user '%s' does not exist\n"),
  				 Prog, user_name);
-@@ -1043,7 +1047,7 @@ int main (int argc, char **argv)
- 			              user_name, AUDIT_NO_ID,
- 			              SHADOW_AUDIT_FAILURE);
- #endif				/* WITH_AUDIT */
--			exit (E_NOTFOUND);
-+			fail_exit (E_NOTFOUND);
- 		}
+ #ifdef WITH_AUDIT
+@@ -1048,6 +1053,7 @@ int main (int argc, char **argv)
  		user_id = pwd->pw_uid;
  		user_gid = pwd->pw_gid;
-@@ -1051,7 +1055,7 @@ int main (int argc, char **argv)
+ 		user_home = xstrdup (pwd->pw_dir);
++		pw_close();
  	}
  #ifdef WITH_TCB
  	if (shadowtcb_set_user (user_name) == SHADOWTCB_FAILURE) {
--		exit (E_NOTFOUND);
-+		fail_exit (E_NOTFOUND);
- 	}
- #endif				/* WITH_TCB */
- #ifdef	USE_NIS
-@@ -1071,7 +1075,7 @@ int main (int argc, char **argv)
- 			         _("%s: %s is the NIS master\n"),
- 			         Prog, nis_master);
- 		}
--		exit (E_NOTFOUND);
-+		fail_exit (E_NOTFOUND);
- 	}
- #endif				/* USE_NIS */
- 	/*
-@@ -1079,7 +1083,7 @@ int main (int argc, char **argv)
+@@ -1079,7 +1085,7 @@ int main (int argc, char **argv)
  	 * Note: This is a best effort basis. The user may log in between,
  	 * a cron job may be started on her behalf, etc.
  	 */
@@ -88,21 +70,3 @@ diff -up shadow-4.5/src/userdel.c.userdel-chroot shadow-4.5/src/userdel.c
  		if (!fflg) {
  #ifdef WITH_AUDIT
  			audit_logger (AUDIT_DEL_USER, Prog,
-@@ -1087,15 +1091,14 @@ int main (int argc, char **argv)
- 			              user_name, AUDIT_NO_ID,
- 			              SHADOW_AUDIT_FAILURE);
- #endif				/* WITH_AUDIT */
--			exit (E_USER_BUSY);
-+			fail_exit (E_USER_BUSY);
- 		}
- 	}
- 
- 	/*
--	 * Do the hard stuff - open the files, create the user entries,
-+	 * Do the hard stuff - create the user entries,
- 	 * create the home directory, then close and update the files.
- 	 */
--	open_files ();
- 	update_user ();
- 	update_groups ();
- 

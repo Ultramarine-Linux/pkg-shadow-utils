@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.5
-Release: 6%{?dist}
+Release: 7%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz
@@ -235,6 +235,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Mon Nov  6 2017 Tomáš Mráz <tmraz@redhat.com> - 2:4.5-7
+- fix regression caused by the userdel-chroot patch (#1509978)
+
 * Thu Nov  2 2017 Tomáš Mráz <tmraz@redhat.com> - 2:4.5-6
 - fix userdel in chroot (#1316168)
 - add useful chage -E example to chage manpage
