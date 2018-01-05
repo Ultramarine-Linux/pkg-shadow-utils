@@ -1,0 +1,10 @@
+This is a basic sanity test for the shadow-utils package. It is implemented
+in python on top of the unittesting.py module.
+
+Its purpose is to ensure that the binaries in the shadow-utils package behave
+as expected and its switches/options work correctly.
+
+For the most part, every binary in the shadow-utils package is represented by
+a single class named Test<BinaryName>, i.e. TestUsermod etc. There are some 
+exceptions, like TestUseraddWeirdNameTest though.
+
