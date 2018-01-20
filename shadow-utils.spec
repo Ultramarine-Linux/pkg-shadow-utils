@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.5
-Release: 7%{?dist}
+Release: 8%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz
@@ -235,6 +235,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Sat Jan 20 2018 Björn Esser <besser82@fedoraproject.org> - 2:4.5-8
+- Rebuilt for switch to libxcrypt
+
 * Mon Nov  6 2017 Tomáš Mráz <tmraz@redhat.com> - 2:4.5-7
 - fix regression caused by the userdel-chroot patch (#1509978)
 
