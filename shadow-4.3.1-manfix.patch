@@ -1,6 +1,7 @@
-diff -up shadow-4.3.1/man/groupmems.8.xml.manfix shadow-4.3.1/man/groupmems.8.xml
---- shadow-4.3.1/man/groupmems.8.xml.manfix	2016-08-15 06:00:59.000000000 +0200
-+++ shadow-4.3.1/man/groupmems.8.xml	2016-08-22 17:08:48.486332066 +0200
+Index: shadow-4.5/man/groupmems.8.xml
+===================================================================
+--- shadow-4.5.orig/man/groupmems.8.xml
++++ shadow-4.5/man/groupmems.8.xml
 @@ -179,20 +179,10 @@
    <refsect1 id='setup'>
      <title>SETUP</title>
@@ -25,9 +26,10 @@ diff -up shadow-4.3.1/man/groupmems.8.xml.manfix shadow-4.3.1/man/groupmems.8.xm
    </refsect1>
  
    <refsect1 id='configuration'>
-diff -up shadow-4.3.1/man/chage.1.xml.manfix shadow-4.3.1/man/chage.1.xml
---- shadow-4.3.1/man/chage.1.xml.manfix	2016-08-15 06:00:59.000000000 +0200
-+++ shadow-4.3.1/man/chage.1.xml	2016-08-22 17:08:48.486332066 +0200
+Index: shadow-4.5/man/chage.1.xml
+===================================================================
+--- shadow-4.5.orig/man/chage.1.xml
++++ shadow-4.5/man/chage.1.xml
 @@ -102,6 +102,9 @@
  	    Set the number of days since January 1st, 1970 when the password
  	    was last changed. The date may also be expressed in the format
@@ -52,10 +54,11 @@ diff -up shadow-4.3.1/man/chage.1.xml.manfix shadow-4.3.1/man/chage.1.xml
  	    Passing the number <emphasis remap='I'>-1</emphasis> as the
  	    <replaceable>EXPIRE_DATE</replaceable> will remove an account
  	    expiration date.
-diff -up shadow-4.3.1/man/ja/man5/login.defs.5.manfix shadow-4.3.1/man/ja/man5/login.defs.5
---- shadow-4.3.1/man/ja/man5/login.defs.5.manfix	2016-08-15 06:00:59.000000000 +0200
-+++ shadow-4.3.1/man/ja/man5/login.defs.5	2016-08-22 17:08:48.486332066 +0200
-@@ -147,10 +147,6 @@ 以下の参照表は、
+Index: shadow-4.5/man/ja/man5/login.defs.5
+===================================================================
+--- shadow-4.5.orig/man/ja/man5/login.defs.5
++++ shadow-4.5/man/ja/man5/login.defs.5
+@@ -147,10 +147,6 @@ PASS_MAX_DAYS, PASS_MIN_DAYS, PASS_WARN_
  shadow パスワード機能のどのプログラムが
  どのパラメータを使用するかを示したものである。
  .na
@@ -66,9 +69,10 @@ diff -up shadow-4.3.1/man/ja/man5/login.defs.5.manfix shadow-4.3.1/man/ja/man5/l
  .IP groupadd 12
  GID_MAX GID_MIN
  .IP newusers 12
-diff -up shadow-4.3.1/man/login.defs.5.xml.manfix shadow-4.3.1/man/login.defs.5.xml
---- shadow-4.3.1/man/login.defs.5.xml.manfix	2016-08-15 06:00:59.000000000 +0200
-+++ shadow-4.3.1/man/login.defs.5.xml	2016-08-22 17:08:48.487332069 +0200
+Index: shadow-4.5/man/login.defs.5.xml
+===================================================================
+--- shadow-4.5.orig/man/login.defs.5.xml
++++ shadow-4.5/man/login.defs.5.xml
 @@ -162,6 +162,17 @@
        long numeric parameters is machine-dependent.
      </para>
@@ -205,9 +209,10 @@ diff -up shadow-4.3.1/man/login.defs.5.xml.manfix shadow-4.3.1/man/login.defs.5.
        <varlistentry>
  	<term>useradd</term>
  	<listitem>
-diff -up shadow-4.3.1/man/shadow.5.xml.manfix shadow-4.3.1/man/shadow.5.xml
---- shadow-4.3.1/man/shadow.5.xml.manfix	2016-08-15 06:00:59.000000000 +0200
-+++ shadow-4.3.1/man/shadow.5.xml	2016-08-22 17:08:48.487332069 +0200
+Index: shadow-4.5/man/shadow.5.xml
+===================================================================
+--- shadow-4.5.orig/man/shadow.5.xml
++++ shadow-4.5/man/shadow.5.xml
 @@ -208,8 +208,8 @@
  	  </para>
  	  <para>
@@ -219,9 +224,10 @@ diff -up shadow-4.3.1/man/shadow.5.xml.manfix shadow-4.3.1/man/shadow.5.xml
  	  </para>
  	  <para>
  	    An empty field means that there are no enforcement of an
-diff -up shadow-4.3.1/man/useradd.8.xml.manfix shadow-4.3.1/man/useradd.8.xml
---- shadow-4.3.1/man/useradd.8.xml.manfix	2016-08-22 17:08:48.446331961 +0200
-+++ shadow-4.3.1/man/useradd.8.xml	2016-08-22 17:08:48.487332069 +0200
+Index: shadow-4.5/man/useradd.8.xml
+===================================================================
+--- shadow-4.5.orig/man/useradd.8.xml
++++ shadow-4.5/man/useradd.8.xml
 @@ -347,6 +347,11 @@
  	    <option>CREATE_HOME</option> is not enabled, no home
  	    directories are created.
@@ -234,9 +240,10 @@ diff -up shadow-4.3.1/man/useradd.8.xml.manfix shadow-4.3.1/man/useradd.8.xml
  	</listitem>
        </varlistentry>
        <varlistentry>
-diff -up shadow-4.3.1/man/usermod.8.xml.manfix shadow-4.3.1/man/usermod.8.xml
---- shadow-4.3.1/man/usermod.8.xml.manfix	2016-08-15 06:00:59.000000000 +0200
-+++ shadow-4.3.1/man/usermod.8.xml	2016-08-22 17:08:48.487332069 +0200
+Index: shadow-4.5/man/usermod.8.xml
+===================================================================
+--- shadow-4.5.orig/man/usermod.8.xml
++++ shadow-4.5/man/usermod.8.xml
 @@ -132,7 +132,8 @@
  	    If the <option>-m</option>
  	    option is given, the contents of the current home directory will

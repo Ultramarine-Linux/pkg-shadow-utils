@@ -1,6 +1,7 @@
-diff -up shadow-4.5/libmisc/chkname.c.goodname shadow-4.5/libmisc/chkname.c
---- shadow-4.5/libmisc/chkname.c.goodname	2014-09-01 16:36:40.000000000 +0200
-+++ shadow-4.5/libmisc/chkname.c	2017-09-15 17:06:29.917939977 +0200
+Index: shadow-4.5/libmisc/chkname.c
+===================================================================
+--- shadow-4.5.orig/libmisc/chkname.c
++++ shadow-4.5/libmisc/chkname.c
 @@ -47,27 +47,46 @@
  #include "chkname.h"
  
@@ -59,9 +60,10 @@ diff -up shadow-4.5/libmisc/chkname.c.goodname shadow-4.5/libmisc/chkname.c
  }
  
  bool is_valid_user_name (const char *name)
-diff -up shadow-4.5/man/groupadd.8.xml.goodname shadow-4.5/man/groupadd.8.xml
---- shadow-4.5/man/groupadd.8.xml.goodname	2014-09-01 16:36:40.000000000 +0200
-+++ shadow-4.5/man/groupadd.8.xml	2017-08-14 10:27:24.657391521 +0200
+Index: shadow-4.5/man/groupadd.8.xml
+===================================================================
+--- shadow-4.5.orig/man/groupadd.8.xml
++++ shadow-4.5/man/groupadd.8.xml
 @@ -256,12 +256,6 @@
     <refsect1 id='caveats'>
       <title>CAVEATS</title>
@@ -75,9 +77,10 @@ diff -up shadow-4.5/man/groupadd.8.xml.goodname shadow-4.5/man/groupadd.8.xml
         Groupnames may only be up to &GROUP_NAME_MAX_LENGTH; characters long.
       </para>
       <para>
-diff -up shadow-4.5/man/useradd.8.xml.goodname shadow-4.5/man/useradd.8.xml
---- shadow-4.5/man/useradd.8.xml.goodname	2016-08-15 04:48:14.000000000 +0200
-+++ shadow-4.5/man/useradd.8.xml	2017-08-14 10:27:24.667391382 +0200
+Index: shadow-4.5/man/useradd.8.xml
+===================================================================
+--- shadow-4.5.orig/man/useradd.8.xml
++++ shadow-4.5/man/useradd.8.xml
 @@ -633,12 +633,6 @@
      </para>
  

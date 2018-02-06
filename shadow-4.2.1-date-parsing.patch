@@ -1,6 +1,7 @@
-diff -up shadow-4.2.1/libmisc/getdate.y.date-parsing shadow-4.2.1/libmisc/getdate.y
---- shadow-4.2.1/libmisc/getdate.y.date-parsing	2014-03-01 18:50:05.000000000 +0100
-+++ shadow-4.2.1/libmisc/getdate.y	2014-11-26 14:58:21.208153924 +0100
+Index: shadow-4.5/libmisc/getdate.y
+===================================================================
+--- shadow-4.5.orig/libmisc/getdate.y
++++ shadow-4.5/libmisc/getdate.y
 @@ -152,6 +152,7 @@ static int	yyHaveDay;
  static int	yyHaveRel;
  static int	yyHaveTime;

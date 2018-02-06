@@ -1,6 +1,7 @@
-diff -up shadow-4.5/src/usermod.c.unlock shadow-4.5/src/usermod.c
---- shadow-4.5/src/usermod.c.unlock	2017-07-20 16:52:23.641969174 +0200
-+++ shadow-4.5/src/usermod.c	2017-07-20 16:54:08.109477127 +0200
+Index: shadow-4.5/src/usermod.c
+===================================================================
+--- shadow-4.5.orig/src/usermod.c
++++ shadow-4.5/src/usermod.c
 @@ -455,14 +455,17 @@ static char *new_pw_passwd (char *pw_pas
  		strcat (buf, pw_pass);
  		pw_pass = buf;

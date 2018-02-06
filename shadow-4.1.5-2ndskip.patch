@@ -1,6 +1,7 @@
-diff -up shadow-4.1.5/src/grpconv.c.2ndskip shadow-4.1.5/src/grpconv.c
---- shadow-4.1.5/src/grpconv.c.2ndskip	2012-06-18 13:08:34.438910815 +0200
-+++ shadow-4.1.5/src/grpconv.c	2012-06-18 13:12:51.270764552 +0200
+Index: shadow-4.5/src/grpconv.c
+===================================================================
+--- shadow-4.5.orig/src/grpconv.c
++++ shadow-4.5/src/grpconv.c
 @@ -143,6 +143,7 @@ int main (int argc, char **argv)
  	struct group grent;
  	const struct sgrp *sg;
@@ -48,9 +49,10 @@ diff -up shadow-4.1.5/src/grpconv.c.2ndskip shadow-4.1.5/src/grpconv.c
  	}
  
  	/*
-diff -up shadow-4.1.5/src/pwconv.c.2ndskip shadow-4.1.5/src/pwconv.c
---- shadow-4.1.5/src/pwconv.c.2ndskip	2012-06-18 11:23:33.938511797 +0200
-+++ shadow-4.1.5/src/pwconv.c	2012-06-18 12:57:18.396426194 +0200
+Index: shadow-4.5/src/pwconv.c
+===================================================================
+--- shadow-4.5.orig/src/pwconv.c
++++ shadow-4.5/src/pwconv.c
 @@ -173,6 +173,7 @@ int main (int argc, char **argv)
  	struct passwd pwent;
  	const struct spwd *sp;

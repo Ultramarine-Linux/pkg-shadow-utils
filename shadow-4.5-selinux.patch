@@ -1,6 +1,7 @@
-diff -up shadow-4.5/lib/semanage.c.selinux shadow-4.5/lib/semanage.c
---- shadow-4.5/lib/semanage.c.selinux	2014-09-01 16:36:40.000000000 +0200
-+++ shadow-4.5/lib/semanage.c	2017-07-20 16:40:49.680297319 +0200
+Index: shadow-4.5/lib/semanage.c
+===================================================================
+--- shadow-4.5.orig/lib/semanage.c
++++ shadow-4.5/lib/semanage.c
 @@ -294,6 +294,9 @@ int set_seuser (const char *login_name,
  
  	ret = 0;
@@ -22,9 +23,10 @@ diff -up shadow-4.5/lib/semanage.c.selinux shadow-4.5/lib/semanage.c
  done:
  	semanage_handle_destroy (handle);
  	return ret;
-diff -up shadow-4.5/src/useradd.c.selinux shadow-4.5/src/useradd.c
---- shadow-4.5/src/useradd.c.selinux	2017-07-20 16:40:49.677297246 +0200
-+++ shadow-4.5/src/useradd.c	2017-07-20 16:44:58.195275331 +0200
+Index: shadow-4.5/src/useradd.c
+===================================================================
+--- shadow-4.5.orig/src/useradd.c
++++ shadow-4.5/src/useradd.c
 @@ -2042,6 +2042,7 @@ static void create_mail (void)
   */
  int main (int argc, char **argv)

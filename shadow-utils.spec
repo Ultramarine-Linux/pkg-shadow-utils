@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.5
-Release: 8%{?dist}
+Release: 9%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz
@@ -30,6 +30,7 @@ Patch28: shadow-4.3.1-selinux-perms.patch
 Patch29: shadow-4.2.1-null-tm.patch
 Patch30: shadow-4.1.5.1-newgrp-grouplist.patch
 Patch31: shadow-4.5-userdel-chroot.patch
+Patch32: shadow-4.5-crypt_h.patch
 
 License: BSD and GPLv2+
 Group: System Environment/Base
@@ -80,6 +81,7 @@ are used for managing group accounts.
 %patch29 -p1 -b .null-tm
 %patch30 -p1 -b .grouplist
 %patch31 -p1 -b .userdel-chroot
+%patch32 -p1 -b .crypt_h
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -107,11 +109,11 @@ autoreconf
         --without-libpam \
         --disable-shared \
         --with-group-name-max-length=32
-make
+%make_build
 
 %install
 rm -rf $RPM_BUILD_ROOT
-make install DESTDIR=$RPM_BUILD_ROOT gnulocaledir=$RPM_BUILD_ROOT/%{_datadir}/locale MKINSTALLDIRS=`pwd`/mkinstalldirs
+%make_install gnulocaledir=$RPM_BUILD_ROOT/%{_datadir}/locale MKINSTALLDIRS=`pwd`/mkinstalldirs
 install -d -m 755 $RPM_BUILD_ROOT/%{_sysconfdir}/default
 install -p -c -m 0644 %{SOURCE3} $RPM_BUILD_ROOT/%{_sysconfdir}/login.defs
 install -p -c -m 0600 %{SOURCE2} $RPM_BUILD_ROOT/%{_sysconfdir}/default/useradd
@@ -235,6 +237,11 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Tue Feb 06 2018 Björn Esser <besser82@fedoraproject.org> - 2:4.5-9
+- Add patch to include crypt.h, if present
+- Use %%make_{build,install} macros
+- Refresh other patches for proper alignment
+
 * Sat Jan 20 2018 Björn Esser <besser82@fedoraproject.org> - 2:4.5-8
 - Rebuilt for switch to libxcrypt
 

@@ -1,6 +1,7 @@
-diff -up shadow-4.1.5.1/src/newgrp.c.ingroup shadow-4.1.5.1/src/newgrp.c
---- shadow-4.1.5.1/src/newgrp.c.ingroup	2014-08-29 13:31:38.000000000 +0200
-+++ shadow-4.1.5.1/src/newgrp.c	2014-08-29 14:04:57.183849650 +0200
+Index: shadow-4.5/src/newgrp.c
+===================================================================
+--- shadow-4.5.orig/src/newgrp.c
++++ shadow-4.5/src/newgrp.c
 @@ -83,15 +83,29 @@ static void usage (void)
  	}
  }
@@ -52,7 +53,7 @@ diff -up shadow-4.1.5.1/src/newgrp.c.ingroup shadow-4.1.5.1/src/newgrp.c
  	}
  	endgrent ();
  	return gr;
-@@ -616,7 +624,7 @@ int main (int argc, char **argv)
+@@ -630,7 +638,7 @@ int main (int argc, char **argv)
  	 * groups of the same GID like the requested group for
  	 * membership of the current user.
  	 */

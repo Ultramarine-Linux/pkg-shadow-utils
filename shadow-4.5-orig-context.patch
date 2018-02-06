@@ -1,6 +1,7 @@
-diff -up shadow-4.5/lib/commonio.c.orig-context shadow-4.5/lib/commonio.c
---- shadow-4.5/lib/commonio.c.orig-context	2017-05-17 21:19:44.000000000 +0200
-+++ shadow-4.5/lib/commonio.c	2017-07-20 16:47:41.102186239 +0200
+Index: shadow-4.5/lib/commonio.c
+===================================================================
+--- shadow-4.5.orig/lib/commonio.c
++++ shadow-4.5/lib/commonio.c
 @@ -941,7 +941,7 @@ int commonio_close (struct commonio_db *
  		snprintf (buf, sizeof buf, "%s-", db->filename);
  
@@ -19,9 +20,10 @@ diff -up shadow-4.5/lib/commonio.c.orig-context shadow-4.5/lib/commonio.c
  		errors++;
  	}
  #endif
-diff -up shadow-4.5/libmisc/copydir.c.orig-context shadow-4.5/libmisc/copydir.c
---- shadow-4.5/libmisc/copydir.c.orig-context	2014-09-01 16:36:40.000000000 +0200
-+++ shadow-4.5/libmisc/copydir.c	2017-07-20 16:47:41.102186239 +0200
+Index: shadow-4.5/libmisc/copydir.c
+===================================================================
+--- shadow-4.5.orig/libmisc/copydir.c
++++ shadow-4.5/libmisc/copydir.c
 @@ -484,7 +484,7 @@ static int copy_dir (const char *src, co
  	 */
  
@@ -58,9 +60,10 @@ diff -up shadow-4.5/libmisc/copydir.c.orig-context shadow-4.5/libmisc/copydir.c
  		return -1;
  	}
  #endif				/* WITH_SELINUX */
-diff -up shadow-4.5/lib/prototypes.h.orig-context shadow-4.5/lib/prototypes.h
---- shadow-4.5/lib/prototypes.h.orig-context	2017-05-17 21:19:44.000000000 +0200
-+++ shadow-4.5/lib/prototypes.h	2017-07-20 16:47:41.102186239 +0200
+Index: shadow-4.5/lib/prototypes.h
+===================================================================
+--- shadow-4.5.orig/lib/prototypes.h
++++ shadow-4.5/lib/prototypes.h
 @@ -311,7 +311,7 @@ extern /*@observer@*/const char *crypt_m
  
  /* selinux.c */
@@ -70,9 +73,10 @@ diff -up shadow-4.5/lib/prototypes.h.orig-context shadow-4.5/lib/prototypes.h
  extern int reset_selinux_file_context (void);
  #endif
  
-diff -up shadow-4.5/lib/selinux.c.orig-context shadow-4.5/lib/selinux.c
---- shadow-4.5/lib/selinux.c.orig-context	2014-09-01 16:36:40.000000000 +0200
-+++ shadow-4.5/lib/selinux.c	2017-07-20 16:47:41.102186239 +0200
+Index: shadow-4.5/lib/selinux.c
+===================================================================
+--- shadow-4.5.orig/lib/selinux.c
++++ shadow-4.5/lib/selinux.c
 @@ -50,7 +50,7 @@ static bool selinux_enabled;
   *	Callers may have to Reset SELinux to create files with default
   *	contexts with reset_selinux_file_context
@@ -114,9 +118,10 @@ diff -up shadow-4.5/lib/selinux.c.orig-context shadow-4.5/lib/selinux.c
  }
  
  /*
-diff -up shadow-4.5/src/useradd.c.orig-context shadow-4.5/src/useradd.c
---- shadow-4.5/src/useradd.c.orig-context	2017-07-20 16:47:41.102186239 +0200
-+++ shadow-4.5/src/useradd.c	2017-07-20 16:50:28.226198387 +0200
+Index: shadow-4.5/src/useradd.c
+===================================================================
+--- shadow-4.5.orig/src/useradd.c
++++ shadow-4.5/src/useradd.c
 @@ -1945,7 +1945,7 @@ static void create_home (void)
  {
  	if (access (user_home, F_OK) != 0) {

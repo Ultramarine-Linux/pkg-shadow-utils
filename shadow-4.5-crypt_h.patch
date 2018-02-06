@@ -1,0 +1,41 @@
+Index: shadow-4.5/configure.ac
+===================================================================
+--- shadow-4.5.orig/configure.ac
++++ shadow-4.5/configure.ac
+@@ -32,9 +32,9 @@ AC_HEADER_STDC
+ AC_HEADER_SYS_WAIT
+ AC_HEADER_STDBOOL
+ 
+-AC_CHECK_HEADERS(errno.h fcntl.h limits.h unistd.h sys/time.h utmp.h \
+-	utmpx.h termios.h termio.h sgtty.h sys/ioctl.h syslog.h paths.h \
+-	utime.h ulimit.h sys/resource.h gshadow.h lastlog.h \
++AC_CHECK_HEADERS(crypt.h errno.h fcntl.h limits.h unistd.h sys/time.h \
++	utmp.h utmpx.h termios.h termio.h sgtty.h sys/ioctl.h syslog.h \
++	paths.h utime.h ulimit.h sys/resource.h gshadow.h lastlog.h \
+ 	locale.h rpc/key_prot.h netdb.h acl/libacl.h attr/libattr.h \
+ 	attr/error_context.h)
+ 
+Index: shadow-4.5/lib/defines.h
+===================================================================
+--- shadow-4.5.orig/lib/defines.h
++++ shadow-4.5/lib/defines.h
+@@ -4,6 +4,8 @@
+ #ifndef _DEFINES_H_
+ #define _DEFINES_H_
+ 
++#include "config.h"
++
+ #if HAVE_STDBOOL_H
+ # include <stdbool.h>
+ #else
+@@ -94,6 +96,10 @@ char *strchr (), *strrchr (), *strtok ()
+ # include <unistd.h>
+ #endif
+ 
++#if HAVE_CRYPT_H
++# include <crypt.h>		/* crypt(3) may be defined in here */
++#endif
++
+ #if TIME_WITH_SYS_TIME
+ # include <sys/time.h>
+ # include <time.h>

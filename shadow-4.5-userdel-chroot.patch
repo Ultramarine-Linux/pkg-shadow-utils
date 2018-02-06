@@ -1,6 +1,7 @@
-diff -up shadow-4.5/lib/selinux.c.userdel-chroot shadow-4.5/lib/selinux.c
---- shadow-4.5/lib/selinux.c.userdel-chroot	2017-11-06 13:40:41.396131526 +0100
-+++ shadow-4.5/lib/selinux.c	2017-11-06 13:40:41.418132035 +0100
+Index: shadow-4.5/lib/selinux.c
+===================================================================
+--- shadow-4.5.orig/lib/selinux.c
++++ shadow-4.5/lib/selinux.c
 @@ -75,7 +75,7 @@ int set_selinux_file_context (const char
  	}
  	return 0;
@@ -19,9 +20,10 @@ diff -up shadow-4.5/lib/selinux.c.userdel-chroot shadow-4.5/lib/selinux.c
  			return 1;
  		}
  	}
-diff -up shadow-4.5/src/userdel.c.userdel-chroot shadow-4.5/src/userdel.c
---- shadow-4.5/src/userdel.c.userdel-chroot	2017-11-06 13:40:41.410131850 +0100
-+++ shadow-4.5/src/userdel.c	2017-11-06 15:26:56.567954410 +0100
+Index: shadow-4.5/src/userdel.c
+===================================================================
+--- shadow-4.5.orig/src/userdel.c
++++ shadow-4.5/src/userdel.c
 @@ -96,6 +96,7 @@ static char *user_home;
  static bool fflg = false;
  static bool rflg = false;

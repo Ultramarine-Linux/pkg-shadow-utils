@@ -1,6 +1,7 @@
-diff -up shadow-4.3.1/src/chgpasswd.c.selinux-perms shadow-4.3.1/src/chgpasswd.c
---- shadow-4.3.1/src/chgpasswd.c.selinux-perms	2016-08-15 06:00:59.000000000 +0200
-+++ shadow-4.3.1/src/chgpasswd.c	2016-08-22 17:25:46.825011776 +0200
+Index: shadow-4.5/src/chgpasswd.c
+===================================================================
+--- shadow-4.5.orig/src/chgpasswd.c
++++ shadow-4.5/src/chgpasswd.c
 @@ -39,6 +39,13 @@
  #include <pwd.h>
  #include <stdio.h>
@@ -147,9 +148,10 @@ diff -up shadow-4.3.1/src/chgpasswd.c.selinux-perms shadow-4.3.1/src/chgpasswd.c
  		/* 
  		 * The updated group file entry is then put back and will
  		 * be written to the group file later, after all the
-diff -up shadow-4.3.1/src/chpasswd.c.selinux-perms shadow-4.3.1/src/chpasswd.c
---- shadow-4.3.1/src/chpasswd.c.selinux-perms	2016-08-15 06:00:59.000000000 +0200
-+++ shadow-4.3.1/src/chpasswd.c	2016-08-22 17:25:46.825011776 +0200
+Index: shadow-4.5/src/chpasswd.c
+===================================================================
+--- shadow-4.5.orig/src/chpasswd.c
++++ shadow-4.5/src/chpasswd.c
 @@ -39,6 +39,13 @@
  #include <pwd.h>
  #include <stdio.h>
@@ -257,9 +259,10 @@ diff -up shadow-4.3.1/src/chpasswd.c.selinux-perms shadow-4.3.1/src/chpasswd.c
  		/* 
  		 * The updated password file entry is then put back and will
  		 * be written to the password file later, after all the
-diff -up shadow-4.3.1/src/Makefile.am.selinux-perms shadow-4.3.1/src/Makefile.am
---- shadow-4.3.1/src/Makefile.am.selinux-perms	2016-08-15 06:00:59.000000000 +0200
-+++ shadow-4.3.1/src/Makefile.am	2016-08-22 17:25:46.825011776 +0200
+Index: shadow-4.5/src/Makefile.am
+===================================================================
+--- shadow-4.5.orig/src/Makefile.am
++++ shadow-4.5/src/Makefile.am
 @@ -87,9 +87,9 @@ chage_LDADD    = $(LDADD) $(LIBPAM_SUID)
  newuidmap_LDADD    = $(LDADD) $(LIBSELINUX)
  newgidmap_LDADD    = $(LDADD) $(LIBSELINUX)
