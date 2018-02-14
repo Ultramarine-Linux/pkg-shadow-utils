@@ -183,9 +183,6 @@ for dir in $(ls -1d $RPM_BUILD_ROOT%{_mandir}/{??,??_??}) ; do
     echo "%%lang($lang) $dir/man*/*" >> shadow.lang
 done
 
-%clean
-rm -rf $RPM_BUILD_ROOT
-
 %files -f shadow.lang
 %defattr(-,root,root)
 %doc NEWS doc/HOWTO README
