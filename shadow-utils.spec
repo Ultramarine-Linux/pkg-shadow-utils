@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.5
-Release: 9%{?dist}
+Release: 10%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz
@@ -31,6 +31,7 @@ Patch29: shadow-4.2.1-null-tm.patch
 Patch30: shadow-4.1.5.1-newgrp-grouplist.patch
 Patch31: shadow-4.5-userdel-chroot.patch
 Patch32: shadow-4.5-crypt_h.patch
+Patch33: shadow-4.5-long-entry.patch
 
 License: BSD and GPLv2+
 Group: System Environment/Base
@@ -83,6 +84,7 @@ are used for managing group accounts.
 %patch30 -p1 -b .grouplist
 %patch31 -p1 -b .userdel-chroot
 %patch32 -p1 -b .crypt_h
+%patch33 -p1 -b .long-entry
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -235,6 +237,10 @@ done
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Fri Apr 20 2018 Tomáš Mráz <tmraz@redhat.com> - 2:4.5-10
+- Raise limit for passwd and shadow entry length but also prevent
+  writing longer entries (#1422497)
+
 * Tue Feb 06 2018 Björn Esser <besser82@fedoraproject.org> - 2:4.5-9
 - Add patch to include crypt.h, if present
 - Use %%make_{build,install} macros
