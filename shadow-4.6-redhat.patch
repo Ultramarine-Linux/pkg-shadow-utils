@@ -1,7 +1,6 @@
-Index: shadow-4.5/src/useradd.c
-===================================================================
---- shadow-4.5.orig/src/useradd.c
-+++ shadow-4.5/src/useradd.c
+diff -up shadow-4.6/src/useradd.c.redhat shadow-4.6/src/useradd.c
+--- shadow-4.6/src/useradd.c.redhat	2018-04-29 18:42:37.000000000 +0200
++++ shadow-4.6/src/useradd.c	2018-05-28 13:37:16.695651258 +0200
 @@ -98,7 +98,7 @@ const char *Prog;
  static gid_t def_group = 100;
  static const char *def_gname = "other";
@@ -20,19 +19,19 @@ Index: shadow-4.5/src/useradd.c
  static uid_t user_id;
  static gid_t user_gid;
  static const char *user_comment = "";
-@@ -1059,9 +1059,9 @@ static void process_flags (int argc, cha
+@@ -1114,9 +1114,9 @@ static void process_flags (int argc, cha
  		};
  		while ((c = getopt_long (argc, argv,
  #ifdef WITH_SELINUX
--		                         "b:c:d:De:f:g:G:hk:K:lmMNop:rR:s:u:UZ:",
-+		                         "b:c:d:De:f:g:G:hk:K:lmMnNop:rR:s:u:UZ:",
+-		                         "b:c:d:De:f:g:G:hk:K:lmMNop:rR:P:s:u:UZ:",
++		                         "b:c:d:De:f:g:G:hk:K:lmMnNop:rR:P:s:u:UZ:",
  #else				/* !WITH_SELINUX */
--		                         "b:c:d:De:f:g:G:hk:K:lmMNop:rR:s:u:U",
-+		                         "b:c:d:De:f:g:G:hk:K:lmMnNop:rR:s:u:U",
+-		                         "b:c:d:De:f:g:G:hk:K:lmMNop:rR:P:s:u:U",
++		                         "b:c:d:De:f:g:G:hk:K:lmMnNop:rR:P:s:u:U",
  #endif				/* !WITH_SELINUX */
  		                         long_options, NULL)) != -1) {
  			switch (c) {
-@@ -1212,6 +1212,7 @@ static void process_flags (int argc, cha
+@@ -1267,6 +1267,7 @@ static void process_flags (int argc, cha
  			case 'M':
  				Mflg = true;
  				break;

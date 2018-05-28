@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
-Version: 4.5
-Release: 10%{?dist}
+Version: 4.6
+Release: 1%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz
@@ -10,28 +10,26 @@ Source2: shadow-utils.useradd
 Source3: shadow-utils.login.defs
 Source4: shadow-bsd.txt
 Source5: https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
-Patch0: shadow-4.1.5-redhat.patch
+Patch0: shadow-4.6-redhat.patch
 Patch1: shadow-4.5-goodname.patch
 Patch2: shadow-4.1.5.1-info-parent-dir.patch
-Patch6: shadow-4.5-selinux.patch
-Patch7: shadow-4.1.5-2ndskip.patch
-Patch10: shadow-4.5-orig-context.patch
+Patch6: shadow-4.6-selinux.patch
+Patch10: shadow-4.6-orig-context.patch
 Patch11: shadow-4.1.5.1-logmsg.patch
 Patch14: shadow-4.1.5.1-default-range.patch
 Patch15: shadow-4.3.1-manfix.patch
 Patch17: shadow-4.1.5.1-userdel-helpfix.patch
 Patch19: shadow-4.2.1-date-parsing.patch
-Patch20: shadow-4.1.5.1-ingroup.patch
-Patch21: shadow-4.1.5.1-move-home.patch
-Patch22: shadow-4.3.1-audit-update.patch
+Patch21: shadow-4.6-move-home.patch
+Patch22: shadow-4.6-audit-update.patch
 Patch23: shadow-4.5-usermod-unlock.patch
 Patch24: shadow-4.2.1-no-lock-dos.patch
 Patch28: shadow-4.3.1-selinux-perms.patch
 Patch29: shadow-4.2.1-null-tm.patch
-Patch30: shadow-4.1.5.1-newgrp-grouplist.patch
-Patch31: shadow-4.5-userdel-chroot.patch
+Patch31: shadow-4.6-getenforce.patch
 Patch32: shadow-4.5-crypt_h.patch
 Patch33: shadow-4.5-long-entry.patch
+Patch34: shadow-4.6-usermod-crash.patch
 
 License: BSD and GPLv2+
 Group: System Environment/Base
@@ -67,24 +65,22 @@ are used for managing group accounts.
 %patch1 -p1 -b .goodname
 %patch2 -p1 -b .info-parent-dir
 %patch6 -p1 -b .selinux
-%patch7 -p1 -b .2ndskip
 %patch10 -p1 -b .orig-context
 %patch11 -p1 -b .logmsg
 %patch14 -p1 -b .default-range
 %patch15 -p1 -b .manfix
 %patch17 -p1 -b .userdel
 %patch19 -p1 -b .date-parsing
-%patch20 -p1 -b .ingroup
 %patch21 -p1 -b .move-home
 %patch22 -p1 -b .audit-update
 %patch23 -p1 -b .unlock
 %patch24 -p1 -b .no-lock-dos
 %patch28 -p1 -b .selinux-perms
 %patch29 -p1 -b .null-tm
-%patch30 -p1 -b .grouplist
-%patch31 -p1 -b .userdel-chroot
+%patch31 -p1 -b .getenforce
 %patch32 -p1 -b .crypt_h
 %patch33 -p1 -b .long-entry
+%patch34 -p1 -b .usermod-crash
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -237,6 +233,9 @@ done
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Mon May 28 2018 Tomáš Mráz <tmraz@redhat.com> - 2:4.6-1
+- update to current upstream release 4.6
+
 * Fri Apr 20 2018 Tomáš Mráz <tmraz@redhat.com> - 2:4.5-10
 - Raise limit for passwd and shadow entry length but also prevent
   writing longer entries (#1422497)

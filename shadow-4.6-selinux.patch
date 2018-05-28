@@ -1,7 +1,6 @@
-Index: shadow-4.5/lib/semanage.c
-===================================================================
---- shadow-4.5.orig/lib/semanage.c
-+++ shadow-4.5/lib/semanage.c
+diff -up shadow-4.6/lib/semanage.c.selinux shadow-4.6/lib/semanage.c
+--- shadow-4.6/lib/semanage.c.selinux	2018-04-29 18:42:37.000000000 +0200
++++ shadow-4.6/lib/semanage.c	2018-05-28 13:38:20.551008911 +0200
 @@ -294,6 +294,9 @@ int set_seuser (const char *login_name,
  
  	ret = 0;
@@ -23,11 +22,10 @@ Index: shadow-4.5/lib/semanage.c
  done:
  	semanage_handle_destroy (handle);
  	return ret;
-Index: shadow-4.5/src/useradd.c
-===================================================================
---- shadow-4.5.orig/src/useradd.c
-+++ shadow-4.5/src/useradd.c
-@@ -2042,6 +2042,7 @@ static void create_mail (void)
+diff -up shadow-4.6/src/useradd.c.selinux shadow-4.6/src/useradd.c
+--- shadow-4.6/src/useradd.c.selinux	2018-05-28 13:43:30.996748997 +0200
++++ shadow-4.6/src/useradd.c	2018-05-28 13:44:04.645486199 +0200
+@@ -2120,6 +2120,7 @@ static void create_mail (void)
   */
  int main (int argc, char **argv)
  {
@@ -35,14 +33,14 @@ Index: shadow-4.5/src/useradd.c
  #ifdef ACCT_TOOLS_SETUID
  #ifdef USE_PAM
  	pam_handle_t *pamh = NULL;
-@@ -2262,27 +2263,11 @@ int main (int argc, char **argv)
+@@ -2342,27 +2343,11 @@ int main (int argc, char **argv)
  
  	usr_update ();
  
 -	if (mflg) {
 -		create_home ();
 -		if (home_added) {
--			copy_tree (def_template, user_home, false, false,
+-			copy_tree (def_template, prefix_user_home, false, false,
 -			           (uid_t)-1, user_id, (gid_t)-1, user_gid);
 -		} else {
 -			fprintf (stderr,
@@ -66,7 +64,7 @@ Index: shadow-4.5/src/useradd.c
  	/*
  	 * tallylog_reset needs to be able to lookup
  	 * a valid existing user name,
-@@ -2293,8 +2278,9 @@ int main (int argc, char **argv)
+@@ -2373,8 +2358,9 @@ int main (int argc, char **argv)
  	}
  
  #ifdef WITH_SELINUX
@@ -78,7 +76,7 @@ Index: shadow-4.5/src/useradd.c
  			fprintf (stderr,
  			         _("%s: warning: the user name %s to %s SELinux user mapping failed.\n"),
  			         Prog, user_name, user_selinux);
-@@ -2303,14 +2289,31 @@ int main (int argc, char **argv)
+@@ -2383,14 +2369,31 @@ int main (int argc, char **argv)
  			              "adding SELinux user mapping",
  			              user_name, (unsigned int) user_id, 0);
  #endif				/* WITH_AUDIT */
@@ -95,7 +93,7 @@ Index: shadow-4.5/src/useradd.c
 +	if (mflg) {
 +		create_home ();
 +		if (home_added) {
-+			copy_tree (def_template, user_home, false, true,
++			copy_tree (def_template, prefix_user_home, false, true,
 +			           (uid_t)-1, user_id, (gid_t)-1, user_gid);
 +		} else {
 +			fprintf (stderr,

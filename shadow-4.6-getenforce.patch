@@ -1,0 +1,21 @@
+diff -up shadow-4.6/lib/selinux.c.getenforce shadow-4.6/lib/selinux.c
+--- shadow-4.6/lib/selinux.c.getenforce	2018-05-28 15:10:15.870315221 +0200
++++ shadow-4.6/lib/selinux.c	2018-05-28 15:10:15.894315731 +0200
+@@ -75,7 +75,7 @@ int set_selinux_file_context (const char
+ 	}
+ 	return 0;
+     error:
+-	if (security_getenforce () != 0) {
++	if (security_getenforce () > 0) {
+ 		return 1;
+ 	}
+ 	return 0;
+@@ -95,7 +95,7 @@ int reset_selinux_file_context (void)
+ 		selinux_checked = true;
+ 	}
+ 	if (selinux_enabled) {
+-		if (setfscreatecon (NULL) != 0) {
++		if (setfscreatecon (NULL) != 0 && security_getenforce () > 0) {
+ 			return 1;
+ 		}
+ 	}

@@ -1,8 +1,7 @@
-Index: shadow-4.5/lib/commonio.c
-===================================================================
---- shadow-4.5.orig/lib/commonio.c
-+++ shadow-4.5/lib/commonio.c
-@@ -941,7 +941,7 @@ int commonio_close (struct commonio_db *
+diff -up shadow-4.6/lib/commonio.c.orig-context shadow-4.6/lib/commonio.c
+--- shadow-4.6/lib/commonio.c.orig-context	2018-04-29 18:42:37.000000000 +0200
++++ shadow-4.6/lib/commonio.c	2018-05-28 14:56:37.287929667 +0200
+@@ -961,7 +961,7 @@ int commonio_close (struct commonio_db *
  		snprintf (buf, sizeof buf, "%s-", db->filename);
  
  #ifdef WITH_SELINUX
@@ -11,7 +10,7 @@ Index: shadow-4.5/lib/commonio.c
  			errors++;
  		}
  #endif
-@@ -974,7 +974,7 @@ int commonio_close (struct commonio_db *
+@@ -994,7 +994,7 @@ int commonio_close (struct commonio_db *
  	snprintf (buf, sizeof buf, "%s+", db->filename);
  
  #ifdef WITH_SELINUX
@@ -20,10 +19,9 @@ Index: shadow-4.5/lib/commonio.c
  		errors++;
  	}
  #endif
-Index: shadow-4.5/libmisc/copydir.c
-===================================================================
---- shadow-4.5.orig/libmisc/copydir.c
-+++ shadow-4.5/libmisc/copydir.c
+diff -up shadow-4.6/libmisc/copydir.c.orig-context shadow-4.6/libmisc/copydir.c
+--- shadow-4.6/libmisc/copydir.c.orig-context	2018-04-29 18:42:37.000000000 +0200
++++ shadow-4.6/libmisc/copydir.c	2018-05-28 14:56:37.287929667 +0200
 @@ -484,7 +484,7 @@ static int copy_dir (const char *src, co
  	 */
  
@@ -60,11 +58,10 @@ Index: shadow-4.5/libmisc/copydir.c
  		return -1;
  	}
  #endif				/* WITH_SELINUX */
-Index: shadow-4.5/lib/prototypes.h
-===================================================================
---- shadow-4.5.orig/lib/prototypes.h
-+++ shadow-4.5/lib/prototypes.h
-@@ -311,7 +311,7 @@ extern /*@observer@*/const char *crypt_m
+diff -up shadow-4.6/lib/prototypes.h.orig-context shadow-4.6/lib/prototypes.h
+--- shadow-4.6/lib/prototypes.h.orig-context	2018-04-29 18:42:37.000000000 +0200
++++ shadow-4.6/lib/prototypes.h	2018-05-28 14:56:37.287929667 +0200
+@@ -326,7 +326,7 @@ extern /*@observer@*/const char *crypt_m
  
  /* selinux.c */
  #ifdef WITH_SELINUX
@@ -73,10 +70,9 @@ Index: shadow-4.5/lib/prototypes.h
  extern int reset_selinux_file_context (void);
  #endif
  
-Index: shadow-4.5/lib/selinux.c
-===================================================================
---- shadow-4.5.orig/lib/selinux.c
-+++ shadow-4.5/lib/selinux.c
+diff -up shadow-4.6/lib/selinux.c.orig-context shadow-4.6/lib/selinux.c
+--- shadow-4.6/lib/selinux.c.orig-context	2018-04-29 18:42:37.000000000 +0200
++++ shadow-4.6/lib/selinux.c	2018-05-28 14:56:37.287929667 +0200
 @@ -50,7 +50,7 @@ static bool selinux_enabled;
   *	Callers may have to Reset SELinux to create files with default
   *	contexts with reset_selinux_file_context
@@ -118,16 +114,15 @@ Index: shadow-4.5/lib/selinux.c
  }
  
  /*
-Index: shadow-4.5/src/useradd.c
-===================================================================
---- shadow-4.5.orig/src/useradd.c
-+++ shadow-4.5/src/useradd.c
-@@ -1945,7 +1945,7 @@ static void create_home (void)
+diff -up shadow-4.6/src/useradd.c.orig-context shadow-4.6/src/useradd.c
+--- shadow-4.6/src/useradd.c.orig-context	2018-05-28 14:56:37.288929688 +0200
++++ shadow-4.6/src/useradd.c	2018-05-28 14:58:02.242730903 +0200
+@@ -2020,7 +2020,7 @@ static void create_home (void)
  {
- 	if (access (user_home, F_OK) != 0) {
+ 	if (access (prefix_user_home, F_OK) != 0) {
  #ifdef WITH_SELINUX
--		if (set_selinux_file_context (user_home) != 0) {
-+		if (set_selinux_file_context (user_home, NULL) != 0) {
+-		if (set_selinux_file_context (prefix_user_home) != 0) {
++		if (set_selinux_file_context (prefix_user_home, NULL) != 0) {
  			fprintf (stderr,
  			         _("%s: cannot set SELinux context for home directory %s\n"),
  			         Prog, user_home);

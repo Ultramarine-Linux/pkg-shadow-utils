@@ -1,0 +1,42 @@
+diff -up shadow-4.6/libmisc/prefix_flag.c.usermod-crash shadow-4.6/libmisc/prefix_flag.c
+--- shadow-4.6/libmisc/prefix_flag.c.usermod-crash	2018-04-29 18:42:37.000000000 +0200
++++ shadow-4.6/libmisc/prefix_flag.c	2018-05-28 15:14:10.642302440 +0200
+@@ -319,6 +319,7 @@ extern struct group *prefix_getgr_nam_gi
+ {
+ 	long long int gid;
+ 	char *endptr;
++	struct group *g;
+ 
+ 	if (NULL == grname) {
+ 		return NULL;
+@@ -333,7 +334,8 @@ extern struct group *prefix_getgr_nam_gi
+ 	    	&& (gid == (gid_t)gid)) {
+ 			return prefix_getgrgid ((gid_t) gid);
+ 		}
+-		return prefix_getgrnam (grname);
++		g = prefix_getgrnam (grname);
++		return g ? __gr_dup(g) : NULL;
+ 	}
+ 	else
+ 		return getgr_nam_gid(grname);
+diff -up shadow-4.6/src/usermod.c.usermod-crash shadow-4.6/src/usermod.c
+--- shadow-4.6/src/usermod.c.usermod-crash	2018-05-28 15:12:37.920332763 +0200
++++ shadow-4.6/src/usermod.c	2018-05-28 15:15:50.337422470 +0200
+@@ -1276,11 +1276,13 @@ static void process_flags (int argc, cha
+ 		prefix_user_home = xmalloc(len);
+ 		wlen = snprintf(prefix_user_home, len, "%s/%s", prefix, user_home);
+ 		assert (wlen == (int) len -1);
++		if (user_newhome) {
++			len = strlen(prefix) + strlen(user_newhome) + 2;
++			prefix_user_newhome = xmalloc(len);
++			wlen = snprintf(prefix_user_newhome, len, "%s/%s", prefix, user_newhome);
++			assert (wlen == (int) len -1);
++		}
+ 
+-		len = strlen(prefix) + strlen(user_newhome) + 2;
+-		prefix_user_newhome = xmalloc(len);
+-		wlen = snprintf(prefix_user_newhome, len, "%s/%s", prefix, user_newhome);
+-		assert (wlen == (int) len -1);
+ 	}
+ 	else {
+ 		prefix_user_home = user_home;
