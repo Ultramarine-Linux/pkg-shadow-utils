@@ -183,7 +183,6 @@ for dir in $(ls -1d $RPM_BUILD_ROOT%{_mandir}/{??,??_??}) ; do
 done
 
 %files -f shadow.lang
-%defattr(-,root,root)
 %doc NEWS doc/HOWTO README
 %{!?_licensedir:%global license %%doc}
 %license gpl-2.0.txt shadow-bsd.txt
