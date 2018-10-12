@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.6
-Release: 2%{?dist}
+Release: 3%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz
@@ -30,6 +30,8 @@ Patch31: shadow-4.6-getenforce.patch
 Patch32: shadow-4.5-crypt_h.patch
 Patch33: shadow-4.5-long-entry.patch
 Patch34: shadow-4.6-usermod-crash.patch
+Patch35: shadow-4.6-coverity.patch
+Patch36: shadow-4.6-sssd-flush.patch
 
 License: BSD and GPLv2+
 Group: System Environment/Base
@@ -81,6 +83,8 @@ are used for managing group accounts.
 %patch32 -p1 -b .crypt_h
 %patch33 -p1 -b .long-entry
 %patch34 -p1 -b .usermod-crash
+%patch35 -p1 -b .coverity
+%patch36 -p1 -b .sssd-flush
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -232,6 +236,10 @@ done
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Wed Oct 10 2018 Tomáš Mráz <tmraz@redhat.com> - 2:4.6-3
+- fix some issues from Coverity scan
+- flush sssd caches - patch by Jakub Hrozek
+
 * Sat Jul 14 2018 Fedora Release Engineering <releng@fedoraproject.org> - 2:4.6-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_29_Mass_Rebuild
 

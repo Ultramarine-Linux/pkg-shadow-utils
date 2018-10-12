@@ -1,0 +1,223 @@
+diff -up shadow-4.6/lib/commonio.c.coverity shadow-4.6/lib/commonio.c
+--- shadow-4.6/lib/commonio.c.coverity	2018-10-10 09:50:59.307738194 +0200
++++ shadow-4.6/lib/commonio.c	2018-10-10 09:55:32.919319048 +0200
+@@ -382,7 +382,7 @@ int commonio_lock_nowait (struct commoni
+ 	char* lock = NULL;
+ 	size_t lock_file_len;
+ 	size_t file_len;
+-	int err;
++	int err = 0;
+ 
+ 	if (db->locked) {
+ 		return 1;
+@@ -391,12 +391,10 @@ int commonio_lock_nowait (struct commoni
+ 	lock_file_len = strlen(db->filename) + 6; /* sizeof ".lock" */
+ 	file = (char*)malloc(file_len);
+ 	if(file == NULL) {
+-		err = ENOMEM;
+ 		goto cleanup_ENOMEM;
+ 	}
+ 	lock = (char*)malloc(lock_file_len);
+ 	if(lock == NULL) {
+-		err = ENOMEM;
+ 		goto cleanup_ENOMEM;
+ 	}
+ 	snprintf (file, file_len, "%s.%lu",
+diff -up shadow-4.6/libmisc/console.c.coverity shadow-4.6/libmisc/console.c
+--- shadow-4.6/libmisc/console.c.coverity	2018-04-29 18:42:37.000000000 +0200
++++ shadow-4.6/libmisc/console.c	2018-10-10 11:56:51.368837533 +0200
+@@ -50,7 +50,7 @@ static bool is_listed (const char *cfgin
+ static bool is_listed (const char *cfgin, const char *tty, bool def)
+ {
+ 	FILE *fp;
+-	char buf[200], *s;
++	char buf[1024], *s;
+ 	const char *cons;
+ 
+ 	/*
+@@ -70,7 +70,8 @@ static bool is_listed (const char *cfgin
+ 
+ 	if (*cons != '/') {
+ 		char *pbuf;
+-		strcpy (buf, cons);
++		strncpy (buf, cons, sizeof (buf));
++		buf[sizeof (buf) - 1] = '\0';
+ 		pbuf = &buf[0];
+ 		while ((s = strtok (pbuf, ":")) != NULL) {
+ 			if (strcmp (s, tty) == 0) {
+diff -up shadow-4.6/lib/spawn.c.coverity shadow-4.6/lib/spawn.c
+--- shadow-4.6/lib/spawn.c.coverity	2018-04-29 18:42:37.000000001 +0200
++++ shadow-4.6/lib/spawn.c	2018-10-10 11:36:49.035784609 +0200
+@@ -69,7 +69,7 @@ int run_command (const char *cmd, const
+ 	do {
+ 		wpid = waitpid (pid, status, 0);
+ 	} while (   ((pid_t)-1 == wpid && errno == EINTR)
+-	         || (wpid != pid));
++	         || ((pid_t)-1 != wpid && wpid != pid));
+ 
+ 	if ((pid_t)-1 == wpid) {
+ 		fprintf (stderr, "%s: waitpid (status: %d): %s\n",
+diff -up shadow-4.6/src/useradd.c.coverity shadow-4.6/src/useradd.c
+--- shadow-4.6/src/useradd.c.coverity	2018-10-10 09:50:59.303738098 +0200
++++ shadow-4.6/src/useradd.c	2018-10-12 13:51:54.480490257 +0200
+@@ -314,7 +314,7 @@ static void fail_exit (int code)
+ static void get_defaults (void)
+ {
+ 	FILE *fp;
+-	char* default_file = USER_DEFAULTS_FILE;
++	char *default_file = USER_DEFAULTS_FILE;
+ 	char buf[1024];
+ 	char *cp;
+ 
+@@ -324,6 +324,8 @@ static void get_defaults (void)
+ 
+ 		len = strlen(prefix) + strlen(USER_DEFAULTS_FILE) + 2;
+ 		default_file = malloc(len);
++                if (default_file == NULL)
++                       return;
+ 		wlen = snprintf(default_file, len, "%s/%s", prefix, USER_DEFAULTS_FILE);
+ 		assert (wlen == (int) len -1);
+ 	}
+@@ -334,7 +336,7 @@ static void get_defaults (void)
+ 
+ 	fp = fopen (default_file, "r");
+ 	if (NULL == fp) {
+-		return;
++		goto getdef_err;
+ 	}
+ 
+ 	/*
+@@ -445,7 +447,7 @@ static void get_defaults (void)
+ 		}
+ 	}
+ 	(void) fclose (fp);
+-
++     getdef_err:
+ 	if(prefix[0]) {
+ 		free(default_file);
+ 	}
+@@ -480,8 +482,8 @@ static int set_defaults (void)
+ 	FILE *ifp;
+ 	FILE *ofp;
+ 	char buf[1024];
+-	char* new_file = NEW_USER_FILE;
+-	char* default_file = USER_DEFAULTS_FILE;
++	char *new_file = NULL;
++	char *default_file = USER_DEFAULTS_FILE;
+ 	char *cp;
+ 	int ofd;
+ 	int wlen;
+@@ -492,17 +494,30 @@ static int set_defaults (void)
+ 	bool out_shell = false;
+ 	bool out_skel = false;
+ 	bool out_create_mail_spool = false;
++	size_t len;
++	int ret = -1;
+ 
+-	if(prefix[0]) {
+-		size_t len;
+ 
+-		len = strlen(prefix) + strlen(NEW_USER_FILE) + 2;
+-		new_file = malloc(len);
+-		wlen = snprintf(new_file, len, "%s/%s", prefix, NEW_USER_FILE);
+-		assert (wlen == (int) len -1);
++	len = strlen(prefix) + strlen(NEW_USER_FILE) + 2;
++	new_file = malloc(len);
++        if (new_file == NULL) {
++		fprintf (stderr,
++		         _("%s: cannot create new defaults file: %s\n"),
++		         Prog, strerror(errno));
++		return -1;
++        }
++	wlen = snprintf(new_file, len, "%s%s%s", prefix, prefix[0]?"/":"", NEW_USER_FILE);
++	assert (wlen <= (int) len -1);
+ 
++	if(prefix[0]) {
+ 		len = strlen(prefix) + strlen(USER_DEFAULTS_FILE) + 2;
+ 		default_file = malloc(len);
++		if (default_file == NULL) {
++			fprintf (stderr,
++			         _("%s: cannot create new defaults file: %s\n"),
++			         Prog, strerror(errno));
++			goto setdef_err;
++		}
+ 		wlen = snprintf(default_file, len, "%s/%s", prefix, USER_DEFAULTS_FILE);
+ 		assert (wlen == (int) len -1);
+ 	}
+@@ -515,7 +530,7 @@ static int set_defaults (void)
+ 		fprintf (stderr,
+ 		         _("%s: cannot create new defaults file\n"),
+ 		         Prog);
+-		return -1;
++		goto setdef_err;
+ 	}
+ 
+ 	ofp = fdopen (ofd, "w");
+@@ -523,7 +538,7 @@ static int set_defaults (void)
+ 		fprintf (stderr,
+ 		         _("%s: cannot open new defaults file\n"),
+ 		         Prog);
+-		return -1;
++		goto setdef_err;
+ 	}
+ 
+ 	/*
+@@ -550,7 +565,7 @@ static int set_defaults (void)
+ 				         _("%s: line too long in %s: %s..."),
+ 				         Prog, default_file, buf);
+ 				(void) fclose (ifp);
+-				return -1;
++				goto setdef_err;
+ 			}
+ 		}
+ 
+@@ -614,7 +629,7 @@ static int set_defaults (void)
+ 	    || (fsync (fileno (ofp)) != 0)
+ 	    || (fclose (ofp) != 0)) {
+ 		unlink (new_file);
+-		return -1;
++		goto setdef_err;
+ 	}
+ 
+ 	/*
+@@ -629,7 +644,7 @@ static int set_defaults (void)
+ 		         _("%s: Cannot create backup file (%s): %s\n"),
+ 		         Prog, buf, strerror (err));
+ 		unlink (new_file);
+-		return -1;
++		goto setdef_err;
+ 	}
+ 
+ 	/*
+@@ -640,11 +655,11 @@ static int set_defaults (void)
+ 		fprintf (stderr,
+ 		         _("%s: rename: %s: %s\n"),
+ 		         Prog, new_file, strerror (err));
+-		return -1;
++		goto setdef_err;
+ 	}
+ #ifdef WITH_AUDIT
+ 	audit_logger (AUDIT_USYS_CONFIG, Prog,
+-	              "changing-useradd-defaults",
++	              "changing useradd defaults",
+ 	              NULL, AUDIT_NO_ID,
+ 	              SHADOW_AUDIT_SUCCESS);
+ #endif
+@@ -654,13 +669,14 @@ static int set_defaults (void)
+ 	         (unsigned int) def_group, def_home, def_shell,
+ 	         def_inactive, def_expire, def_template,
+ 	         def_create_mail_spool));
+-
++	ret = 0;
++    setdef_err:
++	free(new_file);
+ 	if(prefix[0]) {
+-		free(new_file);
+ 		free(default_file);
+ 	}
+ 
+-	return 0;
++	return ret;
+ }
+ 
+ /*
