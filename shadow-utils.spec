@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.6
-Release: 3%{?dist}
+Release: 4%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz
@@ -32,6 +32,7 @@ Patch33: shadow-4.5-long-entry.patch
 Patch34: shadow-4.6-usermod-crash.patch
 Patch35: shadow-4.6-coverity.patch
 Patch36: shadow-4.6-sssd-flush.patch
+Patch37: shadow-4.6-sysugid-min-limit.patch
 
 License: BSD and GPLv2+
 Group: System Environment/Base
@@ -85,6 +86,7 @@ are used for managing group accounts.
 %patch34 -p1 -b .usermod-crash
 %patch35 -p1 -b .coverity
 %patch36 -p1 -b .sssd-flush
+%patch37 -p1 -b .sysugid-min-limit
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -197,8 +199,8 @@ done
 %attr(4755,root,root) %{_bindir}/gpasswd
 %{_bindir}/lastlog
 %attr(4755,root,root) %{_bindir}/newgrp
-%attr(4755,root,root) %{_bindir}/newgidmap
-%attr(4755,root,root) %{_bindir}/newuidmap
+%attr(0755,root,root) %caps(cap_setgid=ep) %{_bindir}/newgidmap
+%attr(0755,root,root) %caps(cap_setuid=ep) %{_bindir}/newuidmap
 %{_sbindir}/adduser
 %attr(0755,root,root)   %{_sbindir}/user*
 %attr(0755,root,root)   %{_sbindir}/group*
@@ -236,6 +238,12 @@ done
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Tue Nov  6 2018 Tomáš Mráz <tmraz@redhat.com> - 2:4.6-4
+- use cap_setxid file capabilities for newxidmap instead of making them setuid
+- limit the SYS_U/GID_MIN value to 1 as the algorithm does not work with 0
+  and the 0 is always used by root anyway
+- manual page improvements
+
 * Wed Oct 10 2018 Tomáš Mráz <tmraz@redhat.com> - 2:4.6-3
 - fix some issues from Coverity scan
 - flush sssd caches - patch by Jakub Hrozek

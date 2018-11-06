@@ -64,7 +64,7 @@ Index: shadow-4.5/man/groupadd.8.xml
 ===================================================================
 --- shadow-4.5.orig/man/groupadd.8.xml
 +++ shadow-4.5/man/groupadd.8.xml
-@@ -256,12 +256,6 @@
+@@ -256,10 +256,14 @@
     <refsect1 id='caveats'>
       <title>CAVEATS</title>
       <para>
@@ -72,16 +72,22 @@ Index: shadow-4.5/man/groupadd.8.xml
 -       followed by lower case letters, digits, underscores, or dashes.
 -       They can end with a dollar sign.
 -       In regular expression terms: [a-z_][a-z0-9_-]*[$]?
--     </para>
--     <para>
-        Groupnames may only be up to &GROUP_NAME_MAX_LENGTH; characters long.
++       Groupnames may contain only lower and upper case letters, digits,
++       underscores, or dashes. They can end with a dollar sign.
++
++       Dashes are not allowed at the beginning of the groupname.
++       Fully numeric groupnames and groupnames . or .. are
++       also disallowed.
++
++       In regular expression terms: [a-zA-Z0-9_.][a-zA-Z0-9_.-]*[$]?
       </para>
       <para>
+        Groupnames may only be up to &GROUP_NAME_MAX_LENGTH; characters long.
 Index: shadow-4.5/man/useradd.8.xml
 ===================================================================
 --- shadow-4.5.orig/man/useradd.8.xml
 +++ shadow-4.5/man/useradd.8.xml
-@@ -633,12 +633,6 @@
+@@ -633,10 +633,16 @@
      </para>
  
      <para>
@@ -89,8 +95,16 @@ Index: shadow-4.5/man/useradd.8.xml
 -      followed by lower case letters, digits, underscores, or dashes.
 -      They can end with a dollar sign.
 -      In regular expression terms: [a-z_][a-z0-9_-]*[$]?
--    </para>
--    <para>
-       Usernames may only be up to 32 characters long.
++      Usernames may contain only lower and upper case letters, digits,
++      underscores, or dashes. They can end with a dollar sign.
++
++      Dashes are not allowed at the beginning of the username.
++      Fully numeric usernames and usernames . or .. are
++      also disallowed. It is not recommended to use usernames beginning
++      with . character as their home directories will be hidden in
++      the <command>ls</command> output.
++
++      In regular expression terms: [a-zA-Z0-9_.][a-zA-Z0-9_.-]*[$]?
      </para>
-   </refsect1>
+     <para>
+       Usernames may only be up to 32 characters long.
