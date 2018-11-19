@@ -31,8 +31,9 @@ Patch32: shadow-4.5-crypt_h.patch
 Patch33: shadow-4.5-long-entry.patch
 Patch34: shadow-4.6-usermod-crash.patch
 Patch35: shadow-4.6-coverity.patch
-Patch36: shadow-4.6-sssd-flush.patch
-Patch37: shadow-4.6-sysugid-min-limit.patch
+Patch36: shadow-4.6-use-itstool.patch
+Patch37: shadow-4.6-sssd-flush.patch
+Patch38: shadow-4.6-sysugid-min-limit.patch
 
 License: BSD and GPLv2+
 Group: System Environment/Base
@@ -41,8 +42,9 @@ BuildRequires: libselinux-devel >= 1.25.2-1
 BuildRequires: audit-libs-devel >= 1.6.5
 BuildRequires: libsemanage-devel
 BuildRequires: libacl-devel, libattr-devel
-BuildRequires: bison, flex, gnome-doc-utils, docbook-style-xsl, docbook-dtds
+BuildRequires: bison, flex, docbook-style-xsl, docbook-dtds
 BuildRequires: autoconf, automake, libtool, gettext-devel
+BuildRequires: /usr/bin/xsltproc, /usr/bin/itstool
 Requires: libselinux >= 1.25.2-1
 Requires: audit-libs >= 1.6.5
 Requires: setup
@@ -85,8 +87,9 @@ are used for managing group accounts.
 %patch33 -p1 -b .long-entry
 %patch34 -p1 -b .usermod-crash
 %patch35 -p1 -b .coverity
-%patch36 -p1 -b .sssd-flush
-%patch37 -p1 -b .sysugid-min-limit
+%patch36 -p1 -b .use-itstool
+%patch37 -p1 -b .sssd-flush
+%patch38 -p1 -b .sysugid-min-limit
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -238,6 +241,9 @@ done
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Mon Nov 19 2018 Tomáš Mráz <tmraz@redhat.com> - 2:4.6-5
+- use itstool instead of xml2po
+
 * Tue Nov  6 2018 Tomáš Mráz <tmraz@redhat.com> - 2:4.6-4
 - use cap_setxid file capabilities for newxidmap instead of making them setuid
 - limit the SYS_U/GID_MIN value to 1 as the algorithm does not work with 0
