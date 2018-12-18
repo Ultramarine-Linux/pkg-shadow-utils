@@ -1,0 +1,44 @@
+diff -up shadow-4.6/man/usermod.8.xml.chgrp-guard shadow-4.6/man/usermod.8.xml
+--- shadow-4.6/man/usermod.8.xml.chgrp-guard	2018-11-06 09:08:54.170095358 +0100
++++ shadow-4.6/man/usermod.8.xml	2018-12-18 15:24:12.283181180 +0100
+@@ -195,6 +195,12 @@
+ 	    The group ownership of files outside of the user's home directory
+ 	    must be fixed manually.
+ 	  </para>
++	  <para>
++	    The change of the group ownership of files inside of the user's
++	    home directory is also not done if the home dir owner uid is
++	    different from the current or new user id. This is safety measure
++	    for special home directories such as <filename>/</filename>.
++	  </para>
+ 	</listitem>
+       </varlistentry>
+       <varlistentry>
+@@ -372,6 +378,12 @@
+ 	    must be fixed manually.
+ 	  </para>
+ 	  <para>
++	    The change of the user ownership of files inside of the user's
++	    home directory is also not done if the home dir owner uid is
++	    different from the current or new user id. This is safety measure
++	    for special home directories such as <filename>/</filename>.
++	  </para>
++	  <para>
+ 	    No checks will be performed with regard to the
+ 	    <option>UID_MIN</option>, <option>UID_MAX</option>,
+ 	    <option>SYS_UID_MIN</option>, or <option>SYS_UID_MAX</option>
+diff -up shadow-4.6/src/usermod.c.chgrp-guard shadow-4.6/src/usermod.c
+--- shadow-4.6/src/usermod.c.chgrp-guard	2018-12-18 15:24:12.286181249 +0100
++++ shadow-4.6/src/usermod.c	2018-12-18 15:26:51.227841435 +0100
+@@ -2336,7 +2336,10 @@ int main (int argc, char **argv)
+ 	}
+ 
+ 	if (!mflg && (uflg || gflg)) {
+-		if (access (dflg ? prefix_user_newhome : prefix_user_home, F_OK) == 0) {
++		struct stat sb;
++
++		if (stat (dflg ? prefix_user_newhome : prefix_user_home, &sb) == 0 &&
++			((uflg && sb.st_uid == user_newid) || sb.st_uid == user_id)) {
+ 			/*
+ 			 * Change the UID on all of the files owned by
+ 			 * `user_id' to `user_newid' in the user's home

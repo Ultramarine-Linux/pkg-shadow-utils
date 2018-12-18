@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.6
-Release: 5%{?dist}
+Release: 6%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz
@@ -34,6 +34,7 @@ Patch35: shadow-4.6-coverity.patch
 Patch36: shadow-4.6-use-itstool.patch
 Patch37: shadow-4.6-sssd-flush.patch
 Patch38: shadow-4.6-sysugid-min-limit.patch
+Patch39: shadow-4.6-chgrp-guard.patch
 
 License: BSD and GPLv2+
 Group: System Environment/Base
@@ -90,6 +91,7 @@ are used for managing group accounts.
 %patch36 -p1 -b .use-itstool
 %patch37 -p1 -b .sssd-flush
 %patch38 -p1 -b .sysugid-min-limit
+%patch39 -p1 -b .chgrp-guard
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -241,6 +243,10 @@ done
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Tue Dec 18 2018 Tomáš Mráz <tmraz@redhat.com> - 2:4.6-6
+- usermod: guard against unsafe change of ownership of
+  special home directories
+
 * Mon Nov 19 2018 Tomáš Mráz <tmraz@redhat.com> - 2:4.6-5
 - use itstool instead of xml2po
 
