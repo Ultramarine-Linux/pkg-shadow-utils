@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.6
-Release: 6%{?dist}
+Release: 7%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz
@@ -243,6 +243,9 @@ done
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Mon Jan 14 2019 Björn Esser <besser82@fedoraproject.org> - 2:4.6-7
+- Rebuilt for libcrypt.so.2 (#1666033)
+
 * Tue Dec 18 2018 Tomáš Mráz <tmraz@redhat.com> - 2:4.6-6
 - usermod: guard against unsafe change of ownership of
   special home directories
