@@ -37,7 +37,6 @@ Patch38: shadow-4.6-sysugid-min-limit.patch
 Patch39: shadow-4.6-chgrp-guard.patch
 
 License: BSD and GPLv2+
-Group: System Environment/Base
 BuildRequires: gcc
 BuildRequires: libselinux-devel >= 1.25.2-1
 BuildRequires: audit-libs-devel >= 1.6.5
