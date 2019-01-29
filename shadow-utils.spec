@@ -50,7 +50,6 @@ Requires: audit-libs >= 1.6.5
 Requires: setup
 Requires(pre): coreutils
 Requires(post): coreutils
-Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 %description
 The shadow-utils package includes the necessary programs for
