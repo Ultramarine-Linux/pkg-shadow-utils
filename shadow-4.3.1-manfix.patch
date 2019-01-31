@@ -282,3 +282,29 @@ Index: shadow-4.5/man/usermod.8.xml
  	  </para>
  	  <para>
  	    This option is only valid in combination with the
+diff --git a/man/login.defs.d/SUB_GID_COUNT.xml b/man/login.defs.d/SUB_GID_COUNT.xml
+index 01ace007..93fe7421 100644
+--- a/man/login.defs.d/SUB_GID_COUNT.xml
++++ b/man/login.defs.d/SUB_GID_COUNT.xml
+@@ -42,7 +42,7 @@
+     <para>
+       The default values for <option>SUB_GID_MIN</option>,
+       <option>SUB_GID_MAX</option>, <option>SUB_GID_COUNT</option>
+-      are respectively 100000, 600100000 and 10000.
++      are respectively 100000, 600100000 and 65536.
+     </para>
+   </listitem>
+ </varlistentry>
+diff --git a/man/login.defs.d/SUB_UID_COUNT.xml b/man/login.defs.d/SUB_UID_COUNT.xml
+index 5ad812f7..516417b7 100644
+--- a/man/login.defs.d/SUB_UID_COUNT.xml
++++ b/man/login.defs.d/SUB_UID_COUNT.xml
+@@ -42,7 +42,7 @@
+     <para>
+       The default values for <option>SUB_UID_MIN</option>,
+       <option>SUB_UID_MAX</option>, <option>SUB_UID_COUNT</option>
+-      are respectively 100000, 600100000 and 10000.
++      are respectively 100000, 600100000 and 65536.
+     </para>
+   </listitem>
+ </varlistentry>
