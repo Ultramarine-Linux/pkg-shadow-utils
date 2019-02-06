@@ -64,7 +64,7 @@ Index: shadow-4.5/man/groupadd.8.xml
 ===================================================================
 --- shadow-4.5.orig/man/groupadd.8.xml
 +++ shadow-4.5/man/groupadd.8.xml
-@@ -256,10 +256,14 @@
+@@ -256,10 +256,12 @@
     <refsect1 id='caveats'>
       <title>CAVEATS</title>
       <para>
@@ -78,8 +78,6 @@ Index: shadow-4.5/man/groupadd.8.xml
 +       Dashes are not allowed at the beginning of the groupname.
 +       Fully numeric groupnames and groupnames . or .. are
 +       also disallowed.
-+
-+       In regular expression terms: [a-zA-Z0-9_.][a-zA-Z0-9_.-]*[$]?
       </para>
       <para>
         Groupnames may only be up to &GROUP_NAME_MAX_LENGTH; characters long.
@@ -87,7 +85,7 @@ Index: shadow-4.5/man/useradd.8.xml
 ===================================================================
 --- shadow-4.5.orig/man/useradd.8.xml
 +++ shadow-4.5/man/useradd.8.xml
-@@ -633,10 +633,16 @@
+@@ -633,10 +633,14 @@
      </para>
  
      <para>
@@ -103,8 +101,6 @@ Index: shadow-4.5/man/useradd.8.xml
 +      also disallowed. It is not recommended to use usernames beginning
 +      with . character as their home directories will be hidden in
 +      the <command>ls</command> output.
-+
-+      In regular expression terms: [a-zA-Z0-9_.][a-zA-Z0-9_.-]*[$]?
      </para>
      <para>
        Usernames may only be up to 32 characters long.
