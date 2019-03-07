@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.6
-Release: 8%{?dist}
+Release: 9%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz
@@ -48,8 +48,6 @@ BuildRequires: /usr/bin/xsltproc, /usr/bin/itstool
 Requires: libselinux >= 1.25.2-1
 Requires: audit-libs >= 1.6.5
 Requires: setup
-Requires(pre): coreutils
-Requires(post): coreutils
 
 %description
 The shadow-utils package includes the necessary programs for
@@ -241,6 +239,9 @@ done
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Thu Mar  7 2019 Tim Landscheidt <tim@tim-landscheidt.de> - 2:4.6-9
+- Remove obsolete requirements for post/pre scriptlets
+
 * Sat Feb 02 2019 Fedora Release Engineering <releng@fedoraproject.org> - 2:4.6-8
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_30_Mass_Rebuild
 
