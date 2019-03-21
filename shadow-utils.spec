@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.6
-Release: 9%{?dist}
+Release: 10%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz
@@ -35,6 +35,7 @@ Patch36: shadow-4.6-use-itstool.patch
 Patch37: shadow-4.6-sssd-flush.patch
 Patch38: shadow-4.6-sysugid-min-limit.patch
 Patch39: shadow-4.6-chgrp-guard.patch
+Patch40: shadow-4.6-ignore-login-prompt.patch
 
 License: BSD and GPLv2+
 BuildRequires: gcc
@@ -88,6 +89,7 @@ are used for managing group accounts.
 %patch37 -p1 -b .sssd-flush
 %patch38 -p1 -b .sysugid-min-limit
 %patch39 -p1 -b .chgrp-guard
+%patch40 -p1 -b .login-prompt
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -239,6 +241,9 @@ done
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Thu Mar 21 2019 Tomáš Mráz <tmraz@redhat.com> - 2:4.6-10
+- Ignore LOGIN_PLAIN_PROMPT variable in login.defs
+
 * Thu Mar  7 2019 Tim Landscheidt <tim@tim-landscheidt.de> - 2:4.6-9
 - Remove obsolete requirements for post/pre scriptlets
 
