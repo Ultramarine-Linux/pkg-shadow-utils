@@ -54,6 +54,25 @@ Index: shadow-4.5/man/chage.1.xml
  	    Passing the number <emphasis remap='I'>-1</emphasis> as the
  	    <replaceable>EXPIRE_DATE</replaceable> will remove an account
  	    expiration date.
+@@ -233,6 +243,18 @@
+       The <command>chage</command> program requires a shadow password file to
+       be available.
+     </para>
++    <para>
++      The chage program will report only the information from the shadow
++      password file. This implies that configuration from other sources
++     (e.g. LDAP or empty password hash field from the passwd file) that
++     affect the user's login will not be shown in the chage output.
++    </para>
++    <para>
++      The <command>chage</command> program will also not report any
++      inconsistency between the shadow and passwd files (e.g. missing x in
++      the passwd file). The <command>pwck</command> can be used to check
++      for this kind of inconsistencies.
++    </para>
+     <para>The <command>chage</command> command is restricted to the root
+       user, except for the <option>-l</option> option, which may be used by
+       an unprivileged user to determine when their password or account is due
 Index: shadow-4.5/man/ja/man5/login.defs.5
 ===================================================================
 --- shadow-4.5.orig/man/ja/man5/login.defs.5

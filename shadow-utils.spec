@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.6
-Release: 10%{?dist}
+Release: 11%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz
@@ -241,6 +241,10 @@ done
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Fri Mar 22 2019 Tomáš Mráz <tmraz@redhat.com> - 2:4.6-11
+- clarify chage manual page in regards to shadow and passwd
+  inconsistency (#1686440)
+
 * Thu Mar 21 2019 Tomáš Mráz <tmraz@redhat.com> - 2:4.6-10
 - Ignore LOGIN_PLAIN_PROMPT variable in login.defs
 
