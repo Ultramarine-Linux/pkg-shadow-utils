@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.6
-Release: 11%{?dist}
+Release: 12%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz
@@ -95,6 +95,9 @@ iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
 
 cp -a %{SOURCE4} %{SOURCE5} .
+
+# Force regeneration of getdate.c
+rm libmisc/getdate.c
 
 %build
 %ifarch sparc64
@@ -241,6 +244,10 @@ done
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Tue Apr  2 2019 Tomáš Mráz <tmraz@redhat.com> - 2:4.6-12
+- force regeneration of getdate.c otherwise the date parsing fix
+  is not applied
+
 * Fri Mar 22 2019 Tomáš Mráz <tmraz@redhat.com> - 2:4.6-11
 - clarify chage manual page in regards to shadow and passwd
   inconsistency (#1686440)
