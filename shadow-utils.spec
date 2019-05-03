@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.6
-Release: 12%{?dist}
+Release: 13%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz
@@ -36,6 +36,7 @@ Patch37: shadow-4.6-sssd-flush.patch
 Patch38: shadow-4.6-sysugid-min-limit.patch
 Patch39: shadow-4.6-chgrp-guard.patch
 Patch40: shadow-4.6-ignore-login-prompt.patch
+Patch41: shadow-4.6-use-lckpwdf.patch
 
 License: BSD and GPLv2+
 BuildRequires: gcc
@@ -90,6 +91,7 @@ are used for managing group accounts.
 %patch38 -p1 -b .sysugid-min-limit
 %patch39 -p1 -b .chgrp-guard
 %patch40 -p1 -b .login-prompt
+%patch41 -p1 -b .use-lckpwdf
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -244,6 +246,10 @@ done
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Fri May  3 2019 Tomáš Mráz <tmraz@redhat.com> - 2:4.6-13
+- use lckpwdf() again to disable concurrent edits of databases by
+  other applications
+
 * Tue Apr  2 2019 Tomáš Mráz <tmraz@redhat.com> - 2:4.6-12
 - force regeneration of getdate.c otherwise the date parsing fix
   is not applied

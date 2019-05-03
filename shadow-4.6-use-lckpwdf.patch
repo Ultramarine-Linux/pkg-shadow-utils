@@ -1,0 +1,190 @@
+commit 408b8a548243aebaa6d773beeae8ddf4bb6100f0
+Author: Tomas Mraz <tmraz@fedoraproject.org>
+Date:   Thu May 2 14:33:06 2019 +0200
+
+    Use the lckpwdf() again if prefix is not set
+    
+    The implementation of prefix option dropped the use of lckpwdf().
+    However that is incorrect as other tools manipulating the shadow passwords
+    such as PAM use lckpwdf() and do not know anything about the
+    shadow's own locking mechanism.
+    
+    This reverts the implementation to use lckpwdf() if prefix option
+    is not used.
+
+diff --git a/lib/commonio.c b/lib/commonio.c
+index 26e518f2..94dda779 100644
+--- a/lib/commonio.c
++++ b/lib/commonio.c
+@@ -364,6 +364,7 @@ static void free_linked_list (struct commonio_db *db)
+ int commonio_setname (struct commonio_db *db, const char *name)
+ {
+ 	snprintf (db->filename, sizeof (db->filename), "%s", name);
++	db->setname = true;
+ 	return 1;
+ }
+ 
+@@ -414,37 +415,39 @@ cleanup_ENOMEM:
+ 
+ int commonio_lock (struct commonio_db *db)
+ {
+-/*#ifdef HAVE_LCKPWDF*/ /* not compatible with prefix option*/
+-#if 0
+-	/*
+-	 * only if the system libc has a real lckpwdf() - the one from
+-	 * lockpw.c calls us and would cause infinite recursion!
+-	 */
++	int i;
+ 
++#ifdef HAVE_LCKPWDF
+ 	/*
+-	 * Call lckpwdf() on the first lock.
+-	 * If it succeeds, call *_lock() only once
+-	 * (no retries, it should always succeed).
++	 * Only if the system libc has a real lckpwdf() - the one from
++	 * lockpw.c calls us and would cause infinite recursion!
++	 * It is also not used with the prefix option.
+ 	 */
+-	if (0 == lock_count) {
+-		if (lckpwdf () == -1) {
+-			if (geteuid () != 0) {
+-				(void) fprintf (stderr,
+-				                "%s: Permission denied.\n",
+-				                Prog);
++	if (!db->setname) {
++		/*
++		 * Call lckpwdf() on the first lock.
++		 * If it succeeds, call *_lock() only once
++		 * (no retries, it should always succeed).
++		 */
++		if (0 == lock_count) {
++			if (lckpwdf () == -1) {
++				if (geteuid () != 0) {
++					(void) fprintf (stderr,
++					                "%s: Permission denied.\n",
++					                Prog);
++				}
++				return 0;	/* failure */
+ 			}
+-			return 0;	/* failure */
+ 		}
+-	}
+ 
+-	if (commonio_lock_nowait (db, true) != 0) {
+-		return 1;	/* success */
+-	}
++		if (commonio_lock_nowait (db, true) != 0) {
++			return 1;	/* success */
++		}
+ 
+-	ulckpwdf ();
+-	return 0;		/* failure */
+-#else				/* !HAVE_LCKPWDF */
+-	int i;
++		ulckpwdf ();
++		return 0;		/* failure */
++	}
++#endif				/* !HAVE_LCKPWDF */
+ 
+ 	/*
+ 	 * lckpwdf() not used - do it the old way.
+@@ -471,7 +474,6 @@ int commonio_lock (struct commonio_db *db)
+ 		}
+ 	}
+ 	return 0;		/* failure */
+-#endif				/* !HAVE_LCKPWDF */
+ }
+ 
+ static void dec_lock_count (void)
+diff --git a/lib/commonio.h b/lib/commonio.h
+index 40e5708f..64e83073 100644
+--- a/lib/commonio.h
++++ b/lib/commonio.h
+@@ -143,6 +143,7 @@ struct commonio_db {
+ 	bool isopen:1;
+ 	bool locked:1;
+ 	bool readonly:1;
++	bool setname:1;
+ };
+ 
+ extern int commonio_setname (struct commonio_db *, const char *);
+diff --git a/lib/groupio.c b/lib/groupio.c
+index ae2302b5..bffb06e0 100644
+--- a/lib/groupio.c
++++ b/lib/groupio.c
+@@ -139,7 +139,8 @@ static /*@owned@*/struct commonio_db group_db = {
+ 	false,			/* changed */
+ 	false,			/* isopen */
+ 	false,			/* locked */
+-	false			/* readonly */
++	false,			/* readonly */
++	false			/* setname */
+ };
+ 
+ int gr_setdbname (const char *filename)
+diff --git a/lib/pwio.c b/lib/pwio.c
+index 7ee85377..127719cb 100644
+--- a/lib/pwio.c
++++ b/lib/pwio.c
+@@ -114,7 +114,8 @@ static struct commonio_db passwd_db = {
+ 	false,			/* changed */
+ 	false,			/* isopen */
+ 	false,			/* locked */
+-	false			/* readonly */
++	false,			/* readonly */
++	false			/* setname */
+ };
+ 
+ int pw_setdbname (const char *filename)
+diff --git a/lib/sgroupio.c b/lib/sgroupio.c
+index 5423626a..ffbdb263 100644
+--- a/lib/sgroupio.c
++++ b/lib/sgroupio.c
+@@ -238,7 +238,8 @@ static struct commonio_db gshadow_db = {
+ 	false,			/* changed */
+ 	false,			/* isopen */
+ 	false,			/* locked */
+-	false			/* readonly */
++	false,			/* readonly */
++	false			/* setname */
+ };
+ 
+ int sgr_setdbname (const char *filename)
+diff --git a/lib/shadowio.c b/lib/shadowio.c
+index 5fa3d312..676b1f1a 100644
+--- a/lib/shadowio.c
++++ b/lib/shadowio.c
+@@ -114,7 +114,8 @@ static struct commonio_db shadow_db = {
+ 	false,			/* changed */
+ 	false,			/* isopen */
+ 	false,			/* locked */
+-	false			/* readonly */
++	false,			/* readonly */
++	false			/* setname */
+ };
+ 
+ int spw_setdbname (const char *filename)
+diff --git a/lib/subordinateio.c b/lib/subordinateio.c
+index a662e67e..dd779c59 100644
+--- a/lib/subordinateio.c
++++ b/lib/subordinateio.c
+@@ -550,7 +550,8 @@ static struct commonio_db subordinate_uid_db = {
+ 	false,			/* changed */
+ 	false,			/* isopen */
+ 	false,			/* locked */
+-	false			/* readonly */
++	false,			/* readonly */
++	false			/* setname */
+ };
+ 
+ int sub_uid_setdbname (const char *filename)
+@@ -631,7 +632,8 @@ static struct commonio_db subordinate_gid_db = {
+ 	false,			/* changed */
+ 	false,			/* isopen */
+ 	false,			/* locked */
+-	false			/* readonly */
++	false,			/* readonly */
++	false			/* setname */
+ };
+ 
+ int sub_gid_setdbname (const char *filename)
