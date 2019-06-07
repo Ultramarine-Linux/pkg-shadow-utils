@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.6
-Release: 13%{?dist}
+Release: 14%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz
@@ -246,6 +246,9 @@ done
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Fri Jun  7 2019 Tomáš Mráz <tmraz@redhat.com> - 2:4.6-14
+- minor auditing fixes
+
 * Fri May  3 2019 Tomáš Mráz <tmraz@redhat.com> - 2:4.6-13
 - use lckpwdf() again to disable concurrent edits of databases by
   other applications

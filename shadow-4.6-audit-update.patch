@@ -834,16 +834,23 @@ diff -up shadow-4.6/src/groupmod.c.audit-update shadow-4.6/src/groupmod.c
  	              info_group.audit_msg,
  	              group_name, AUDIT_NO_ID,
  	              SHADOW_AUDIT_SUCCESS);
-@@ -472,7 +472,7 @@ static void close_files (void)
+@@ -472,7 +472,14 @@ static void close_files (void)
  			exit (E_GRP_UPDATE);
  		}
  #ifdef WITH_AUDIT
 -		audit_logger (AUDIT_USER_ACCT, Prog,
-+		audit_logger (AUDIT_GRP_MGMT, Prog,
++		/* If both happened, log password change as its more important */
++		if (pflg)
++			audit_logger (AUDIT_GRP_CHAUTHTOK, Prog,
++		              info_gshadow.audit_msg,
++		              group_name, AUDIT_NO_ID,
++		              SHADOW_AUDIT_SUCCESS);
++		else
++			audit_logger (AUDIT_GRP_MGMT, Prog,
  		              info_gshadow.audit_msg,
  		              group_name, AUDIT_NO_ID,
  		              SHADOW_AUDIT_SUCCESS);
-@@ -495,7 +495,7 @@ static void close_files (void)
+@@ -495,7 +502,7 @@ static void close_files (void)
  			exit (E_GRP_UPDATE);
  		}
  #ifdef WITH_AUDIT
@@ -852,7 +859,7 @@ diff -up shadow-4.6/src/groupmod.c.audit-update shadow-4.6/src/groupmod.c
  		              info_passwd.audit_msg,
  		              group_name, AUDIT_NO_ID,
  		              SHADOW_AUDIT_SUCCESS);
-@@ -510,8 +510,8 @@ static void close_files (void)
+@@ -510,8 +517,8 @@ static void close_files (void)
  	}
  
  #ifdef WITH_AUDIT
@@ -863,7 +870,7 @@ diff -up shadow-4.6/src/groupmod.c.audit-update shadow-4.6/src/groupmod.c
  	              group_name, AUDIT_NO_ID,
  	              SHADOW_AUDIT_SUCCESS);
  #endif
-@@ -523,6 +523,8 @@ static void close_files (void)
+@@ -523,6 +530,8 @@ static void close_files (void)
   */
  static void prepare_failure_reports (void)
  {
@@ -872,7 +879,7 @@ diff -up shadow-4.6/src/groupmod.c.audit-update shadow-4.6/src/groupmod.c
  	info_group.name   = group_name;
  #ifdef	SHADOWGRP
  	info_gshadow.name = group_name;
-@@ -535,76 +537,106 @@ static void prepare_failure_reports (voi
+@@ -535,76 +544,109 @@ static void prepare_failure_reports (voi
  #endif
  	info_passwd.audit_msg  = xmalloc (512);
  
@@ -971,6 +978,9 @@ diff -up shadow-4.6/src/groupmod.c.audit-update shadow-4.6/src/groupmod.c
 +		free(nv_pair);
  	}
  	if (pflg) {
++		strncat(info_passwd.audit_msg, "op=change-password",
++			511 - strlen (info_passwd.action));
++
 +		/* Note: audit doesn't want this value recorded */
  		strncat (info_group.action, ", new password",
 -		         511 - strlen (info_group.audit_msg));
@@ -1006,7 +1016,7 @@ diff -up shadow-4.6/src/groupmod.c.audit-update shadow-4.6/src/groupmod.c
  		                 "%lu", (unsigned long int) group_newid);
  	}
  	info_group.audit_msg[511]   = '\0';
-@@ -612,6 +644,11 @@ static void prepare_failure_reports (voi
+@@ -612,6 +654,11 @@ static void prepare_failure_reports (voi
  	info_gshadow.audit_msg[511] = '\0';
  #endif
  	info_passwd.audit_msg[511]  = '\0';
@@ -1603,16 +1613,24 @@ diff -up shadow-4.6/src/useradd.c.audit-update shadow-4.6/src/useradd.c
  		fail_exit (E_PW_UPDATE);
  	}
  #ifdef ENABLE_SUBIDS
-@@ -1997,7 +1939,7 @@ static void usr_update (void)
+@@ -1996,9 +1938,14 @@ static void usr_update (void)
+ #endif				/* ENABLE_SUBIDS */
  
  #ifdef WITH_AUDIT
++	/*
++	 * Even though we have the ID of the user, we won't send it now
++	 * because its not written to disk yet. After close_files it is
++	 * and we can use the real ID thereafter.
++	 */
  	audit_logger (AUDIT_ADD_USER, Prog,
 -	              "adding user",
+-	              user_name, (unsigned int) user_id,
 +	              "add-user",
- 	              user_name, (unsigned int) user_id,
++	              user_name, AUDIT_NO_ID,
  	              SHADOW_AUDIT_SUCCESS);
  #endif
-@@ -2032,12 +1974,6 @@ static void create_home (void)
+ 	/*
+@@ -2032,12 +1979,6 @@ static void create_home (void)
  			fprintf (stderr,
  			         _("%s: cannot create directory %s\n"),
  			         Prog, prefix_user_home);
@@ -1625,7 +1643,7 @@ diff -up shadow-4.6/src/useradd.c.audit-update shadow-4.6/src/useradd.c
  			fail_exit (E_HOMEDIR);
  		}
  		(void) chown (prefix_user_home, user_id, user_gid);
-@@ -2045,8 +1981,8 @@ static void create_home (void)
+@@ -2045,8 +1986,8 @@ static void create_home (void)
  		       0777 & ~getdef_num ("UMASK", GETDEF_DEFAULT_UMASK));
  		home_added = true;
  #ifdef WITH_AUDIT
@@ -1636,7 +1654,7 @@ diff -up shadow-4.6/src/useradd.c.audit-update shadow-4.6/src/useradd.c
  		              user_name, (unsigned int) user_id,
  		              SHADOW_AUDIT_SUCCESS);
  #endif
-@@ -2231,12 +2167,6 @@ int main (int argc, char **argv)
+@@ -2231,12 +2172,6 @@ int main (int argc, char **argv)
  	 */
  	if (prefix_getpwnam (user_name) != NULL) { /* local, no need for xgetpwnam */
  		fprintf (stderr, _("%s: user '%s' already exists\n"), Prog, user_name);
@@ -1649,7 +1667,7 @@ diff -up shadow-4.6/src/useradd.c.audit-update shadow-4.6/src/useradd.c
  		fail_exit (E_NAME_IN_USE);
  	}
  
-@@ -2252,12 +2182,6 @@ int main (int argc, char **argv)
+@@ -2252,12 +2187,6 @@ int main (int argc, char **argv)
  			fprintf (stderr,
  			         _("%s: group %s exists - if you want to add this user to that group, use -g.\n"),
  			         Prog, user_name);
@@ -1662,7 +1680,7 @@ diff -up shadow-4.6/src/useradd.c.audit-update shadow-4.6/src/useradd.c
  			fail_exit (E_NAME_IN_USE);
  		}
  	}
-@@ -2287,12 +2211,6 @@ int main (int argc, char **argv)
+@@ -2287,12 +2216,6 @@ int main (int argc, char **argv)
  				fprintf (stderr,
  				         _("%s: UID %lu is not unique\n"),
  				         Prog, (unsigned long) user_id);

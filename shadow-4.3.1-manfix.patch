@@ -327,3 +327,23 @@ index 5ad812f7..516417b7 100644
      </para>
    </listitem>
  </varlistentry>
+diff -up shadow-4.6/man/groupadd.8.xml.manfix shadow-4.6/man/groupadd.8.xml
+--- shadow-4.6/man/groupadd.8.xml.manfix	2019-04-02 16:35:52.096637444 +0200
++++ shadow-4.6/man/groupadd.8.xml	2019-06-07 14:23:57.477602106 +0200
+@@ -320,13 +320,13 @@
+ 	<varlistentry>
+ 	  <term><replaceable>4</replaceable></term>
+ 	  <listitem>
+-	    <para>GID not unique (when <option>-o</option> not used)</para>
++	    <para>GID is already used (when called without <option>-o</option>)</para>
+ 	  </listitem>
+ 	</varlistentry>
+ 	<varlistentry>
+ 	  <term><replaceable>9</replaceable></term>
+ 	  <listitem>
+-	    <para>group name not unique</para>
++	    <para>group name is already used</para>
+ 	  </listitem>
+ 	</varlistentry>
+ 	<varlistentry>
+
