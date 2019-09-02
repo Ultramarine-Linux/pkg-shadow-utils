@@ -98,7 +98,17 @@ Index: shadow-4.5/src/chgpasswd.c
  	int errors = 0;
  	int line = 0;
  
-@@ -408,8 +476,33 @@ int main (int argc, char **argv)
+@@ -402,12 +470,37 @@ int main (int argc, char **argv)
+ 	(void) bindtextdomain (PACKAGE, LOCALEDIR);
+ 	(void) textdomain (PACKAGE);
+ 
++#ifdef WITH_SELINUX
++	selinux_check_root ();
++#endif
++
+ 	process_root_flag ("-R", argc, argv);
+ 
+ 	process_flags (argc, argv);
  
  	OPENLOG ("chgpasswd");
  
@@ -125,10 +135,6 @@ Index: shadow-4.5/src/chgpasswd.c
 +
  	check_perms ();
  
-+#ifdef WITH_SELINUX
-+	selinux_check_root ();
-+#endif
-+
  #ifdef SHADOWGRP
  	is_shadow_grp = sgr_file_present ();
  #endif
@@ -230,7 +236,18 @@ Index: shadow-4.5/src/chpasswd.c
  /*
   * open_files - lock and open the password databases
   */
-@@ -405,8 +469,16 @@ int main (int argc, char **argv)
+@@ -393,6 +457,10 @@ int main (int argc, char **argv)
+ 	(void) bindtextdomain (PACKAGE, LOCALEDIR);
+ 	(void) textdomain (PACKAGE);
+ 
++#ifdef WITH_SELINUX
++	selinux_check_root ();
++#endif
++
+ 	process_root_flag ("-R", argc, argv);
+ 
+ 	process_flags (argc, argv);
+@@ -405,6 +473,10 @@ int main (int argc, char **argv)
  
  	OPENLOG ("chpasswd");
  
@@ -240,10 +257,6 @@ Index: shadow-4.5/src/chpasswd.c
 +
  	check_perms ();
  
-+#ifdef WITH_SELINUX
-+	selinux_check_root ();
-+#endif
-+
  #ifdef USE_PAM
  	if (!use_pam)
  #endif				/* USE_PAM */
