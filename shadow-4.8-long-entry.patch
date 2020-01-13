@@ -1,17 +1,19 @@
-diff -up shadow-4.5/lib/defines.h.long-entry shadow-4.5/lib/defines.h
---- shadow-4.5/lib/defines.h.long-entry	2014-09-01 16:36:40.000000000 +0200
-+++ shadow-4.5/lib/defines.h	2018-04-20 11:53:07.419308212 +0200
-@@ -382,4 +382,7 @@ extern char *strerror ();
+diff -up shadow-4.8/lib/defines.h.long-entry shadow-4.8/lib/defines.h
+--- shadow-4.8/lib/defines.h.long-entry	2020-01-13 10:29:45.288957339 +0100
++++ shadow-4.8/lib/defines.h	2020-01-13 10:30:47.482902954 +0100
+@@ -388,6 +388,9 @@ extern char *strerror ();
  # endif
  #endif
  
 +/* Maximum length of passwd entry */
 +#define PASSWD_ENTRY_MAX_LENGTH 32768
 +
- #endif				/* _DEFINES_H_ */
-diff -up shadow-4.5/lib/pwio.c.long-entry shadow-4.5/lib/pwio.c
---- shadow-4.5/lib/pwio.c.long-entry	2015-11-17 17:45:15.000000000 +0100
-+++ shadow-4.5/lib/pwio.c	2018-04-20 12:10:24.400837235 +0200
+ #ifdef HAVE_SECURE_GETENV
+ #  define shadow_getenv(name) secure_getenv(name)
+ # else
+diff -up shadow-4.8/lib/pwio.c.long-entry shadow-4.8/lib/pwio.c
+--- shadow-4.8/lib/pwio.c.long-entry	2019-07-23 17:26:08.000000000 +0200
++++ shadow-4.8/lib/pwio.c	2020-01-13 10:29:45.288957339 +0100
 @@ -79,7 +79,10 @@ static int passwd_put (const void *ent,
  	    || (pw->pw_gid == (gid_t)-1)
  	    || (valid_field (pw->pw_gecos, ":\n") == -1)
@@ -24,9 +26,9 @@ diff -up shadow-4.5/lib/pwio.c.long-entry shadow-4.5/lib/pwio.c
  		return -1;
  	}
  
-diff -up shadow-4.5/lib/sgetpwent.c.long-entry shadow-4.5/lib/sgetpwent.c
---- shadow-4.5/lib/sgetpwent.c.long-entry	2014-09-01 16:36:40.000000000 +0200
-+++ shadow-4.5/lib/sgetpwent.c	2018-04-20 12:16:31.911513808 +0200
+diff -up shadow-4.8/lib/sgetpwent.c.long-entry shadow-4.8/lib/sgetpwent.c
+--- shadow-4.8/lib/sgetpwent.c.long-entry	2019-10-05 03:23:58.000000000 +0200
++++ shadow-4.8/lib/sgetpwent.c	2020-01-13 10:29:45.288957339 +0100
 @@ -57,7 +57,7 @@
  struct passwd *sgetpwent (const char *buf)
  {
@@ -48,9 +50,9 @@ diff -up shadow-4.5/lib/sgetpwent.c.long-entry shadow-4.5/lib/sgetpwent.c
  	strcpy (pwdbuf, buf);
  
  	/*
-diff -up shadow-4.5/lib/sgetspent.c.long-entry shadow-4.5/lib/sgetspent.c
---- shadow-4.5/lib/sgetspent.c.long-entry	2014-09-01 16:36:40.000000000 +0200
-+++ shadow-4.5/lib/sgetspent.c	2018-04-20 12:16:54.505056257 +0200
+diff -up shadow-4.8/lib/sgetspent.c.long-entry shadow-4.8/lib/sgetspent.c
+--- shadow-4.8/lib/sgetspent.c.long-entry	2019-07-23 17:26:08.000000000 +0200
++++ shadow-4.8/lib/sgetspent.c	2020-01-13 10:29:45.289957322 +0100
 @@ -48,7 +48,7 @@
   */
  struct spwd *sgetspent (const char *string)
@@ -68,9 +70,9 @@ diff -up shadow-4.5/lib/sgetspent.c.long-entry shadow-4.5/lib/sgetspent.c
  		return 0;	/* fail if too long */
  	}
  	strcpy (spwbuf, string);
-diff -up shadow-4.5/lib/shadowio.c.long-entry shadow-4.5/lib/shadowio.c
---- shadow-4.5/lib/shadowio.c.long-entry	2016-12-07 06:30:41.000000001 +0100
-+++ shadow-4.5/lib/shadowio.c	2018-04-20 12:12:03.292171667 +0200
+diff -up shadow-4.8/lib/shadowio.c.long-entry shadow-4.8/lib/shadowio.c
+--- shadow-4.8/lib/shadowio.c.long-entry	2019-07-23 17:26:08.000000000 +0200
++++ shadow-4.8/lib/shadowio.c	2020-01-13 10:29:45.289957322 +0100
 @@ -79,7 +79,9 @@ static int shadow_put (const void *ent,
  
  	if (   (NULL == sp)

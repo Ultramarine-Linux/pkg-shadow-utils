@@ -1,18 +1,12 @@
-Index: shadow-4.5/libmisc/chkname.c
-===================================================================
---- shadow-4.5.orig/libmisc/chkname.c
-+++ shadow-4.5/libmisc/chkname.c
-@@ -47,27 +47,46 @@
- #include "chkname.h"
+diff -up shadow-4.8/libmisc/chkname.c.goodname shadow-4.8/libmisc/chkname.c
+--- shadow-4.8/libmisc/chkname.c.goodname	2020-01-13 09:44:41.968507996 +0100
++++ shadow-4.8/libmisc/chkname.c	2020-01-13 09:46:27.863727732 +0100
+@@ -55,26 +55,44 @@ static bool is_valid_name (const char *n
+ 	}
  
- static bool is_valid_name (const char *name)
--{
-+{      
  	/*
 -	 * User/group names must match [a-z_][a-z0-9_-]*[$]
 -	 */
--	if (('\0' == *name) ||
--	    !((('a' <= *name) && ('z' >= *name)) || ('_' == *name))) {
 +         * User/group names must match gnu e-regex:
 +         *    [a-zA-Z0-9_.][a-zA-Z0-9_.-]{0,30}[a-zA-Z0-9_.$-]?
 +         *
@@ -22,7 +16,9 @@ Index: shadow-4.5/libmisc/chkname.c
 +         * Also do not allow fully numeric names or just "." or "..".
 +         */
 +	int numeric;
-+
+ 
+-	if (('\0' == *name) ||
+-	    !((('a' <= *name) && ('z' >= *name)) || ('_' == *name))) {
 +	if ('\0' == *name ||
 +	    ('.' == *name && (('.' == name[1] && '\0' == name[2]) ||
 +			      '\0' == name[1])) ||
@@ -60,11 +56,10 @@ Index: shadow-4.5/libmisc/chkname.c
  }
  
  bool is_valid_user_name (const char *name)
-Index: shadow-4.5/man/groupadd.8.xml
-===================================================================
---- shadow-4.5.orig/man/groupadd.8.xml
-+++ shadow-4.5/man/groupadd.8.xml
-@@ -256,10 +256,12 @@
+diff -up shadow-4.8/man/groupadd.8.xml.goodname shadow-4.8/man/groupadd.8.xml
+--- shadow-4.8/man/groupadd.8.xml.goodname	2019-07-23 17:26:08.000000000 +0200
++++ shadow-4.8/man/groupadd.8.xml	2020-01-13 09:44:41.968507996 +0100
+@@ -273,10 +273,12 @@
     <refsect1 id='caveats'>
       <title>CAVEATS</title>
       <para>
@@ -81,11 +76,10 @@ Index: shadow-4.5/man/groupadd.8.xml
       </para>
       <para>
         Groupnames may only be up to &GROUP_NAME_MAX_LENGTH; characters long.
-Index: shadow-4.5/man/useradd.8.xml
-===================================================================
---- shadow-4.5.orig/man/useradd.8.xml
-+++ shadow-4.5/man/useradd.8.xml
-@@ -633,10 +633,14 @@
+diff -up shadow-4.8/man/useradd.8.xml.goodname shadow-4.8/man/useradd.8.xml
+--- shadow-4.8/man/useradd.8.xml.goodname	2019-10-05 03:23:58.000000000 +0200
++++ shadow-4.8/man/useradd.8.xml	2020-01-13 09:44:41.968507996 +0100
+@@ -661,10 +661,14 @@
      </para>
  
      <para>

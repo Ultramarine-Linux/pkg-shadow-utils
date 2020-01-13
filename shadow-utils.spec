@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
-Version: 4.6
-Release: 16%{?dist}
+Version: 4.8
+Release: 1%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz
@@ -10,33 +10,44 @@ Source2: shadow-utils.useradd
 Source3: shadow-utils.login.defs
 Source4: shadow-bsd.txt
 Source5: https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
+# Misc small changes - most probably non-upstreamable
 Patch0: shadow-4.6-redhat.patch
-Patch1: shadow-4.5-goodname.patch
+# Be more lenient with acceptable user/group names - non upstreamable
+Patch1: shadow-4.8-goodname.patch
+# Docfix for newusers - could be upstreamed
 Patch2: shadow-4.1.5.1-info-parent-dir.patch
-Patch6: shadow-4.6-selinux.patch
-Patch10: shadow-4.6-orig-context.patch
+# Misc SElinux related changes - upstreamability unknown
+Patch6: shadow-4.8-selinux.patch
+# Syslog message change - could be upstreamed
 Patch11: shadow-4.1.5.1-logmsg.patch
+# SElinux related - upstreamability unknown
 Patch14: shadow-4.1.5.1-default-range.patch
-Patch15: shadow-4.3.1-manfix.patch
+# Misc manual page changes - only some of them could be upstreamed
+Patch15: shadow-4.8-manfix.patch
+# Userdel usage message change - could be upstreamed
 Patch17: shadow-4.1.5.1-userdel-helpfix.patch
+# Date parsing improvement - could be upstreamed
 Patch19: shadow-4.2.1-date-parsing.patch
+# Additional error message - could be upstreamed
 Patch21: shadow-4.6-move-home.patch
-Patch22: shadow-4.6-audit-update.patch
+# Audit message changes - upstreamability unknown
+Patch22: shadow-4.8-audit-update.patch
+# Changes related to password unlocking - could be upstreamed
 Patch23: shadow-4.5-usermod-unlock.patch
-Patch24: shadow-4.2.1-no-lock-dos.patch
-Patch28: shadow-4.3.1-selinux-perms.patch
+# Additional SElinux related changes - upstreamability unknown
+Patch28: shadow-4.8-selinux-perms.patch
+# Handle NULL return from *time funcs - could be upstreamed
 Patch29: shadow-4.2.1-null-tm.patch
+# SElinux related - upstreamability unknown
 Patch31: shadow-4.6-getenforce.patch
-Patch32: shadow-4.5-crypt_h.patch
-Patch33: shadow-4.5-long-entry.patch
-Patch34: shadow-4.6-usermod-crash.patch
-Patch35: shadow-4.6-coverity.patch
-Patch36: shadow-4.6-use-itstool.patch
-Patch37: shadow-4.6-sssd-flush.patch
+# Handle include of crypt.h - could be upstreamed
+Patch32: shadow-4.8-crypt_h.patch
+# Handle /etc/passwd corruption - could be upstreamed
+Patch33: shadow-4.8-long-entry.patch
+# Limit uid/gid allocation to non-zero - could be upstreamed
 Patch38: shadow-4.6-sysugid-min-limit.patch
-Patch39: shadow-4.6-chgrp-guard.patch
-Patch40: shadow-4.6-ignore-login-prompt.patch
-Patch41: shadow-4.6-use-lckpwdf.patch
+# Ignore LOGIN_PLAIN_PROMPT in login.defs - upstreamability unknown
+Patch40: shadow-4.8-ignore-login-prompt.patch
 
 License: BSD and GPLv2+
 BuildRequires: gcc
@@ -69,7 +80,6 @@ are used for managing group accounts.
 %patch1 -p1 -b .goodname
 %patch2 -p1 -b .info-parent-dir
 %patch6 -p1 -b .selinux
-%patch10 -p1 -b .orig-context
 %patch11 -p1 -b .logmsg
 %patch14 -p1 -b .default-range
 %patch15 -p1 -b .manfix
@@ -78,20 +88,13 @@ are used for managing group accounts.
 %patch21 -p1 -b .move-home
 %patch22 -p1 -b .audit-update
 %patch23 -p1 -b .unlock
-%patch24 -p1 -b .no-lock-dos
 %patch28 -p1 -b .selinux-perms
 %patch29 -p1 -b .null-tm
 %patch31 -p1 -b .getenforce
 %patch32 -p1 -b .crypt_h
 %patch33 -p1 -b .long-entry
-%patch34 -p1 -b .usermod-crash
-%patch35 -p1 -b .coverity
-%patch36 -p1 -b .use-itstool
-%patch37 -p1 -b .sssd-flush
 %patch38 -p1 -b .sysugid-min-limit
-%patch39 -p1 -b .chgrp-guard
 %patch40 -p1 -b .login-prompt
-%patch41 -p1 -b .use-lckpwdf
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -246,6 +249,9 @@ done
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Mon Jan 13 2020 Tomáš Mráz <tmraz@redhat.com> - 2:4.8-1
+- update to current upstream release 4.8
+
 * Mon Sep  2 2019 Tomáš Mráz <tmraz@redhat.com> - 2:4.6-16
 - fix SELinux related problem in chpasswd/chgpasswd when run with -R
   (patch by Petr Lautrbach) (#1747215)

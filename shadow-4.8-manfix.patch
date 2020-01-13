@@ -1,35 +1,6 @@
-Index: shadow-4.5/man/groupmems.8.xml
-===================================================================
---- shadow-4.5.orig/man/groupmems.8.xml
-+++ shadow-4.5/man/groupmems.8.xml
-@@ -179,20 +179,10 @@
-   <refsect1 id='setup'>
-     <title>SETUP</title>
-     <para>
--      The <command>groupmems</command> executable should be in mode
--      <literal>2770</literal> as user <emphasis>root</emphasis> and in group
--      <emphasis>groups</emphasis>. The system administrator can add users to
--      group <emphasis>groups</emphasis> to allow or disallow them using the
--      <command>groupmems</command> utility to manage their own group
--      membership list.
-+      In this operating system the <command>groupmems</command> executable
-+      is not setuid and regular users cannot use it to manipulate
-+      the membership of their own group.
-     </para>
--
--    <programlisting>
--	$ groupadd -r groups
--	$ chmod 2770 groupmems
--	$ chown root.groups groupmems
--	$ groupmems -g groups -a gk4
--    </programlisting>
-   </refsect1>
- 
-   <refsect1 id='configuration'>
-Index: shadow-4.5/man/chage.1.xml
-===================================================================
---- shadow-4.5.orig/man/chage.1.xml
-+++ shadow-4.5/man/chage.1.xml
+diff -up shadow-4.8/man/chage.1.xml.manfix shadow-4.8/man/chage.1.xml
+--- shadow-4.8/man/chage.1.xml.manfix	2019-10-05 01:28:34.000000000 +0200
++++ shadow-4.8/man/chage.1.xml	2020-01-13 10:12:48.445155882 +0100
 @@ -102,6 +102,9 @@
  	    Set the number of days since January 1st, 1970 when the password
  	    was last changed. The date may also be expressed in the format
@@ -54,7 +25,7 @@ Index: shadow-4.5/man/chage.1.xml
  	    Passing the number <emphasis remap='I'>-1</emphasis> as the
  	    <replaceable>EXPIRE_DATE</replaceable> will remove an account
  	    expiration date.
-@@ -233,6 +243,18 @@
+@@ -239,6 +249,18 @@
        The <command>chage</command> program requires a shadow password file to
        be available.
      </para>
@@ -73,11 +44,56 @@ Index: shadow-4.5/man/chage.1.xml
      <para>The <command>chage</command> command is restricted to the root
        user, except for the <option>-l</option> option, which may be used by
        an unprivileged user to determine when their password or account is due
-Index: shadow-4.5/man/ja/man5/login.defs.5
-===================================================================
---- shadow-4.5.orig/man/ja/man5/login.defs.5
-+++ shadow-4.5/man/ja/man5/login.defs.5
-@@ -147,10 +147,6 @@ PASS_MAX_DAYS, PASS_MIN_DAYS, PASS_WARN_
+diff -up shadow-4.8/man/groupadd.8.xml.manfix shadow-4.8/man/groupadd.8.xml
+--- shadow-4.8/man/groupadd.8.xml.manfix	2020-01-13 10:12:48.432156100 +0100
++++ shadow-4.8/man/groupadd.8.xml	2020-01-13 10:13:06.096859122 +0100
+@@ -320,13 +320,13 @@
+ 	<varlistentry>
+ 	  <term><replaceable>4</replaceable></term>
+ 	  <listitem>
+-	    <para>GID not unique (when <option>-o</option> not used)</para>
++	    <para>GID is already used (when called without <option>-o</option>)</para>
+ 	  </listitem>
+ 	</varlistentry>
+ 	<varlistentry>
+ 	  <term><replaceable>9</replaceable></term>
+ 	  <listitem>
+-	    <para>group name not unique</para>
++	    <para>group name is already used</para>
+ 	  </listitem>
+ 	</varlistentry>
+ 	<varlistentry>
+diff -up shadow-4.8/man/groupmems.8.xml.manfix shadow-4.8/man/groupmems.8.xml
+--- shadow-4.8/man/groupmems.8.xml.manfix	2019-07-23 17:26:08.000000000 +0200
++++ shadow-4.8/man/groupmems.8.xml	2020-01-13 10:12:48.445155882 +0100
+@@ -179,20 +179,10 @@
+   <refsect1 id='setup'>
+     <title>SETUP</title>
+     <para>
+-      The <command>groupmems</command> executable should be in mode
+-      <literal>2770</literal> as user <emphasis>root</emphasis> and in group
+-      <emphasis>groups</emphasis>. The system administrator can add users to
+-      group <emphasis>groups</emphasis> to allow or disallow them using the
+-      <command>groupmems</command> utility to manage their own group
+-      membership list.
++      In this operating system the <command>groupmems</command> executable
++      is not setuid and regular users cannot use it to manipulate
++      the membership of their own group.
+     </para>
+-
+-    <programlisting>
+-	$ groupadd -r groups
+-	$ chmod 2770 groupmems
+-	$ chown root.groups groupmems
+-	$ groupmems -g groups -a gk4
+-    </programlisting>
+   </refsect1>
+ 
+   <refsect1 id='configuration'>
+diff -up shadow-4.8/man/ja/man5/login.defs.5.manfix shadow-4.8/man/ja/man5/login.defs.5
+--- shadow-4.8/man/ja/man5/login.defs.5.manfix	2019-07-23 17:26:08.000000000 +0200
++++ shadow-4.8/man/ja/man5/login.defs.5	2020-01-13 10:12:48.445155882 +0100
+@@ -147,10 +147,6 @@ 以下の参照表は、
  shadow パスワード機能のどのプログラムが
  どのパラメータを使用するかを示したものである。
  .na
@@ -88,11 +104,10 @@ Index: shadow-4.5/man/ja/man5/login.defs.5
  .IP groupadd 12
  GID_MAX GID_MIN
  .IP newusers 12
-Index: shadow-4.5/man/login.defs.5.xml
-===================================================================
---- shadow-4.5.orig/man/login.defs.5.xml
-+++ shadow-4.5/man/login.defs.5.xml
-@@ -162,6 +162,17 @@
+diff -up shadow-4.8/man/login.defs.5.xml.manfix shadow-4.8/man/login.defs.5.xml
+--- shadow-4.8/man/login.defs.5.xml.manfix	2019-07-23 17:26:08.000000000 +0200
++++ shadow-4.8/man/login.defs.5.xml	2020-01-13 10:14:10.491776547 +0100
+@@ -163,6 +163,17 @@
        long numeric parameters is machine-dependent.
      </para>
  
@@ -110,7 +125,7 @@ Index: shadow-4.5/man/login.defs.5.xml
      <para>The following configuration items are provided:</para>
  
      <variablelist remap='IP'>
-@@ -252,16 +263,6 @@
+@@ -254,16 +265,6 @@
  	</listitem>
        </varlistentry>
        <varlistentry>
@@ -127,7 +142,7 @@ Index: shadow-4.5/man/login.defs.5.xml
  	<term>chgpasswd</term>
  	<listitem>
  	  <para>
-@@ -282,14 +283,6 @@
+@@ -284,14 +285,6 @@
  	  </para>
  	</listitem>
        </varlistentry>
@@ -142,10 +157,10 @@ Index: shadow-4.5/man/login.defs.5.xml
        <!-- expiry: no variables (CONSOLE_GROUPS linked, but not used) -->
        <!-- faillog: no variables -->
        <varlistentry>
-@@ -350,34 +343,6 @@
+@@ -357,34 +350,6 @@
+ 	  <para>LASTLOG_UID_MAX</para>
+ 	</listitem>
        </varlistentry>
-       <!-- id: no variables -->
-       <!-- lastlog: no variables -->
 -      <varlistentry>
 -	<term>login</term>
 -	<listitem>
@@ -161,7 +176,7 @@ Index: shadow-4.5/man/login.defs.5.xml
 -	    HUSHLOGIN_FILE
 -	    <phrase condition="no_pam">ISSUE_FILE</phrase>
 -	    KILLCHAR
--	    <phrase condition="no_pam">LASTLOG_ENAB</phrase>
+-	    <phrase condition="no_pam">LASTLOG_ENAB LASTLOG_UID_MAX</phrase>
 -	    LOGIN_RETRIES
 -	    <phrase condition="no_pam">LOGIN_STRING</phrase>
 -	    LOGIN_TIMEOUT LOG_OK_LOGINS LOG_UNKFAIL_ENAB
@@ -177,7 +192,7 @@ Index: shadow-4.5/man/login.defs.5.xml
        <!-- logoutd: no variables -->
        <varlistentry>
  	<term>newgrp / sg</term>
-@@ -405,17 +370,6 @@
+@@ -412,17 +377,6 @@
  	</listitem>
        </varlistentry>
        <!-- nologin: no variables -->
@@ -195,7 +210,7 @@ Index: shadow-4.5/man/login.defs.5.xml
        <varlistentry>
  	<term>pwck</term>
  	<listitem>
-@@ -442,32 +396,6 @@
+@@ -449,32 +403,6 @@
  	  </para>
  	</listitem>
        </varlistentry>
@@ -228,10 +243,9 @@ Index: shadow-4.5/man/login.defs.5.xml
        <varlistentry>
  	<term>useradd</term>
  	<listitem>
-Index: shadow-4.5/man/shadow.5.xml
-===================================================================
---- shadow-4.5.orig/man/shadow.5.xml
-+++ shadow-4.5/man/shadow.5.xml
+diff -up shadow-4.8/man/shadow.5.xml.manfix shadow-4.8/man/shadow.5.xml
+--- shadow-4.8/man/shadow.5.xml.manfix	2019-12-01 17:52:32.000000000 +0100
++++ shadow-4.8/man/shadow.5.xml	2020-01-13 10:12:48.446155865 +0100
 @@ -129,7 +129,7 @@
  	<listitem>
  	  <para>
@@ -261,11 +275,10 @@ Index: shadow-4.5/man/shadow.5.xml
  	  </para>
  	  <para>
  	    Note that an account expiration differs from a password
-Index: shadow-4.5/man/useradd.8.xml
-===================================================================
---- shadow-4.5.orig/man/useradd.8.xml
-+++ shadow-4.5/man/useradd.8.xml
-@@ -347,6 +347,11 @@
+diff -up shadow-4.8/man/useradd.8.xml.manfix shadow-4.8/man/useradd.8.xml
+--- shadow-4.8/man/useradd.8.xml.manfix	2020-01-13 10:12:48.432156100 +0100
++++ shadow-4.8/man/useradd.8.xml	2020-01-13 10:12:48.446155865 +0100
+@@ -358,6 +358,11 @@
  	    <option>CREATE_HOME</option> is not enabled, no home
  	    directories are created.
  	  </para>
@@ -277,11 +290,10 @@ Index: shadow-4.5/man/useradd.8.xml
  	</listitem>
        </varlistentry>
        <varlistentry>
-Index: shadow-4.5/man/usermod.8.xml
-===================================================================
---- shadow-4.5.orig/man/usermod.8.xml
-+++ shadow-4.5/man/usermod.8.xml
-@@ -132,7 +132,8 @@
+diff -up shadow-4.8/man/usermod.8.xml.manfix shadow-4.8/man/usermod.8.xml
+--- shadow-4.8/man/usermod.8.xml.manfix	2019-10-05 03:23:58.000000000 +0200
++++ shadow-4.8/man/usermod.8.xml	2020-01-13 10:12:48.446155865 +0100
+@@ -153,7 +153,8 @@
  	    If the <option>-m</option>
  	    option is given, the contents of the current home directory will
  	    be moved to the new home directory, which is created if it does
@@ -291,7 +303,20 @@ Index: shadow-4.5/man/usermod.8.xml
  	  </para>
  	</listitem>
        </varlistentry>
-@@ -256,7 +257,8 @@
+@@ -215,6 +216,12 @@
+ 	    The group ownership of files outside of the user's home directory
+ 	    must be fixed manually.
+ 	  </para>
++	  <para>
++	    The change of the group ownership of files inside of the user's
++	    home directory is also not done if the home dir owner uid is
++	    different from the current or new user id. This is safety measure
++	    for special home directories such as <filename>/</filename>.
++	  </para>
+ 	</listitem>
+       </varlistentry>
+       <varlistentry>
+@@ -277,7 +284,8 @@
  	<listitem>
  	  <para>
  	    Move the content of the user's home directory to the new
@@ -301,49 +326,16 @@ Index: shadow-4.5/man/usermod.8.xml
  	  </para>
  	  <para>
  	    This option is only valid in combination with the
-diff --git a/man/login.defs.d/SUB_GID_COUNT.xml b/man/login.defs.d/SUB_GID_COUNT.xml
-index 01ace007..93fe7421 100644
---- a/man/login.defs.d/SUB_GID_COUNT.xml
-+++ b/man/login.defs.d/SUB_GID_COUNT.xml
-@@ -42,7 +42,7 @@
-     <para>
-       The default values for <option>SUB_GID_MIN</option>,
-       <option>SUB_GID_MAX</option>, <option>SUB_GID_COUNT</option>
--      are respectively 100000, 600100000 and 10000.
-+      are respectively 100000, 600100000 and 65536.
-     </para>
-   </listitem>
- </varlistentry>
-diff --git a/man/login.defs.d/SUB_UID_COUNT.xml b/man/login.defs.d/SUB_UID_COUNT.xml
-index 5ad812f7..516417b7 100644
---- a/man/login.defs.d/SUB_UID_COUNT.xml
-+++ b/man/login.defs.d/SUB_UID_COUNT.xml
-@@ -42,7 +42,7 @@
-     <para>
-       The default values for <option>SUB_UID_MIN</option>,
-       <option>SUB_UID_MAX</option>, <option>SUB_UID_COUNT</option>
--      are respectively 100000, 600100000 and 10000.
-+      are respectively 100000, 600100000 and 65536.
-     </para>
-   </listitem>
- </varlistentry>
-diff -up shadow-4.6/man/groupadd.8.xml.manfix shadow-4.6/man/groupadd.8.xml
---- shadow-4.6/man/groupadd.8.xml.manfix	2019-04-02 16:35:52.096637444 +0200
-+++ shadow-4.6/man/groupadd.8.xml	2019-06-07 14:23:57.477602106 +0200
-@@ -320,13 +320,13 @@
- 	<varlistentry>
- 	  <term><replaceable>4</replaceable></term>
- 	  <listitem>
--	    <para>GID not unique (when <option>-o</option> not used)</para>
-+	    <para>GID is already used (when called without <option>-o</option>)</para>
- 	  </listitem>
- 	</varlistentry>
- 	<varlistentry>
- 	  <term><replaceable>9</replaceable></term>
- 	  <listitem>
--	    <para>group name not unique</para>
-+	    <para>group name is already used</para>
- 	  </listitem>
- 	</varlistentry>
- 	<varlistentry>
-
+@@ -391,6 +399,12 @@
+ 	    must be fixed manually.
+ 	  </para>
+ 	  <para>
++	    The change of the user ownership of files inside of the user's
++	    home directory is also not done if the home dir owner uid is
++	    different from the current or new user id. This is safety measure
++	    for special home directories such as <filename>/</filename>.
++	  </para>
++	  <para>
+ 	    No checks will be performed with regard to the
+ 	    <option>UID_MIN</option>, <option>UID_MAX</option>,
+ 	    <option>SYS_UID_MIN</option>, or <option>SYS_UID_MAX</option>

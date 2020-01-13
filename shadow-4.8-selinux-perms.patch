@@ -1,7 +1,6 @@
-Index: shadow-4.5/src/chgpasswd.c
-===================================================================
---- shadow-4.5.orig/src/chgpasswd.c
-+++ shadow-4.5/src/chgpasswd.c
+diff -up shadow-4.8/src/chgpasswd.c.selinux-perms shadow-4.8/src/chgpasswd.c
+--- shadow-4.8/src/chgpasswd.c.selinux-perms	2019-12-01 18:02:43.000000000 +0100
++++ shadow-4.8/src/chgpasswd.c	2020-01-13 10:21:44.558107260 +0100
 @@ -39,6 +39,13 @@
  #include <pwd.h>
  #include <stdio.h>
@@ -16,7 +15,7 @@ Index: shadow-4.5/src/chgpasswd.c
  #ifdef ACCT_TOOLS_SETUID
  #ifdef USE_PAM
  #include "pam_defs.h"
-@@ -76,6 +83,9 @@ static bool sgr_locked = false;
+@@ -80,6 +87,9 @@ static bool sgr_locked = false;
  #endif
  static bool gr_locked = false;
  
@@ -26,7 +25,7 @@ Index: shadow-4.5/src/chgpasswd.c
  /* local function prototypes */
  static void fail_exit (int code);
  static /*@noreturn@*/void usage (int status);
-@@ -300,6 +310,63 @@ static void check_perms (void)
+@@ -334,6 +344,63 @@ static void check_perms (void)
  #endif				/* ACCT_TOOLS_SETUID */
  }
  
@@ -90,7 +89,7 @@ Index: shadow-4.5/src/chgpasswd.c
  /*
   * open_files - lock and open the group databases
   */
-@@ -393,6 +460,7 @@ int main (int argc, char **argv)
+@@ -427,6 +494,7 @@ int main (int argc, char **argv)
  
  	const struct group *gr;
  	struct group newgr;
@@ -98,7 +97,7 @@ Index: shadow-4.5/src/chgpasswd.c
  	int errors = 0;
  	int line = 0;
  
-@@ -402,12 +470,37 @@ int main (int argc, char **argv)
+@@ -436,12 +504,37 @@ int main (int argc, char **argv)
  	(void) bindtextdomain (PACKAGE, LOCALEDIR);
  	(void) textdomain (PACKAGE);
  
@@ -136,28 +135,9 @@ Index: shadow-4.5/src/chgpasswd.c
  	check_perms ();
  
  #ifdef SHADOWGRP
- 	is_shadow_grp = sgr_file_present ();
- #endif
-@@ -536,6 +629,15 @@ int main (int argc, char **argv)
- 			newgr.gr_passwd = cp;
- 		}
- 
-+#ifdef WITH_AUDIT
-+		{
-+
-+			audit_logger_with_group (AUDIT_GRP_CHAUTHTOK, Prog,
-+		              "change-password",
-+		              myname, AUDIT_NO_ID, gr->gr_name,
-+		              SHADOW_AUDIT_SUCCESS);
-+		}
-+#endif
- 		/* 
- 		 * The updated group file entry is then put back and will
- 		 * be written to the group file later, after all the
-Index: shadow-4.5/src/chpasswd.c
-===================================================================
---- shadow-4.5.orig/src/chpasswd.c
-+++ shadow-4.5/src/chpasswd.c
+diff -up shadow-4.8/src/chpasswd.c.selinux-perms shadow-4.8/src/chpasswd.c
+--- shadow-4.8/src/chpasswd.c.selinux-perms	2019-12-01 18:02:43.000000000 +0100
++++ shadow-4.8/src/chpasswd.c	2020-01-13 10:21:44.558107260 +0100
 @@ -39,6 +39,13 @@
  #include <pwd.h>
  #include <stdio.h>
@@ -172,7 +152,7 @@ Index: shadow-4.5/src/chpasswd.c
  #ifdef USE_PAM
  #include "pam_defs.h"
  #endif				/* USE_PAM */
-@@ -297,6 +304,63 @@ static void check_perms (void)
+@@ -332,6 +339,63 @@ static void check_perms (void)
  #endif				/* USE_PAM */
  }
  
@@ -236,7 +216,7 @@ Index: shadow-4.5/src/chpasswd.c
  /*
   * open_files - lock and open the password databases
   */
-@@ -393,6 +457,10 @@ int main (int argc, char **argv)
+@@ -428,6 +492,10 @@ int main (int argc, char **argv)
  	(void) bindtextdomain (PACKAGE, LOCALEDIR);
  	(void) textdomain (PACKAGE);
  
@@ -247,7 +227,7 @@ Index: shadow-4.5/src/chpasswd.c
  	process_root_flag ("-R", argc, argv);
  
  	process_flags (argc, argv);
-@@ -405,6 +473,10 @@ int main (int argc, char **argv)
+@@ -440,6 +508,10 @@ int main (int argc, char **argv)
  
  	OPENLOG ("chpasswd");
  
@@ -258,33 +238,3 @@ Index: shadow-4.5/src/chpasswd.c
  	check_perms ();
  
  #ifdef USE_PAM
- 	if (!use_pam)
- #endif				/* USE_PAM */
-@@ -566,6 +638,11 @@ int main (int argc, char **argv)
- 			newpw.pw_passwd = cp;
- 		}
- 
-+#ifdef WITH_AUDIT
-+		audit_logger (AUDIT_USER_CHAUTHTOK, Prog,
-+		              "updating-password",
-+		              pw->pw_name, (unsigned int) pw->pw_uid, 1);
-+#endif
- 		/* 
- 		 * The updated password file entry is then put back and will
- 		 * be written to the password file later, after all the
-Index: shadow-4.5/src/Makefile.am
-===================================================================
---- shadow-4.5.orig/src/Makefile.am
-+++ shadow-4.5/src/Makefile.am
-@@ -87,9 +87,9 @@ chage_LDADD    = $(LDADD) $(LIBPAM_SUID)
- newuidmap_LDADD    = $(LDADD) $(LIBSELINUX)
- newgidmap_LDADD    = $(LDADD) $(LIBSELINUX)
- chfn_LDADD     = $(LDADD) $(LIBPAM) $(LIBSELINUX) $(LIBCRYPT_NOPAM) $(LIBSKEY) $(LIBMD)
--chgpasswd_LDADD = $(LDADD) $(LIBPAM_SUID) $(LIBSELINUX) $(LIBCRYPT)
-+chgpasswd_LDADD = $(LDADD) $(LIBPAM_SUID) $(LIBSELINUX) $(LIBAUDIT) $(LIBCRYPT)
- chsh_LDADD     = $(LDADD) $(LIBPAM) $(LIBSELINUX) $(LIBCRYPT_NOPAM) $(LIBSKEY) $(LIBMD)
--chpasswd_LDADD = $(LDADD) $(LIBPAM) $(LIBSELINUX) $(LIBCRYPT)
-+chpasswd_LDADD = $(LDADD) $(LIBPAM) $(LIBSELINUX) $(LIBAUDIT) $(LIBCRYPT)
- gpasswd_LDADD  = $(LDADD) $(LIBAUDIT) $(LIBSELINUX) $(LIBCRYPT)
- groupadd_LDADD = $(LDADD) $(LIBPAM_SUID) $(LIBAUDIT) $(LIBSELINUX)
- groupdel_LDADD = $(LDADD) $(LIBPAM_SUID) $(LIBAUDIT) $(LIBSELINUX)
