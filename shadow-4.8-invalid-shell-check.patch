@@ -22,7 +22,7 @@ diff -up shadow-4.8/src/useradd.c.invalid-shell shadow-4.8/src/useradd.c
 +				         || S_ISDIR(st.st_mode)
 +				         || access(optarg, X_OK) != 0)) {
 +					fprintf (stderr,
-+					         _("%s: Warning: missing or not executable shell '%s'\n"),
++					         _("%s: Warning: missing or non-executable shell '%s'\n"),
 +					         Prog, optarg);
 +				}
  				user_shell = optarg;
