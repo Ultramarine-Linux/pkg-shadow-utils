@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.8
-Release: 1%{?dist}
+Release: 2%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz
@@ -48,6 +48,8 @@ Patch33: shadow-4.8-long-entry.patch
 Patch38: shadow-4.6-sysugid-min-limit.patch
 # Ignore LOGIN_PLAIN_PROMPT in login.defs - upstreamability unknown
 Patch40: shadow-4.8-ignore-login-prompt.patch
+# Make the missing shell check into warning - could be upstreamed
+Patch41: shadow-4.8-invalid-shell-check.patch
 
 License: BSD and GPLv2+
 BuildRequires: gcc
@@ -95,6 +97,7 @@ are used for managing group accounts.
 %patch33 -p1 -b .long-entry
 %patch38 -p1 -b .sysugid-min-limit
 %patch40 -p1 -b .login-prompt
+%patch41 -p1 -b .invalid-shell
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -249,6 +252,9 @@ done
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Thu Jan 16 2020 Tomáš Mráz <tmraz@redhat.com> - 2:4.8-2
+- make the invalid shell check into warning
+
 * Mon Jan 13 2020 Tomáš Mráz <tmraz@redhat.com> - 2:4.8-1
 - update to current upstream release 4.8
 
