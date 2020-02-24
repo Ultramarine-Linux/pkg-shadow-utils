@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.8
-Release: 3%{?dist}
+Release: 4%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz
@@ -50,6 +50,8 @@ Patch38: shadow-4.6-sysugid-min-limit.patch
 Patch40: shadow-4.8-ignore-login-prompt.patch
 # Make the missing shell check into warning - could be upstreamed
 Patch41: shadow-4.8-invalid-shell-check.patch
+# Generate /var/spool/mail/$USER with the proper SELinux user identity - already upstreamed
+Patch42: shadow-4.8-useradd-selinux-mail.patch
 
 License: BSD and GPLv2+
 BuildRequires: gcc
@@ -98,6 +100,7 @@ are used for managing group accounts.
 %patch38 -p1 -b .sysugid-min-limit
 %patch40 -p1 -b .login-prompt
 %patch41 -p1 -b .invalid-shell
+%patch42 -p1 -b .useradd-selinux-mail
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -252,6 +255,10 @@ done
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Mon Feb 24 2020 Iker Pedrosa <ipedrosa@redhat.com> - 2:4.8-4
+- fix useradd: doesn't generate spool mail with the proper SELinux user identity
+  (#1690527)
+
 * Thu Jan 30 2020 Fedora Release Engineering <releng@fedoraproject.org> - 2:4.8-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild
 
