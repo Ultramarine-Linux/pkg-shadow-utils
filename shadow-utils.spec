@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.6
-Release: 8%{?dist}
+Release: 9%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz
@@ -35,6 +35,8 @@ Patch36: shadow-4.6-use-itstool.patch
 Patch37: shadow-4.6-sssd-flush.patch
 Patch38: shadow-4.6-sysugid-min-limit.patch
 Patch39: shadow-4.6-chgrp-guard.patch
+# Generate /var/spool/mail/$USER with the proper SELinux user identity - already upstreamed
+Patch40: shadow-4.6-useradd-selinux-mail.patch
 
 License: BSD and GPLv2+
 BuildRequires: gcc
@@ -90,6 +92,7 @@ are used for managing group accounts.
 %patch37 -p1 -b .sssd-flush
 %patch38 -p1 -b .sysugid-min-limit
 %patch39 -p1 -b .chgrp-guard
+%patch40 -p1 -b .useradd-selinux-mail
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -241,6 +244,10 @@ done
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Mon Feb 24 2020 Iker Pedrosa <ipedrosa@redhat.com> - 2:4.6-9
+- fix useradd: doesn't generate spool mail with the proper SELinux user identity
+  (#1690527)
+
 * Sat Feb 02 2019 Fedora Release Engineering <releng@fedoraproject.org> - 2:4.6-8
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_30_Mass_Rebuild
 
