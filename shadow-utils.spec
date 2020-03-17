@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
-Version: 4.8
-Release: 5%{?dist}
+Version: 4.8.1
+Release: 1%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz
@@ -10,6 +10,7 @@ Source2: shadow-utils.useradd
 Source3: shadow-utils.login.defs
 Source4: shadow-bsd.txt
 Source5: https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
+Source6: shadow-utils.HOME_MODE.xml
 # Misc small changes - most probably non-upstreamable
 Patch0: shadow-4.6-redhat.patch
 # Be more lenient with acceptable user/group names - non upstreamable
@@ -23,7 +24,7 @@ Patch11: shadow-4.1.5.1-logmsg.patch
 # SElinux related - upstreamability unknown
 Patch14: shadow-4.1.5.1-default-range.patch
 # Misc manual page changes - only some of them could be upstreamed
-Patch15: shadow-4.8-manfix.patch
+Patch15: shadow-4.8.1-manfix.patch
 # Userdel usage message change - could be upstreamed
 Patch17: shadow-4.1.5.1-userdel-helpfix.patch
 # Date parsing improvement - could be upstreamed
@@ -31,7 +32,7 @@ Patch19: shadow-4.2.1-date-parsing.patch
 # Additional error message - could be upstreamed
 Patch21: shadow-4.6-move-home.patch
 # Audit message changes - upstreamability unknown
-Patch22: shadow-4.8-audit-update.patch
+Patch22: shadow-4.8.1-audit-update.patch
 # Changes related to password unlocking - could be upstreamed
 Patch23: shadow-4.5-usermod-unlock.patch
 # Additional SElinux related changes - upstreamability unknown
@@ -48,8 +49,6 @@ Patch33: shadow-4.8-long-entry.patch
 Patch38: shadow-4.6-sysugid-min-limit.patch
 # Ignore LOGIN_PLAIN_PROMPT in login.defs - upstreamability unknown
 Patch40: shadow-4.8-ignore-login-prompt.patch
-# Make the missing shell check into warning - could be upstreamed
-Patch41: shadow-4.8-invalid-shell-check.patch
 # Generate /var/spool/mail/$USER with the proper SELinux user identity - already upstreamed
 Patch42: shadow-4.8-useradd-selinux-mail.patch
 
@@ -99,13 +98,13 @@ are used for managing group accounts.
 %patch33 -p1 -b .long-entry
 %patch38 -p1 -b .sysugid-min-limit
 %patch40 -p1 -b .login-prompt
-%patch41 -p1 -b .invalid-shell
 %patch42 -p1 -b .useradd-selinux-mail
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
 
 cp -a %{SOURCE4} %{SOURCE5} .
+cp -a %{SOURCE6} man/login.defs.d/HOME_MODE.xml
 
 # Force regeneration of getdate.c
 rm libmisc/getdate.c
@@ -255,7 +254,10 @@ done
 %{_mandir}/man8/vigr.8*
 
 %changelog
-* Mon Mar 17 2020 Iker Pedrosa <ipedrosa@redhat.com> - 2:4.8-5
+* Tue Mar 17 2020 Iker Pedrosa <ipedrosa@redhat.com> - 2:4.8.1-1
+- updated upstream to 4.8.1
+
+* Tue Mar 17 2020 Iker Pedrosa <ipedrosa@redhat.com> - 2:4.8-5
 - synchronized login.defs with upstream file (#1261099 and #1807957)
 
 * Mon Feb 24 2020 Iker Pedrosa <ipedrosa@redhat.com> - 2:4.8-4
