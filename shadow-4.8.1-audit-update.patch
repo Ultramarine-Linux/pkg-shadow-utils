@@ -1,6 +1,6 @@
-diff -up shadow-4.8/libmisc/audit_help.c.audit-update shadow-4.8/libmisc/audit_help.c
---- shadow-4.8/libmisc/audit_help.c.audit-update	2019-07-23 17:26:08.000000000 +0200
-+++ shadow-4.8/libmisc/audit_help.c	2020-01-13 10:15:51.802073378 +0100
+diff -up shadow-4.8.1/libmisc/audit_help.c.audit-update shadow-4.8.1/libmisc/audit_help.c
+--- shadow-4.8.1/libmisc/audit_help.c.audit-update	2019-07-23 17:26:08.000000000 +0200
++++ shadow-4.8.1/libmisc/audit_help.c	2020-03-17 16:53:44.371943299 +0100
 @@ -68,7 +68,7 @@ void audit_help_open (void)
   * This function will log a message to the audit system using a predefined
   * message format. Parameter usage is as follows:
@@ -50,9 +50,9 @@ diff -up shadow-4.8/libmisc/audit_help.c.audit-update shadow-4.8/libmisc/audit_h
  void audit_logger_message (const char *message, shadow_audit_result result)
  {
  	if (audit_fd < 0) {
-diff -up shadow-4.8/libmisc/cleanup_group.c.audit-update shadow-4.8/libmisc/cleanup_group.c
---- shadow-4.8/libmisc/cleanup_group.c.audit-update	2019-07-23 17:26:08.000000000 +0200
-+++ shadow-4.8/libmisc/cleanup_group.c	2020-01-13 10:15:51.802073378 +0100
+diff -up shadow-4.8.1/libmisc/cleanup_group.c.audit-update shadow-4.8.1/libmisc/cleanup_group.c
+--- shadow-4.8.1/libmisc/cleanup_group.c.audit-update	2019-07-23 17:26:08.000000000 +0200
++++ shadow-4.8.1/libmisc/cleanup_group.c	2020-03-17 16:53:44.371943299 +0100
 @@ -83,7 +83,7 @@ void cleanup_report_mod_group (void *cle
  	         gr_dbname (),
  	         info->action));
@@ -131,9 +131,9 @@ diff -up shadow-4.8/libmisc/cleanup_group.c.audit-update shadow-4.8/libmisc/clea
  		                      SHADOW_AUDIT_FAILURE);
  #endif
  	}
-diff -up shadow-4.8/libmisc/cleanup_user.c.audit-update shadow-4.8/libmisc/cleanup_user.c
---- shadow-4.8/libmisc/cleanup_user.c.audit-update	2019-07-23 17:26:08.000000000 +0200
-+++ shadow-4.8/libmisc/cleanup_user.c	2020-01-13 10:15:51.802073378 +0100
+diff -up shadow-4.8.1/libmisc/cleanup_user.c.audit-update shadow-4.8.1/libmisc/cleanup_user.c
+--- shadow-4.8.1/libmisc/cleanup_user.c.audit-update	2019-07-23 17:26:08.000000000 +0200
++++ shadow-4.8.1/libmisc/cleanup_user.c	2020-03-17 16:53:44.371943299 +0100
 @@ -65,7 +65,7 @@ void cleanup_report_mod_passwd (void *cl
  	         pw_dbname (),
  	         info->action));
@@ -181,9 +181,9 @@ diff -up shadow-4.8/libmisc/cleanup_user.c.audit-update shadow-4.8/libmisc/clean
  		                      SHADOW_AUDIT_FAILURE);
  #endif
  	}
-diff -up shadow-4.8/lib/prototypes.h.audit-update shadow-4.8/lib/prototypes.h
---- shadow-4.8/lib/prototypes.h.audit-update	2020-01-13 10:15:51.785073664 +0100
-+++ shadow-4.8/lib/prototypes.h	2020-01-13 10:15:51.803073362 +0100
+diff -up shadow-4.8.1/lib/prototypes.h.audit-update shadow-4.8.1/lib/prototypes.h
+--- shadow-4.8.1/lib/prototypes.h.audit-update	2020-03-17 16:53:44.364943206 +0100
++++ shadow-4.8.1/lib/prototypes.h	2020-03-17 16:53:44.371943299 +0100
 @@ -219,12 +219,21 @@ extern int audit_fd;
  extern void audit_help_open (void);
  /* Use AUDIT_NO_ID when a name is provided to audit_logger instead of an ID */
@@ -206,9 +206,9 @@ diff -up shadow-4.8/lib/prototypes.h.audit-update shadow-4.8/lib/prototypes.h
  void audit_logger_message (const char *message, shadow_audit_result result);
  #endif
  
-diff -up shadow-4.8/src/chage.c.audit-update shadow-4.8/src/chage.c
---- shadow-4.8/src/chage.c.audit-update	2019-11-12 01:18:25.000000000 +0100
-+++ shadow-4.8/src/chage.c	2020-01-13 10:15:51.806073311 +0100
+diff -up shadow-4.8.1/src/chage.c.audit-update shadow-4.8.1/src/chage.c
+--- shadow-4.8.1/src/chage.c.audit-update	2019-11-12 01:18:25.000000000 +0100
++++ shadow-4.8.1/src/chage.c	2020-03-17 16:53:44.371943299 +0100
 @@ -123,9 +123,10 @@ static /*@noreturn@*/void fail_exit (int
  
  #ifdef WITH_AUDIT
@@ -296,9 +296,9 @@ diff -up shadow-4.8/src/chage.c.audit-update shadow-4.8/src/chage.c
  			              user_name, (unsigned int) user_uid, 1);
  		}
  #endif
-diff -up shadow-4.8/src/gpasswd.c.audit-update shadow-4.8/src/gpasswd.c
---- shadow-4.8/src/gpasswd.c.audit-update	2019-07-23 17:26:08.000000000 +0200
-+++ shadow-4.8/src/gpasswd.c	2020-01-13 10:15:51.803073362 +0100
+diff -up shadow-4.8.1/src/gpasswd.c.audit-update shadow-4.8.1/src/gpasswd.c
+--- shadow-4.8.1/src/gpasswd.c.audit-update	2019-07-23 17:26:08.000000000 +0200
++++ shadow-4.8.1/src/gpasswd.c	2020-03-17 16:53:44.371943299 +0100
 @@ -138,7 +138,7 @@ static void usage (int status)
  	(void) fputs (_("  -d, --delete USER             remove USER from GROUP\n"), usageout);
  	(void) fputs (_("  -h, --help                    display this help message and exit\n"), usageout);
@@ -562,9 +562,9 @@ diff -up shadow-4.8/src/gpasswd.c.audit-update shadow-4.8/src/gpasswd.c
  		              SHADOW_AUDIT_SUCCESS);
  #endif
  	}
-diff -up shadow-4.8/src/groupadd.c.audit-update shadow-4.8/src/groupadd.c
---- shadow-4.8/src/groupadd.c.audit-update	2019-07-23 17:26:08.000000000 +0200
-+++ shadow-4.8/src/groupadd.c	2020-01-13 10:15:51.804073345 +0100
+diff -up shadow-4.8.1/src/groupadd.c.audit-update shadow-4.8.1/src/groupadd.c
+--- shadow-4.8.1/src/groupadd.c.audit-update	2019-07-23 17:26:08.000000000 +0200
++++ shadow-4.8.1/src/groupadd.c	2020-03-17 16:53:44.372943312 +0100
 @@ -131,6 +131,15 @@ static /*@noreturn@*/void usage (int sta
  	exit (status);
  }
@@ -740,9 +740,9 @@ diff -up shadow-4.8/src/groupadd.c.audit-update shadow-4.8/src/groupadd.c
  		}
  	}
  
-diff -up shadow-4.8/src/groupdel.c.audit-update shadow-4.8/src/groupdel.c
---- shadow-4.8/src/groupdel.c.audit-update	2019-07-23 17:26:08.000000000 +0200
-+++ shadow-4.8/src/groupdel.c	2020-01-13 10:15:51.804073345 +0100
+diff -up shadow-4.8.1/src/groupdel.c.audit-update shadow-4.8.1/src/groupdel.c
+--- shadow-4.8.1/src/groupdel.c.audit-update	2019-07-23 17:26:08.000000000 +0200
++++ shadow-4.8.1/src/groupdel.c	2020-03-17 16:53:44.372943312 +0100
 @@ -106,6 +106,15 @@ static /*@noreturn@*/void usage (int sta
  	exit (status);
  }
@@ -912,9 +912,9 @@ diff -up shadow-4.8/src/groupdel.c.audit-update shadow-4.8/src/groupdel.c
  	}
  #endif
  
-diff -up shadow-4.8/src/groupmod.c.audit-update shadow-4.8/src/groupmod.c
---- shadow-4.8/src/groupmod.c.audit-update	2019-07-23 17:26:08.000000000 +0200
-+++ shadow-4.8/src/groupmod.c	2020-01-13 10:15:51.805073328 +0100
+diff -up shadow-4.8.1/src/groupmod.c.audit-update shadow-4.8.1/src/groupmod.c
+--- shadow-4.8.1/src/groupmod.c.audit-update	2019-07-23 17:26:08.000000000 +0200
++++ shadow-4.8.1/src/groupmod.c	2020-03-17 16:53:44.372943312 +0100
 @@ -450,7 +450,7 @@ static void close_files (void)
  		exit (E_GRP_UPDATE);
  	}
@@ -1118,9 +1118,9 @@ diff -up shadow-4.8/src/groupmod.c.audit-update shadow-4.8/src/groupmod.c
  
  // FIXME: add a system cleanup
  	add_cleanup (cleanup_report_mod_group, &info_group);
-diff -up shadow-4.8/src/newgrp.c.audit-update shadow-4.8/src/newgrp.c
---- shadow-4.8/src/newgrp.c.audit-update	2019-07-23 17:26:08.000000000 +0200
-+++ shadow-4.8/src/newgrp.c	2020-01-13 10:15:51.806073311 +0100
+diff -up shadow-4.8.1/src/newgrp.c.audit-update shadow-4.8.1/src/newgrp.c
+--- shadow-4.8.1/src/newgrp.c.audit-update	2020-01-12 15:19:28.000000000 +0100
++++ shadow-4.8.1/src/newgrp.c	2020-03-17 16:53:44.372943312 +0100
 @@ -206,11 +206,12 @@ static void check_perms (const struct gr
  		    strcmp (cpasswd, grp->gr_passwd) != 0) {
  #ifdef WITH_AUDIT
@@ -1203,7 +1203,7 @@ diff -up shadow-4.8/src/newgrp.c.audit-update shadow-4.8/src/newgrp.c
  			}
  #endif
  			exit (EXIT_FAILURE);
-@@ -457,7 +458,7 @@ int main (int argc, char **argv)
+@@ -458,7 +459,7 @@ int main (int argc, char **argv)
  #ifdef WITH_AUDIT
  		audit_logger (AUDIT_CHGRP_ID, Prog,
  		              "changing", NULL,
@@ -1212,7 +1212,7 @@ diff -up shadow-4.8/src/newgrp.c.audit-update shadow-4.8/src/newgrp.c
  #endif
  		SYSLOG ((LOG_WARN, "Cannot determine the user name of the caller (UID %lu)",
  		         (unsigned long) getuid ()));
-@@ -573,15 +574,26 @@ int main (int argc, char **argv)
+@@ -574,15 +575,26 @@ int main (int argc, char **argv)
  		perror ("getgroups");
  #ifdef WITH_AUDIT
  		if (group) {
@@ -1243,7 +1243,7 @@ diff -up shadow-4.8/src/newgrp.c.audit-update shadow-4.8/src/newgrp.c
  		}
  #endif
  		exit (EXIT_FAILURE);
-@@ -738,10 +750,10 @@ int main (int argc, char **argv)
+@@ -739,10 +751,10 @@ int main (int argc, char **argv)
  		perror ("setgid");
  #ifdef WITH_AUDIT
  		snprintf (audit_buf, sizeof(audit_buf),
@@ -1256,7 +1256,7 @@ diff -up shadow-4.8/src/newgrp.c.audit-update shadow-4.8/src/newgrp.c
  #endif
  		exit (EXIT_FAILURE);
  	}
-@@ -750,10 +762,10 @@ int main (int argc, char **argv)
+@@ -751,10 +763,10 @@ int main (int argc, char **argv)
  		perror ("setuid");
  #ifdef WITH_AUDIT
  		snprintf (audit_buf, sizeof(audit_buf),
@@ -1269,7 +1269,7 @@ diff -up shadow-4.8/src/newgrp.c.audit-update shadow-4.8/src/newgrp.c
  #endif
  		exit (EXIT_FAILURE);
  	}
-@@ -767,10 +779,10 @@ int main (int argc, char **argv)
+@@ -768,10 +780,10 @@ int main (int argc, char **argv)
  		execl (SHELL, "sh", "-c", command, (char *) 0);
  #ifdef WITH_AUDIT
  		snprintf (audit_buf, sizeof(audit_buf),
@@ -1282,7 +1282,7 @@ diff -up shadow-4.8/src/newgrp.c.audit-update shadow-4.8/src/newgrp.c
  #endif
  		perror (SHELL);
  		exit ((errno == ENOENT) ? E_CMD_NOTFOUND : E_CMD_NOEXEC);
-@@ -834,11 +846,11 @@ int main (int argc, char **argv)
+@@ -835,11 +847,11 @@ int main (int argc, char **argv)
  	}
  
  #ifdef WITH_AUDIT
@@ -1296,7 +1296,7 @@ diff -up shadow-4.8/src/newgrp.c.audit-update shadow-4.8/src/newgrp.c
  #endif
  	/*
  	 * Exec the login shell and go away. We are trying to get back to
-@@ -862,15 +874,24 @@ int main (int argc, char **argv)
+@@ -863,15 +875,24 @@ int main (int argc, char **argv)
  	closelog ();
  #ifdef WITH_AUDIT
  	if (NULL != group) {
@@ -1325,9 +1325,9 @@ diff -up shadow-4.8/src/newgrp.c.audit-update shadow-4.8/src/newgrp.c
  	}
  #endif
  	exit (EXIT_FAILURE);
-diff -up shadow-4.8/src/useradd.c.audit-update shadow-4.8/src/useradd.c
---- shadow-4.8/src/useradd.c.audit-update	2020-01-13 10:15:51.789073597 +0100
-+++ shadow-4.8/src/useradd.c	2020-01-13 10:17:30.929406913 +0100
+diff -up shadow-4.8.1/src/useradd.c.audit-update shadow-4.8.1/src/useradd.c
+--- shadow-4.8.1/src/useradd.c.audit-update	2020-03-17 16:53:44.365943219 +0100
++++ shadow-4.8.1/src/useradd.c	2020-03-17 17:03:11.614503929 +0100
 @@ -233,6 +233,8 @@ static void create_mail (void);
   */
  static void fail_exit (int code)
@@ -1510,7 +1510,7 @@ diff -up shadow-4.8/src/useradd.c.audit-update shadow-4.8/src/useradd.c
  		              SHADOW_AUDIT_SUCCESS);
  #endif
  		SYSLOG ((LOG_INFO,
-@@ -1445,7 +1393,7 @@ static void process_flags (int argc, cha
+@@ -1452,7 +1400,7 @@ static void process_flags (int argc, cha
  			         Prog, user_name);
  #ifdef WITH_AUDIT
  			audit_logger (AUDIT_ADD_USER, Prog,
@@ -1519,7 +1519,7 @@ diff -up shadow-4.8/src/useradd.c.audit-update shadow-4.8/src/useradd.c
  			              user_name, AUDIT_NO_ID,
  			              SHADOW_AUDIT_FAILURE);
  #endif
-@@ -1560,7 +1508,7 @@ static void close_files (void)
+@@ -1567,7 +1515,7 @@ static void close_files (void)
  			SYSLOG ((LOG_ERR, "failed to unlock %s", spw_dbname ()));
  #ifdef WITH_AUDIT
  			audit_logger (AUDIT_ADD_USER, Prog,
@@ -1528,7 +1528,7 @@ diff -up shadow-4.8/src/useradd.c.audit-update shadow-4.8/src/useradd.c
  			              user_name, AUDIT_NO_ID,
  			              SHADOW_AUDIT_FAILURE);
  #endif
-@@ -1573,7 +1521,7 @@ static void close_files (void)
+@@ -1580,7 +1528,7 @@ static void close_files (void)
  		SYSLOG ((LOG_ERR, "failed to unlock %s", pw_dbname ()));
  #ifdef WITH_AUDIT
  		audit_logger (AUDIT_ADD_USER, Prog,
@@ -1537,7 +1537,7 @@ diff -up shadow-4.8/src/useradd.c.audit-update shadow-4.8/src/useradd.c
  		              user_name, AUDIT_NO_ID,
  		              SHADOW_AUDIT_FAILURE);
  #endif
-@@ -1585,7 +1533,7 @@ static void close_files (void)
+@@ -1592,7 +1540,7 @@ static void close_files (void)
  		SYSLOG ((LOG_ERR, "failed to unlock %s", gr_dbname ()));
  #ifdef WITH_AUDIT
  		audit_logger (AUDIT_ADD_USER, Prog,
@@ -1546,7 +1546,7 @@ diff -up shadow-4.8/src/useradd.c.audit-update shadow-4.8/src/useradd.c
  		              user_name, AUDIT_NO_ID,
  		              SHADOW_AUDIT_FAILURE);
  #endif
-@@ -1599,7 +1547,7 @@ static void close_files (void)
+@@ -1606,7 +1554,7 @@ static void close_files (void)
  			SYSLOG ((LOG_ERR, "failed to unlock %s", sgr_dbname ()));
  #ifdef WITH_AUDIT
  			audit_logger (AUDIT_ADD_USER, Prog,
@@ -1555,7 +1555,7 @@ diff -up shadow-4.8/src/useradd.c.audit-update shadow-4.8/src/useradd.c
  			              user_name, AUDIT_NO_ID,
  			              SHADOW_AUDIT_FAILURE);
  #endif
-@@ -1615,7 +1563,7 @@ static void close_files (void)
+@@ -1622,7 +1570,7 @@ static void close_files (void)
  			SYSLOG ((LOG_ERR, "failed to unlock %s", sub_uid_dbname ()));
  #ifdef WITH_AUDIT
  			audit_logger (AUDIT_ADD_USER, Prog,
@@ -1564,7 +1564,7 @@ diff -up shadow-4.8/src/useradd.c.audit-update shadow-4.8/src/useradd.c
  				user_name, AUDIT_NO_ID,
  				SHADOW_AUDIT_FAILURE);
  #endif
-@@ -1629,7 +1577,7 @@ static void close_files (void)
+@@ -1636,7 +1584,7 @@ static void close_files (void)
  			SYSLOG ((LOG_ERR, "failed to unlock %s", sub_gid_dbname ()));
  #ifdef WITH_AUDIT
  			audit_logger (AUDIT_ADD_USER, Prog,
@@ -1573,7 +1573,7 @@ diff -up shadow-4.8/src/useradd.c.audit-update shadow-4.8/src/useradd.c
  				user_name, AUDIT_NO_ID,
  				SHADOW_AUDIT_FAILURE);
  #endif
-@@ -1821,7 +1769,7 @@ static void grp_add (void)
+@@ -1828,7 +1776,7 @@ static void grp_add (void)
  		         Prog, gr_dbname (), grp.gr_name);
  #ifdef WITH_AUDIT
  		audit_logger (AUDIT_ADD_GROUP, Prog,
@@ -1582,7 +1582,7 @@ diff -up shadow-4.8/src/useradd.c.audit-update shadow-4.8/src/useradd.c
  		              grp.gr_name, AUDIT_NO_ID,
  		              SHADOW_AUDIT_FAILURE);
  #endif
-@@ -1837,7 +1785,7 @@ static void grp_add (void)
+@@ -1844,7 +1792,7 @@ static void grp_add (void)
  		         Prog, sgr_dbname (), sgrp.sg_name);
  #ifdef WITH_AUDIT
  		audit_logger (AUDIT_ADD_GROUP, Prog,
@@ -1591,7 +1591,7 @@ diff -up shadow-4.8/src/useradd.c.audit-update shadow-4.8/src/useradd.c
  		              grp.gr_name, AUDIT_NO_ID,
  		              SHADOW_AUDIT_FAILURE);
  #endif
-@@ -1847,7 +1795,7 @@ static void grp_add (void)
+@@ -1854,7 +1802,7 @@ static void grp_add (void)
  	SYSLOG ((LOG_INFO, "new group: name=%s, GID=%u", user_name, user_gid));
  #ifdef WITH_AUDIT
  	audit_logger (AUDIT_ADD_GROUP, Prog,
@@ -1600,7 +1600,7 @@ diff -up shadow-4.8/src/useradd.c.audit-update shadow-4.8/src/useradd.c
  	              grp.gr_name, AUDIT_NO_ID,
  	              SHADOW_AUDIT_SUCCESS);
  #endif
-@@ -2015,12 +1963,6 @@ static void usr_update (void)
+@@ -2025,12 +1973,6 @@ static void usr_update (void)
  		fprintf (stderr,
  		         _("%s: failed to prepare the new %s entry '%s'\n"),
  		         Prog, spw_dbname (), spent.sp_namp);
@@ -1613,7 +1613,7 @@ diff -up shadow-4.8/src/useradd.c.audit-update shadow-4.8/src/useradd.c
  		fail_exit (E_PW_UPDATE);
  	}
  #ifdef ENABLE_SUBIDS
-@@ -2041,9 +1983,14 @@ static void usr_update (void)
+@@ -2051,9 +1993,14 @@ static void usr_update (void)
  #endif				/* ENABLE_SUBIDS */
  
  #ifdef WITH_AUDIT
@@ -1630,7 +1630,7 @@ diff -up shadow-4.8/src/useradd.c.audit-update shadow-4.8/src/useradd.c
  	              SHADOW_AUDIT_SUCCESS);
  #endif
  	/*
-@@ -2130,12 +2077,6 @@ static void create_home (void)
+@@ -2140,12 +2087,6 @@ static void create_home (void)
  			fprintf (stderr,
  							_("%s: cannot create directory %s\n"),
  							Prog, path);
@@ -1643,8 +1643,8 @@ diff -up shadow-4.8/src/useradd.c.audit-update shadow-4.8/src/useradd.c
  			fail_exit (E_HOMEDIR);
  		}
  				if (chown (path, 0, 0) < 0) {
-@@ -2157,8 +2098,8 @@ static void create_home (void)
- 		       0777 & ~getdef_num ("UMASK", GETDEF_DEFAULT_UMASK));
+@@ -2168,8 +2109,8 @@ static void create_home (void)
+ 		chmod (prefix_user_home, mode);
  		home_added = true;
  #ifdef WITH_AUDIT
 -		audit_logger (AUDIT_ADD_USER, Prog,
@@ -1654,7 +1654,7 @@ diff -up shadow-4.8/src/useradd.c.audit-update shadow-4.8/src/useradd.c
  		              user_name, (unsigned int) user_id,
  		              SHADOW_AUDIT_SUCCESS);
  #endif
-@@ -2343,12 +2284,6 @@ int main (int argc, char **argv)
+@@ -2354,12 +2295,6 @@ int main (int argc, char **argv)
  	 */
  	if (prefix_getpwnam (user_name) != NULL) { /* local, no need for xgetpwnam */
  		fprintf (stderr, _("%s: user '%s' already exists\n"), Prog, user_name);
@@ -1667,7 +1667,7 @@ diff -up shadow-4.8/src/useradd.c.audit-update shadow-4.8/src/useradd.c
  		fail_exit (E_NAME_IN_USE);
  	}
  
-@@ -2364,12 +2299,6 @@ int main (int argc, char **argv)
+@@ -2375,12 +2310,6 @@ int main (int argc, char **argv)
  			fprintf (stderr,
  			         _("%s: group %s exists - if you want to add this user to that group, use -g.\n"),
  			         Prog, user_name);
@@ -1680,7 +1680,7 @@ diff -up shadow-4.8/src/useradd.c.audit-update shadow-4.8/src/useradd.c
  			fail_exit (E_NAME_IN_USE);
  		}
  	}
-@@ -2399,12 +2328,6 @@ int main (int argc, char **argv)
+@@ -2410,12 +2339,6 @@ int main (int argc, char **argv)
  				fprintf (stderr,
  				         _("%s: UID %lu is not unique\n"),
  				         Prog, (unsigned long) user_id);
@@ -1693,7 +1693,7 @@ diff -up shadow-4.8/src/useradd.c.audit-update shadow-4.8/src/useradd.c
  				fail_exit (E_UID_IN_USE);
  			}
  		}
-@@ -2478,9 +2401,10 @@ int main (int argc, char **argv)
+@@ -2489,9 +2412,10 @@ int main (int argc, char **argv)
  			         _("%s: warning: the user name %s to %s SELinux user mapping failed.\n"),
  			         Prog, user_name, user_selinux);
  #ifdef WITH_AUDIT
@@ -1707,9 +1707,9 @@ diff -up shadow-4.8/src/useradd.c.audit-update shadow-4.8/src/useradd.c
  #endif				/* WITH_AUDIT */
  			rv = E_SE_UPDATE;
  		    }
-diff -up shadow-4.8/src/userdel.c.audit-update shadow-4.8/src/userdel.c
---- shadow-4.8/src/userdel.c.audit-update	2020-01-13 10:15:51.797073462 +0100
-+++ shadow-4.8/src/userdel.c	2020-01-13 10:15:51.809073261 +0100
+diff -up shadow-4.8.1/src/userdel.c.audit-update shadow-4.8.1/src/userdel.c
+--- shadow-4.8.1/src/userdel.c.audit-update	2020-03-17 16:53:44.368943259 +0100
++++ shadow-4.8.1/src/userdel.c	2020-03-17 16:53:44.373943325 +0100
 @@ -222,9 +222,9 @@ static void update_groups (void)
  		 * Update the DBM group file with the new entry as well.
  		 */
@@ -2037,9 +2037,9 @@ diff -up shadow-4.8/src/userdel.c.audit-update shadow-4.8/src/userdel.c
  			              user_name, (unsigned int) user_id,
  			              SHADOW_AUDIT_FAILURE);
  #endif				/* WITH_AUDIT */
-diff -up shadow-4.8/src/usermod.c.audit-update shadow-4.8/src/usermod.c
---- shadow-4.8/src/usermod.c.audit-update	2020-01-13 10:15:51.800073412 +0100
-+++ shadow-4.8/src/usermod.c	2020-01-13 10:15:51.812073210 +0100
+diff -up shadow-4.8.1/src/usermod.c.audit-update shadow-4.8.1/src/usermod.c
+--- shadow-4.8.1/src/usermod.c.audit-update	2020-03-17 16:53:44.370943285 +0100
++++ shadow-4.8.1/src/usermod.c	2020-03-17 16:53:44.373943325 +0100
 @@ -457,8 +457,8 @@ static char *new_pw_passwd (char *pw_pas
  
  #ifdef WITH_AUDIT
