@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.8
-Release: 4%{?dist}
+Release: 5%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz
@@ -255,6 +255,9 @@ done
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Tue Mar 17 2020 Iker Pedrosa <ipedrosa@redhat.com> - 2:4.8-5
+- synchronized login.defs with upstream file (#1261099)
+
 * Mon Feb 24 2020 Iker Pedrosa <ipedrosa@redhat.com> - 2:4.8-4
 - fix useradd: doesn't generate spool mail with the proper SELinux user identity
   (#1690527)
