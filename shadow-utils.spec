@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.8.1
-Release: 1%{?dist}
+Release: 2%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz
@@ -51,6 +51,8 @@ Patch38: shadow-4.6-sysugid-min-limit.patch
 Patch40: shadow-4.8-ignore-login-prompt.patch
 # Generate /var/spool/mail/$USER with the proper SELinux user identity - already upstreamed
 Patch42: shadow-4.8-useradd-selinux-mail.patch
+# Clarify useradd man regarding "-d" parameter - already upstreamed
+Patch43: shadow-4.8.1-useradd-man-clarification.patch
 
 License: BSD and GPLv2+
 BuildRequires: gcc
@@ -99,6 +101,7 @@ are used for managing group accounts.
 %patch38 -p1 -b .sysugid-min-limit
 %patch40 -p1 -b .login-prompt
 %patch42 -p1 -b .useradd-selinux-mail
+%patch43 -p1 -b .useradd-man-clarification
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -254,6 +257,9 @@ done
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Tue Mar 24 2020 Iker Pedrosa <ipedrosa@redhat.com> - 2:4.8.1-2
+- useradd: clarify the useradd -d parameter behavior in man page
+
 * Tue Mar 17 2020 Iker Pedrosa <ipedrosa@redhat.com> - 2:4.8.1-1
 - updated upstream to 4.8.1
 
