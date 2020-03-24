@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.6
-Release: 17%{?dist}
+Release: 18%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz
@@ -39,6 +39,8 @@ Patch40: shadow-4.6-ignore-login-prompt.patch
 Patch41: shadow-4.6-use-lckpwdf.patch
 # Generate /var/spool/mail/$USER with the proper SELinux user identity - already upstreamed
 Patch42: shadow-4.6-useradd-selinux-mail.patch
+# Clarify useradd man regarding "-d" parameter - already upstreamed
+Patch43: shadow-4.6-useradd-man-clarification.patch
 
 License: BSD and GPLv2+
 BuildRequires: gcc
@@ -95,6 +97,7 @@ are used for managing group accounts.
 %patch40 -p1 -b .login-prompt
 %patch41 -p1 -b .use-lckpwdf
 %patch42 -p1 -b .useradd-selinux-mail
+%patch43 -p1 -b .useradd-man-clarification
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -249,6 +252,9 @@ done
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Tue Mar 24 2020 Iker Pedrosa <ipedrosa@redhat.com> - 2:4.6-18
+- useradd: clarify the useradd -d parameter behavior in man page
+
 * Mon Feb 24 2020 Iker Pedrosa <ipedrosa@redhat.com> - 2:4.6-17
 - fix useradd: doesn't generate spool mail with the proper SELinux user identity
   (#1690527)
