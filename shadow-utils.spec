@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.8.1
-Release: 2%{?dist}
+Release: 3%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz
@@ -53,6 +53,8 @@ Patch40: shadow-4.8-ignore-login-prompt.patch
 Patch42: shadow-4.8-useradd-selinux-mail.patch
 # Clarify useradd man regarding "-d" parameter - already upstreamed
 Patch43: shadow-4.8.1-useradd-man-clarification.patch
+# Upstreamed
+Patch44: shadow-4.8.1-check-local-groups.patch
 
 License: BSD and GPLv2+
 BuildRequires: gcc
@@ -102,6 +104,7 @@ are used for managing group accounts.
 %patch40 -p1 -b .login-prompt
 %patch42 -p1 -b .useradd-selinux-mail
 %patch43 -p1 -b .useradd-man-clarification
+%patch44 -p1 -b .check-local-groups
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -257,6 +260,9 @@ done
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Thu May 14 2020 Iker Pedrosa <ipedrosa@redhat.com> - 2:4.8.1-3
+- check only local groups when adding new supplementary groups to a user (#1727236)
+
 * Tue Mar 24 2020 Iker Pedrosa <ipedrosa@redhat.com> - 2:4.8.1-2
 - useradd: clarify the useradd -d parameter behavior in man page
 
