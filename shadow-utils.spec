@@ -66,6 +66,7 @@ BuildRequires: /usr/bin/xsltproc, /usr/bin/itstool
 Requires: libselinux >= 1.25.2-1
 Requires: audit-libs >= 1.6.5
 Requires: setup
+Provides: shadow = %{epoch}:%{version}-%{release}
 
 %description
 The shadow-utils package includes the necessary programs for
