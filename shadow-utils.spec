@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.8.1
-Release: 4%{?dist}
+Release: 5%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz
@@ -261,6 +261,9 @@ done
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Tue Nov  3 2020 Petr Lautrbach <plautrba@redhat.com> - 2:4.8.1-5
+- Rebuild with libsemanage.so.2
+
 * Wed Jul 29 2020 Fedora Release Engineering <releng@fedoraproject.org> - 2:4.8.1-4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
 
