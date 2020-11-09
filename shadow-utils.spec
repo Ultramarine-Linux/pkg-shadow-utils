@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.8.1
-Release: 4%{?dist}
+Release: 5%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz
@@ -53,8 +53,11 @@ Patch40: shadow-4.8-ignore-login-prompt.patch
 Patch42: shadow-4.8-useradd-selinux-mail.patch
 # Clarify useradd man regarding "-d" parameter - already upstreamed
 Patch43: shadow-4.8.1-useradd-man-clarification.patch
-# Upstreamed
+# https://github.com/shadow-maint/shadow/commit/140510de9de4771feb3af1d859c09604043a4c9b
+# https://github.com/shadow-maint/shadow/commit/8762f465d487a52bf68f9c0b7c3c1eb3caea7bc9
 Patch44: shadow-4.8.1-check-local-groups.patch
+# https://github.com/shadow-maint/shadow/commit/599cc003daf833bffdc9cbe0d33dc8b3e7ec74c8
+Patch45: shadow-4.8.1-commonio-force-lock-file-sync.patch
 
 License: BSD and GPLv2+
 BuildRequires: gcc
@@ -106,6 +109,7 @@ are used for managing group accounts.
 %patch42 -p1 -b .useradd-selinux-mail
 %patch43 -p1 -b .useradd-man-clarification
 %patch44 -p1 -b .check-local-groups
+%patch45 -p1 -b .commonio-force-lock-file-sync
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -261,6 +265,10 @@ done
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Mon Nov 16 2020 Iker Pedrosa <ipedrosa@redhat.com> - 2:4.8.1-5
+- commonio: force lock file sync (#1862056)
+- spec: add Provides keyword
+
 * Wed Jul 29 2020 Fedora Release Engineering <releng@fedoraproject.org> - 2:4.8.1-4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
 
