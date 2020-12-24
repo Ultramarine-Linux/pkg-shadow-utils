@@ -3,7 +3,7 @@ Name: shadow-utils
 Version: 4.8.1
 Release: 6%{?dist}
 Epoch: 2
-URL: http://pkg-shadow.alioth.debian.org/
+URL: https://github.com/shadow-maint/shadow
 Source0: https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz
 Source1: https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz.asc
 Source2: shadow-utils.useradd
@@ -144,66 +144,65 @@ autoreconf
 %make_build
 
 %install
-rm -rf $RPM_BUILD_ROOT
-%make_install gnulocaledir=$RPM_BUILD_ROOT/%{_datadir}/locale MKINSTALLDIRS=`pwd`/mkinstalldirs
-install -d -m 755 $RPM_BUILD_ROOT/%{_sysconfdir}/default
-install -p -c -m 0644 %{SOURCE3} $RPM_BUILD_ROOT/%{_sysconfdir}/login.defs
-install -p -c -m 0600 %{SOURCE2} $RPM_BUILD_ROOT/%{_sysconfdir}/default/useradd
+%make_install gnulocaledir=$RPM_BUILD_ROOT%{_datadir}/locale MKINSTALLDIRS=`pwd`/mkinstalldirs
+install -d -m 755 $RPM_BUILD_ROOT%{_sysconfdir}/default
+install -p -c -m 0644 %{SOURCE3} $RPM_BUILD_ROOT%{_sysconfdir}/login.defs
+install -p -c -m 0600 %{SOURCE2} $RPM_BUILD_ROOT%{_sysconfdir}/default/useradd
 
 
 ln -s useradd $RPM_BUILD_ROOT%{_sbindir}/adduser
-ln -s useradd.8 $RPM_BUILD_ROOT/%{_mandir}/man8/adduser.8
-for subdir in $RPM_BUILD_ROOT/%{_mandir}/{??,??_??,??_??.*}/man* ; do
+ln -s useradd.8 $RPM_BUILD_ROOT%{_mandir}/man8/adduser.8
+for subdir in $RPM_BUILD_ROOT%{_mandir}/{??,??_??,??_??.*}/man* ; do
         test -d $subdir && test -e $subdir/useradd.8 && echo ".so man8/useradd.8" > $subdir/adduser.8
 done
 
 # Remove binaries we don't use.
-rm $RPM_BUILD_ROOT/%{_bindir}/chfn
-rm $RPM_BUILD_ROOT/%{_bindir}/chsh
-rm $RPM_BUILD_ROOT/%{_bindir}/expiry
-rm $RPM_BUILD_ROOT/%{_bindir}/groups
-rm $RPM_BUILD_ROOT/%{_bindir}/login
-rm $RPM_BUILD_ROOT/%{_bindir}/passwd
-rm $RPM_BUILD_ROOT/%{_bindir}/su
-rm $RPM_BUILD_ROOT/%{_bindir}/faillog
-rm $RPM_BUILD_ROOT/%{_sysconfdir}/login.access
-rm $RPM_BUILD_ROOT/%{_sysconfdir}/limits
-rm $RPM_BUILD_ROOT/%{_sbindir}/logoutd
-rm $RPM_BUILD_ROOT/%{_sbindir}/nologin
-rm $RPM_BUILD_ROOT/%{_mandir}/man1/chfn.*
-rm $RPM_BUILD_ROOT/%{_mandir}/*/man1/chfn.*
-rm $RPM_BUILD_ROOT/%{_mandir}/man1/chsh.*
-rm $RPM_BUILD_ROOT/%{_mandir}/*/man1/chsh.*
-rm $RPM_BUILD_ROOT/%{_mandir}/man1/expiry.*
-rm $RPM_BUILD_ROOT/%{_mandir}/*/man1/expiry.*
-rm $RPM_BUILD_ROOT/%{_mandir}/man1/groups.*
-rm $RPM_BUILD_ROOT/%{_mandir}/*/man1/groups.*
-rm $RPM_BUILD_ROOT/%{_mandir}/man1/login.*
-rm $RPM_BUILD_ROOT/%{_mandir}/*/man1/login.*
-rm $RPM_BUILD_ROOT/%{_mandir}/man1/passwd.*
-rm $RPM_BUILD_ROOT/%{_mandir}/*/man1/passwd.*
-rm $RPM_BUILD_ROOT/%{_mandir}/man1/su.*
-rm $RPM_BUILD_ROOT/%{_mandir}/*/man1/su.*
-rm $RPM_BUILD_ROOT/%{_mandir}/man5/limits.*
-rm $RPM_BUILD_ROOT/%{_mandir}/*/man5/limits.*
-rm $RPM_BUILD_ROOT/%{_mandir}/man5/login.access.*
-rm $RPM_BUILD_ROOT/%{_mandir}/*/man5/login.access.*
-rm $RPM_BUILD_ROOT/%{_mandir}/man5/passwd.*
-rm $RPM_BUILD_ROOT/%{_mandir}/*/man5/passwd.*
-rm $RPM_BUILD_ROOT/%{_mandir}/man5/porttime.*
-rm $RPM_BUILD_ROOT/%{_mandir}/*/man5/porttime.*
-rm $RPM_BUILD_ROOT/%{_mandir}/man5/suauth.*
-rm $RPM_BUILD_ROOT/%{_mandir}/*/man5/suauth.*
-rm $RPM_BUILD_ROOT/%{_mandir}/man8/logoutd.*
-rm $RPM_BUILD_ROOT/%{_mandir}/*/man8/logoutd.*
-rm $RPM_BUILD_ROOT/%{_mandir}/man8/nologin.*
-rm $RPM_BUILD_ROOT/%{_mandir}/*/man8/nologin.*
-rm $RPM_BUILD_ROOT/%{_mandir}/man3/getspnam.*
-rm $RPM_BUILD_ROOT/%{_mandir}/*/man3/getspnam.*
-rm $RPM_BUILD_ROOT/%{_mandir}/man5/faillog.*
-rm $RPM_BUILD_ROOT/%{_mandir}/*/man5/faillog.*
-rm $RPM_BUILD_ROOT/%{_mandir}/man8/faillog.*
-rm $RPM_BUILD_ROOT/%{_mandir}/*/man8/faillog.*
+rm $RPM_BUILD_ROOT%{_bindir}/chfn
+rm $RPM_BUILD_ROOT%{_bindir}/chsh
+rm $RPM_BUILD_ROOT%{_bindir}/expiry
+rm $RPM_BUILD_ROOT%{_bindir}/groups
+rm $RPM_BUILD_ROOT%{_bindir}/login
+rm $RPM_BUILD_ROOT%{_bindir}/passwd
+rm $RPM_BUILD_ROOT%{_bindir}/su
+rm $RPM_BUILD_ROOT%{_bindir}/faillog
+rm $RPM_BUILD_ROOT%{_sysconfdir}/login.access
+rm $RPM_BUILD_ROOT%{_sysconfdir}/limits
+rm $RPM_BUILD_ROOT%{_sbindir}/logoutd
+rm $RPM_BUILD_ROOT%{_sbindir}/nologin
+rm $RPM_BUILD_ROOT%{_mandir}/man1/chfn.*
+rm $RPM_BUILD_ROOT%{_mandir}/*/man1/chfn.*
+rm $RPM_BUILD_ROOT%{_mandir}/man1/chsh.*
+rm $RPM_BUILD_ROOT%{_mandir}/*/man1/chsh.*
+rm $RPM_BUILD_ROOT%{_mandir}/man1/expiry.*
+rm $RPM_BUILD_ROOT%{_mandir}/*/man1/expiry.*
+rm $RPM_BUILD_ROOT%{_mandir}/man1/groups.*
+rm $RPM_BUILD_ROOT%{_mandir}/*/man1/groups.*
+rm $RPM_BUILD_ROOT%{_mandir}/man1/login.*
+rm $RPM_BUILD_ROOT%{_mandir}/*/man1/login.*
+rm $RPM_BUILD_ROOT%{_mandir}/man1/passwd.*
+rm $RPM_BUILD_ROOT%{_mandir}/*/man1/passwd.*
+rm $RPM_BUILD_ROOT%{_mandir}/man1/su.*
+rm $RPM_BUILD_ROOT%{_mandir}/*/man1/su.*
+rm $RPM_BUILD_ROOT%{_mandir}/man5/limits.*
+rm $RPM_BUILD_ROOT%{_mandir}/*/man5/limits.*
+rm $RPM_BUILD_ROOT%{_mandir}/man5/login.access.*
+rm $RPM_BUILD_ROOT%{_mandir}/*/man5/login.access.*
+rm $RPM_BUILD_ROOT%{_mandir}/man5/passwd.*
+rm $RPM_BUILD_ROOT%{_mandir}/*/man5/passwd.*
+rm $RPM_BUILD_ROOT%{_mandir}/man5/porttime.*
+rm $RPM_BUILD_ROOT%{_mandir}/*/man5/porttime.*
+rm $RPM_BUILD_ROOT%{_mandir}/man5/suauth.*
+rm $RPM_BUILD_ROOT%{_mandir}/*/man5/suauth.*
+rm $RPM_BUILD_ROOT%{_mandir}/man8/logoutd.*
+rm $RPM_BUILD_ROOT%{_mandir}/*/man8/logoutd.*
+rm $RPM_BUILD_ROOT%{_mandir}/man8/nologin.*
+rm $RPM_BUILD_ROOT%{_mandir}/*/man8/nologin.*
+rm $RPM_BUILD_ROOT%{_mandir}/man3/getspnam.*
+rm $RPM_BUILD_ROOT%{_mandir}/*/man3/getspnam.*
+rm $RPM_BUILD_ROOT%{_mandir}/man5/faillog.*
+rm $RPM_BUILD_ROOT%{_mandir}/*/man5/faillog.*
+rm $RPM_BUILD_ROOT%{_mandir}/man8/faillog.*
+rm $RPM_BUILD_ROOT%{_mandir}/*/man8/faillog.*
 
 find $RPM_BUILD_ROOT%{_mandir} -depth -type d -empty -delete
 %find_lang shadow
@@ -217,7 +216,6 @@ done
 
 %files -f shadow.lang
 %doc NEWS doc/HOWTO README
-%{!?_licensedir:%global license %%doc}
 %license gpl-2.0.txt shadow-bsd.txt
 %attr(0644,root,root)   %config(noreplace) %{_sysconfdir}/login.defs
 %attr(0644,root,root)   %config(noreplace) %{_sysconfdir}/default/useradd
