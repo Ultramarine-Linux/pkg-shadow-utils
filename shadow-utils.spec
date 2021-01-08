@@ -60,6 +60,7 @@ Patch44: shadow-4.8.1-check-local-groups.patch
 Patch45: shadow-4.8.1-commonio-force-lock-file-sync.patch
 
 License: BSD and GPLv2+
+BuildRequires: make
 BuildRequires: gcc
 BuildRequires: libselinux-devel >= 1.25.2-1
 BuildRequires: audit-libs-devel >= 1.6.5
