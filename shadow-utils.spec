@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.8.1
-Release: 6%{?dist}
+Release: 7%{?dist}
 Epoch: 2
 URL: https://github.com/shadow-maint/shadow
 Source0: https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz
@@ -264,6 +264,9 @@ done
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Wed Jan 27 2021 Fedora Release Engineering <releng@fedoraproject.org> - 2:4.8.1-7
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+
 * Mon Nov  9 2020 Iker Pedrosa <ipedrosa@redhat.com> - 2:4.8.1-6
 - commonio: force lock file sync (#1862056)
 
