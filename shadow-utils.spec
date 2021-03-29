@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.8.1
-Release: 5%{?dist}
+Release: 6%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz
@@ -15,17 +15,19 @@ Source6: shadow-utils.HOME_MODE.xml
 Patch0: shadow-4.6-redhat.patch
 # Be more lenient with acceptable user/group names - non upstreamable
 Patch1: shadow-4.8-goodname.patch
-# Docfix for newusers - could be upstreamed
+# https://github.com/shadow-maint/shadow/commit/7384865775b0203b9cf5337a047744f0a4555868
 Patch2: shadow-4.1.5.1-info-parent-dir.patch
 # Misc SElinux related changes - upstreamability unknown
 Patch6: shadow-4.8-selinux.patch
-# Syslog message change - could be upstreamed
+# https://github.com/shadow-maint/shadow/commit/a8361e741040cd926c9c93aac89820052531b1a3
 Patch11: shadow-4.1.5.1-logmsg.patch
 # SElinux related - upstreamability unknown
 Patch14: shadow-4.1.5.1-default-range.patch
-# Misc manual page changes - only some of them could be upstreamed
+# Misc manual page changes
+# https://github.com/shadow-maint/shadow/commit/c0818ab01d1896784245eedec9495e1e6e0260af
+# Changes in man/groupmems.8.xml, man/ja/man5/login.defs.5 and man/login.defs.5.xml not upstreamed
 Patch15: shadow-4.8.1-manfix.patch
-# Userdel usage message change - could be upstreamed
+# https://github.com/shadow-maint/shadow/commit/f4cbf38ad7801bab6fae50e9b5a2effc3c48a1ea
 Patch17: shadow-4.1.5.1-userdel-helpfix.patch
 # Date parsing improvement - could be upstreamed
 Patch19: shadow-4.2.1-date-parsing.patch
@@ -58,6 +60,8 @@ Patch43: shadow-4.8.1-useradd-man-clarification.patch
 Patch44: shadow-4.8.1-check-local-groups.patch
 # https://github.com/shadow-maint/shadow/commit/599cc003daf833bffdc9cbe0d33dc8b3e7ec74c8
 Patch45: shadow-4.8.1-commonio-force-lock-file-sync.patch
+# https://github.com/shadow-maint/shadow/commit/df6ec1d1693c8c80c323b40d6fc82bb549363db3
+Patch46: shadow-4.8.1-man-include-lastlog-file-caveat.patch
 
 License: BSD and GPLv2+
 BuildRequires: gcc
@@ -110,6 +114,7 @@ are used for managing group accounts.
 %patch43 -p1 -b .useradd-man-clarification
 %patch44 -p1 -b .check-local-groups
 %patch45 -p1 -b .commonio-force-lock-file-sync
+%patch46 -p1 -b .man-include-lastlog-file-caveat
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -265,6 +270,10 @@ done
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Mon Apr 26 2021 Iker Pedrosa <ipedrosa@redhat.com> - 2:4.8.1-6
+- man: include lastlog file caveat (#951564)
+- Upstream links to several patches
+
 * Mon Nov 16 2020 Iker Pedrosa <ipedrosa@redhat.com> - 2:4.8.1-5
 - commonio: force lock file sync (#1862056)
 - spec: add Provides keyword
