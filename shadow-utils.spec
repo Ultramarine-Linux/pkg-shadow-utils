@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.8.1
-Release: 8%{?dist}
+Release: 9%{?dist}
 Epoch: 2
 URL: https://github.com/shadow-maint/shadow
 Source0: https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz
@@ -11,6 +11,11 @@ Source3: shadow-utils.login.defs
 Source4: shadow-bsd.txt
 Source5: https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
 Source6: shadow-utils.HOME_MODE.xml
+
+### Globals ###
+%global includesubiddir %{_includedir}/subid
+
+### Patches ###
 # Misc small changes - most probably non-upstreamable
 Patch0: shadow-4.6-redhat.patch
 # Be more lenient with acceptable user/group names - non upstreamable
@@ -62,6 +67,15 @@ Patch44: shadow-4.8.1-check-local-groups.patch
 Patch45: shadow-4.8.1-commonio-force-lock-file-sync.patch
 # https://github.com/shadow-maint/shadow/commit/df6ec1d1693c8c80c323b40d6fc82bb549363db3
 Patch46: shadow-4.8.1-man-include-lastlog-file-caveat.patch
+# https://github.com/shadow-maint/shadow/commit/0a7888b1fad613a052b988b01a71933b67296e68
+# https://github.com/shadow-maint/shadow/commit/607f1dd549cf9abc87af1cf29275f0d2d11eea29
+# https://github.com/shadow-maint/shadow/commit/b5fb1b38eea2fb0489ed088c82daf6700e72363e
+# https://github.com/shadow-maint/shadow/commit/43a917cce54019799a8de037fd63780a2b640afc
+Patch47: shadow-4.8.1-libsubid_creation.patch
+# https://github.com/shadow-maint/shadow/commit/514c1328b6c90d817ae0a9f7addfb3c9a11a275a
+# https://github.com/shadow-maint/shadow/commit/8492dee6632e340dee76eee895c3e30877bebf45
+# https://github.com/shadow-maint/shadow/commit/0f4347d1483191b2142546416a9eefe0c9459600
+Patch48: shadow-4.8.1-libsubid_nsswitch_support.patch
 
 License: BSD and GPLv2+
 BuildRequires: make
@@ -90,6 +104,23 @@ for all users. The useradd, userdel, and usermod commands are used for
 managing user accounts. The groupadd, groupdel, and groupmod commands
 are used for managing group accounts.
 
+
+### Subpackages ###
+%package subid
+Summary: A library to manage subordinate uid and gid ranges
+License: BSD and GPLv2+
+
+%description subid
+Utility library that provides a way to manage subid ranges.
+
+
+%package subid-devel
+Summary: Development package for shadow-utils-subid
+License: BSD and GPLv2+
+
+%description subid-devel
+Development files for shadow-utils-subid.
+
 %prep
 %setup -q -n shadow-%{version}
 %patch0 -p1 -b .redhat
@@ -116,6 +147,8 @@ are used for managing group accounts.
 %patch44 -p1 -b .check-local-groups
 %patch45 -p1 -b .commonio-force-lock-file-sync
 %patch46 -p1 -b .man-include-lastlog-file-caveat
+%patch47 -p1 -b .libsubid_creation
+%patch48 -p1 -b .libsubid_nsswitch_support
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -145,7 +178,7 @@ autoreconf
         --with-selinux \
         --without-libcrack \
         --without-libpam \
-        --disable-shared \
+        --enable-shared \
         --with-group-name-max-length=32
 %make_build
 
@@ -220,6 +253,14 @@ for dir in $(ls -1d $RPM_BUILD_ROOT%{_mandir}/{??,??_??}) ; do
     echo "%%lang($lang) $dir/man*/*" >> shadow.lang
 done
 
+# Move header files to its own folder
+echo $(ls)
+mkdir -p $RPM_BUILD_ROOT/%{includesubiddir}
+install -m 644 libsubid/subid.h $RPM_BUILD_ROOT/%{includesubiddir}/
+
+# Remove .la files created by libsubid
+rm -f $RPM_BUILD_ROOT/%{_libdir}/libsubid.la
+
 %files -f shadow.lang
 %doc NEWS doc/HOWTO README
 %license gpl-2.0.txt shadow-bsd.txt
@@ -268,7 +309,18 @@ done
 %{_mandir}/man8/vipw.8*
 %{_mandir}/man8/vigr.8*
 
+%files subid
+%{_libdir}/libsubid.so.*
+
+%files subid-devel
+%{includesubiddir}/subid.h
+%{_libdir}/libsubid.so
+
 %changelog
+* Fri Apr 16 2021 Iker Pedrosa <ipedrosa@redhat.com> - 2:4.8.1-9
+- libsubid: creation and nsswitch support
+- Creation of subid and subid-devel subpackages
+
 * Mon Mar 29 2021 Iker Pedrosa <ipedrosa@redhat.com> - 2:4.8.1-8
 - man: include lastlog file caveat (#951564)
 - Upstream links to several patches

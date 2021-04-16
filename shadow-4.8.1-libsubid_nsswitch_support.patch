@@ -1,0 +1,2107 @@
+From 514c1328b6c90d817ae0a9f7addfb3c9a11a275a Mon Sep 17 00:00:00 2001
+From: Serge Hallyn <serge@hallyn.com>
+Date: Sun, 31 Jan 2021 22:44:09 -0600
+Subject: [PATCH 1/6] try again to fix libmisc sharing problem
+
+Issue #297 reported seeing
+
+*** Warning: Linking the shared library libsubid.la against the
+*** static library ../libmisc/libmisc.a is not portable!
+
+which commit b5fb1b38eea2fb0489ed088c82daf6700e72363e was supposed
+to fix.  But a few commits later it's back.  So try to fix it
+in the way the bug reporter suggested.  This broke builds some
+other ways, namely a few missing library specifications, so add
+those.
+
+Signed-off-by: Serge Hallyn <serge@hallyn.com>
+---
+ configure.ac         |  2 +-
+ libmisc/Makefile.am  |  6 +++---
+ libsubid/Makefile.am |  6 ++++--
+ src/Makefile.am      | 37 +++++++++++++++++++++++--------------
+ 4 files changed, 31 insertions(+), 20 deletions(-)
+
+diff --git a/configure.ac b/configure.ac
+index 6aaae6b7..7884bfb6 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -55,7 +55,7 @@ AC_CHECK_FUNCS(l64a fchmod fchown fsync futimes getgroups gethostname getspnam \
+ 	gettimeofday getusershell getutent initgroups lchown lckpwdf lstat \
+ 	lutimes memcpy memset setgroups sigaction strchr updwtmp updwtmpx innetgr \
+ 	getpwnam_r getpwuid_r getgrnam_r getgrgid_r getspnam_r getaddrinfo \
+-	ruserok)
++	ruserok dlopen)
+ AC_SYS_LARGEFILE
+ 
+ dnl Checks for typedefs, structures, and compiler characteristics.
+diff --git a/libmisc/Makefile.am b/libmisc/Makefile.am
+index 7f43161f..9766a7ec 100644
+--- a/libmisc/Makefile.am
++++ b/libmisc/Makefile.am
+@@ -3,9 +3,9 @@ EXTRA_DIST = .indent.pro xgetXXbyYY.c
+ 
+ AM_CPPFLAGS = -I$(top_srcdir)/lib $(ECONF_CPPFLAGS)
+ 
+-noinst_LIBRARIES = libmisc.a
++noinst_LTLIBRARIES = libmisc.la
+ 
+-libmisc_a_SOURCES = \
++libmisc_la_SOURCES = \
+ 	addgrps.c \
+ 	age.c \
+ 	audit_help.c \
+@@ -74,6 +74,6 @@ libmisc_a_SOURCES = \
+ 	yesno.c
+ 
+ if WITH_BTRFS
+-libmisc_a_SOURCES += btrfs.c
++libmisc_la_SOURCES += btrfs.c
+ endif
+ 
+diff --git a/libsubid/Makefile.am b/libsubid/Makefile.am
+index 8bef1ecc..f24dbb94 100644
+--- a/libsubid/Makefile.am
++++ b/libsubid/Makefile.am
+@@ -12,12 +12,14 @@ MISCLIBS = \
+ 	$(LIBMD) \
+ 	$(LIBECONF) \
+ 	$(LIBCRYPT) \
++	$(LIBACL) \
++	$(LIBATTR) \
+ 	$(LIBTCB)
+ 
+ libsubid_la_LIBADD = \
+ 	$(top_srcdir)/lib/libshadow.la \
+-	$(MISCLIBS) \
+-	$(top_srcdir)/libmisc/libmisc.a
++	$(top_srcdir)/libmisc/libmisc.la \
++	$(MISCLIBS)
+ 
+ AM_CPPFLAGS = \
+ 	-I${top_srcdir}/lib \
+diff --git a/src/Makefile.am b/src/Makefile.am
+index 8499ce08..e9d354fd 100644
+--- a/src/Makefile.am
++++ b/src/Makefile.am
+@@ -78,7 +78,7 @@ shadowsgidubins = passwd
+ endif
+ 
+ LDADD          = $(INTLLIBS) \
+-		 $(top_builddir)/libmisc/libmisc.a \
++		 $(top_builddir)/libmisc/libmisc.la \
+ 		 $(top_builddir)/lib/libshadow.la \
+ 		 $(LIBTCB)
+ 
+@@ -95,28 +95,37 @@ LIBCRYPT_NOPAM = $(LIBCRYPT)
+ endif
+ 
+ chage_LDADD    = $(LDADD) $(LIBPAM_SUID) $(LIBAUDIT) $(LIBSELINUX) $(LIBECONF)
+-newuidmap_LDADD    = $(LDADD) $(LIBAUDIT) $(LIBSELINUX) $(LIBCAP)
+-newgidmap_LDADD    = $(LDADD) $(LIBAUDIT) $(LIBSELINUX) $(LIBCAP)
++newuidmap_LDADD    = $(LDADD) $(LIBAUDIT) $(LIBSELINUX) $(LIBCAP) -ldl
++newgidmap_LDADD    = $(LDADD) $(LIBAUDIT) $(LIBSELINUX) $(LIBCAP) -ldl
+ chfn_LDADD     = $(LDADD) $(LIBPAM) $(LIBAUDIT) $(LIBSELINUX) $(LIBCRYPT_NOPAM) $(LIBSKEY) $(LIBMD) $(LIBECONF)
+ chgpasswd_LDADD = $(LDADD) $(LIBPAM_SUID) $(LIBAUDIT) $(LIBSELINUX) $(LIBCRYPT) $(LIBECONF)
+ chsh_LDADD     = $(LDADD) $(LIBPAM) $(LIBAUDIT) $(LIBSELINUX) $(LIBCRYPT_NOPAM) $(LIBSKEY) $(LIBMD) $(LIBECONF)
+ chpasswd_LDADD = $(LDADD) $(LIBPAM) $(LIBAUDIT) $(LIBSELINUX) $(LIBCRYPT) $(LIBECONF)
+ expiry_LDADD = $(LDADD) $(LIBECONF)
+ gpasswd_LDADD  = $(LDADD) $(LIBAUDIT) $(LIBSELINUX) $(LIBCRYPT) $(LIBECONF)
+-groupadd_LDADD = $(LDADD) $(LIBPAM_SUID) $(LIBAUDIT) $(LIBSELINUX) $(LIBECONF)
+-groupdel_LDADD = $(LDADD) $(LIBPAM_SUID) $(LIBAUDIT) $(LIBSELINUX) $(LIBECONF)
++groupadd_LDADD = $(LDADD) $(LIBPAM_SUID) $(LIBAUDIT) $(LIBSELINUX) $(LIBECONF) -ldl
++groupdel_LDADD = $(LDADD) $(LIBPAM_SUID) $(LIBAUDIT) $(LIBSELINUX) $(LIBECONF) -ldl
+ groupmems_LDADD = $(LDADD) $(LIBPAM) $(LIBAUDIT) $(LIBSELINUX) $(LIBECONF)
+-groupmod_LDADD = $(LDADD) $(LIBPAM_SUID) $(LIBAUDIT) $(LIBSELINUX) $(LIBECONF)
++groupmod_LDADD = $(LDADD) $(LIBPAM_SUID) $(LIBAUDIT) $(LIBSELINUX) $(LIBECONF) -ldl
+ grpck_LDADD    = $(LDADD) $(LIBAUDIT) $(LIBSELINUX) $(LIBECONF)
+ grpconv_LDADD  = $(LDADD) $(LIBAUDIT) $(LIBSELINUX) $(LIBECONF)
+ grpunconv_LDADD = $(LDADD) $(LIBAUDIT) $(LIBSELINUX) $(LIBECONF)
+ lastlog_LDADD   = $(LDADD) $(LIBAUDIT) $(LIBECONF)
++newuidmap_SOURCES = newuidmap.c ../libmisc/nss.c
++newgidmap_SOURCES = newgidmap.c ../libmisc/nss.c
++groupadd_SOURCES = groupadd.c ../libmisc/nss.c
++groupmod_SOURCES = groupmod.c ../libmisc/nss.c
++groupdel_SOURCES = groupdel.c ../libmisc/nss.c
++newusers_SOURCES = newusers.c ../libmisc/nss.c
++useradd_SOURCES = useradd.c ../libmisc/nss.c
++usermod_SOURCES = usermod.c ../libmisc/nss.c
++userdel_SOURCES = userdel.c ../libmisc/nss.c
+ login_SOURCES  = \
+ 	login.c \
+ 	login_nopam.c
+ login_LDADD    = $(LDADD) $(LIBPAM) $(LIBAUDIT) $(LIBCRYPT_NOPAM) $(LIBSKEY) $(LIBMD) $(LIBECONF)
+ newgrp_LDADD   = $(LDADD) $(LIBAUDIT) $(LIBCRYPT) $(LIBECONF)
+-newusers_LDADD = $(LDADD) $(LIBPAM) $(LIBAUDIT) $(LIBSELINUX) $(LIBCRYPT) $(LIBECONF)
++newusers_LDADD = $(LDADD) $(LIBPAM) $(LIBAUDIT) $(LIBSELINUX) $(LIBCRYPT) $(LIBECONF) -ldl
+ nologin_LDADD  =
+ passwd_LDADD   = $(LDADD) $(LIBPAM) $(LIBCRACK) $(LIBAUDIT) $(LIBSELINUX) $(LIBCRYPT_NOPAM) $(LIBECONF)
+ pwck_LDADD     = $(LDADD) $(LIBAUDIT) $(LIBSELINUX) $(LIBECONF)
+@@ -127,9 +136,9 @@ su_SOURCES     = \
+ 	suauth.c
+ su_LDADD       = $(LDADD) $(LIBPAM) $(LIBAUDIT) $(LIBCRYPT_NOPAM) $(LIBSKEY) $(LIBMD) $(LIBECONF)
+ sulogin_LDADD  = $(LDADD) $(LIBCRYPT) $(LIBECONF)
+-useradd_LDADD  = $(LDADD) $(LIBPAM_SUID) $(LIBAUDIT) $(LIBSELINUX) $(LIBSEMANAGE) $(LIBACL) $(LIBATTR) $(LIBECONF)
+-userdel_LDADD  = $(LDADD) $(LIBPAM_SUID) $(LIBAUDIT) $(LIBSELINUX) $(LIBSEMANAGE) $(LIBECONF)
+-usermod_LDADD  = $(LDADD) $(LIBPAM_SUID) $(LIBAUDIT) $(LIBSELINUX) $(LIBSEMANAGE) $(LIBACL) $(LIBATTR) $(LIBECONF)
++useradd_LDADD  = $(LDADD) $(LIBPAM_SUID) $(LIBAUDIT) $(LIBSELINUX) $(LIBSEMANAGE) $(LIBACL) $(LIBATTR) $(LIBECONF) -ldl
++userdel_LDADD  = $(LDADD) $(LIBPAM_SUID) $(LIBAUDIT) $(LIBSELINUX) $(LIBSEMANAGE) $(LIBECONF) -ldl
++usermod_LDADD  = $(LDADD) $(LIBPAM_SUID) $(LIBAUDIT) $(LIBSELINUX) $(LIBSEMANAGE) $(LIBACL) $(LIBATTR) $(LIBECONF) -ldl
+ vipw_LDADD     = $(LDADD) $(LIBAUDIT) $(LIBSELINUX) $(LIBECONF)
+ 
+ install-am: all-am
+@@ -175,7 +184,7 @@ MISCLIBS = \
+ 
+ list_subid_ranges_LDADD = \
+ 	$(top_builddir)/lib/libshadow.la \
+-	$(top_builddir)/libmisc/libmisc.a \
++	$(top_builddir)/libmisc/libmisc.la \
+ 	$(top_builddir)/libsubid/libsubid.la \
+ 	$(MISCLIBS)
+ 
+@@ -186,7 +195,7 @@ list_subid_ranges_CPPFLAGS = \
+ 
+ get_subid_owners_LDADD = \
+ 	$(top_builddir)/lib/libshadow.la \
+-	$(top_builddir)/libmisc/libmisc.a \
++	$(top_builddir)/libmisc/libmisc.la \
+ 	$(top_builddir)/libsubid/libsubid.la \
+ 	$(MISCLIBS)
+ 
+@@ -202,7 +211,7 @@ new_subid_range_CPPFLAGS = \
+ 
+ new_subid_range_LDADD = \
+ 	$(top_builddir)/lib/libshadow.la \
+-	$(top_builddir)/libmisc/libmisc.a \
++	$(top_builddir)/libmisc/libmisc.la \
+ 	$(top_builddir)/libsubid/libsubid.la \
+ 	$(MISCLIBS)
+ 
+@@ -213,7 +222,7 @@ free_subid_range_CPPFLAGS = \
+ 
+ free_subid_range_LDADD = \
+ 	$(top_builddir)/lib/libshadow.la \
+-	$(top_builddir)/libmisc/libmisc.a \
++	$(top_builddir)/libmisc/libmisc.la \
+ 	$(top_builddir)/libsubid/libsubid.la \
+ 	$(MISCLIBS)
+ endif
+-- 
+2.30.2
+
+
+From 8492dee6632e340dee76eee895c3e30877bebf45 Mon Sep 17 00:00:00 2001
+From: Serge Hallyn <serge@hallyn.com>
+Date: Sun, 31 Jan 2021 17:38:20 -0600
+Subject: [PATCH 2/6] subids: support nsswitch
+
+Closes #154
+
+When starting any operation to do with subuid delegation, check
+nsswitch for a module to use.  If none is specified, then use
+the traditional /etc/subuid and /etc/subgid files.
+
+Currently only one module is supported, and there is no fallback
+to the files on errors.  Several possibilities could be considered:
+
+1. in case of connection error, fall back to files
+2. in case of unknown user, also fall back to files
+
+etc...
+
+When non-files nss module is used, functions to edit the range
+are not supported.  It may make sense to support it, but it also
+may make sense to require another tool to be used.
+
+libsubordinateio also uses the nss_ helpers.  This is how for instance
+lxc could easily be converted to supporting nsswitch.
+
+Add a set of test cases, including a dummy libsubid_zzz module.  This
+hardcodes values such that:
+
+'ubuntu' gets 200000 - 300000
+'user1' gets 100000 - 165536
+'error' emulates an nss module error
+'unknown' emulates a user unknown to the nss module
+'conn' emulates a connection error ot the nss module
+
+Changes to libsubid:
+
+Change the list_owner_ranges api: return a count instead of making the array
+null terminated.
+
+This is a breaking change, so bump the libsubid abi major number.
+
+Rename free_subuid_range and free_subgid_range to ungrant_subuid_range,
+because otherwise it's confusing with free_subid_ranges which frees
+    memory.
+
+Run libsubid tests in jenkins
+
+Switch argument order in find_subid_owners
+
+Move the db locking into subordinateio.c
+
+Signed-off-by: Serge Hallyn <serge@hallyn.com>
+---
+ configure.ac                         |   2 +-
+ lib/Makefile.am                      |   1 +
+ lib/nss.c                            | 157 ++++++++++++++++
+ lib/prototypes.h                     |  69 ++++++++
+ lib/subordinateio.c                  | 256 ++++++++++++++++++++++++---
+ lib/subordinateio.h                  |   6 +-
+ libmisc/idmapping.h                  |   2 +
+ libsubid/Makefile.am                 |   2 +-
+ libsubid/api.c                       | 168 +++---------------
+ libsubid/api.h                       |  10 +-
+ libsubid/subid.h                     |   8 +
+ src/Makefile.am                      |  29 +--
+ src/check_subid_range.c              |  48 +++++
+ src/free_subid_range.c               |   4 +-
+ src/list_subid_ranges.c              |  10 +-
+ tests/libsubid/04_nss/Makefile       |  12 ++
+ tests/libsubid/04_nss/empty          |   0
+ tests/libsubid/04_nss/libsubid_zzz.c | 146 +++++++++++++++
+ tests/libsubid/04_nss/nsswitch1.conf |  20 +++
+ tests/libsubid/04_nss/nsswitch2.conf |  22 +++
+ tests/libsubid/04_nss/nsswitch3.conf |  22 +++
+ tests/libsubid/04_nss/subidnss.test  |  22 +++
+ tests/libsubid/04_nss/test_nss.c     |  72 ++++++++
+ tests/libsubid/04_nss/test_range     |  50 ++++++
+ tests/run_some                       |   1 +
+ 26 files changed, 935 insertions(+), 205 deletions(-)
+ create mode 100644 lib/nss.c
+ create mode 100644 src/check_subid_range.c
+ create mode 100644 tests/libsubid/04_nss/Makefile
+ create mode 100644 tests/libsubid/04_nss/empty
+ create mode 100644 tests/libsubid/04_nss/libsubid_zzz.c
+ create mode 100644 tests/libsubid/04_nss/nsswitch1.conf
+ create mode 100644 tests/libsubid/04_nss/nsswitch2.conf
+ create mode 100644 tests/libsubid/04_nss/nsswitch3.conf
+ create mode 100755 tests/libsubid/04_nss/subidnss.test
+ create mode 100644 tests/libsubid/04_nss/test_nss.c
+ create mode 100755 tests/libsubid/04_nss/test_range
+
+diff --git a/configure.ac b/configure.ac
+index 7884bfb6..7f7e8784 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -1,6 +1,6 @@
+ dnl Process this file with autoconf to produce a configure script.
+ AC_PREREQ([2.69])
+-m4_define([libsubid_abi_major], 1)
++m4_define([libsubid_abi_major], 2)
+ m4_define([libsubid_abi_minor], 0)
+ m4_define([libsubid_abi_micro], 0)
+ m4_define([libsubid_abi], [libsubid_abi_major.libsubid_abi_minor.libsubid_abi_micro])
+diff --git a/lib/Makefile.am b/lib/Makefile.am
+index bd9d6bfb..ecf3ee25 100644
+--- a/lib/Makefile.am
++++ b/lib/Makefile.am
+@@ -31,6 +31,7 @@ libshadow_la_SOURCES = \
+ 	groupio.h \
+ 	gshadow.c \
+ 	lockpw.c \
++	nss.c \
+ 	nscd.c \
+ 	nscd.h \
+ 	sssd.c \
+diff --git a/lib/nss.c b/lib/nss.c
+new file mode 100644
+index 00000000..2f924740
+--- /dev/null
++++ b/lib/nss.c
+@@ -0,0 +1,157 @@
++#include <stdio.h>
++#include <stdlib.h>
++#include <dlfcn.h>
++#include <stdbool.h>
++#include <string.h>
++#include <strings.h>
++#include <ctype.h>
++#include <stdatomic.h>
++#include "prototypes.h"
++#include "../libsubid/subid.h"
++
++#define NSSWITCH "/etc/nsswitch.conf"
++
++// NSS plugin handling for subids
++// If nsswitch has a line like
++//    subid: sssd
++// then sssd will be consulted for subids.  Unlike normal NSS dbs,
++// only one db is supported at a time.  That's open to debate, but
++// the subids are a pretty limited resource, and local files seem
++// bound to step on any other allocations leading to insecure
++// conditions.
++static atomic_flag nss_init_started;
++static atomic_bool nss_init_completed;
++
++static struct subid_nss_ops *subid_nss;
++
++bool nss_is_initialized() {
++	return atomic_load(&nss_init_completed);
++}
++
++void nss_exit() {
++	if (nss_is_initialized() && subid_nss) {
++		dlclose(subid_nss->handle);
++		free(subid_nss);
++		subid_nss = NULL;
++	}
++}
++
++// nsswitch_path is an argument only to support testing.
++void nss_init(char *nsswitch_path) {
++	FILE *nssfp = NULL;
++	char *line = NULL, *p, *token, *saveptr;
++	size_t len = 0;
++
++	if (atomic_flag_test_and_set(&nss_init_started)) {
++		// Another thread has started nss_init, wait for it to complete
++		while (!atomic_load(&nss_init_completed))
++			usleep(100);
++		return;
++	}
++
++	if (!nsswitch_path)
++		nsswitch_path = NSSWITCH;
++
++	// read nsswitch.conf to check for a line like:
++	//   subid:	files
++	nssfp = fopen(nsswitch_path, "r");
++	if (!nssfp) {
++		fprintf(stderr, "Failed opening %s: %m", nsswitch_path);
++		atomic_store(&nss_init_completed, true);
++		return;
++	}
++	while ((getline(&line, &len, nssfp)) != -1) {
++		if (line[0] == '\0' || line[0] == '#')
++			continue;
++		if (strlen(line) < 8)
++			continue;
++		if (strncasecmp(line, "subid:", 6) != 0)
++			continue;
++		p = &line[6];
++		while ((*p) && isspace(*p))
++			p++;
++		if (!*p)
++			continue;
++		for (token = strtok_r(p, " \n\t", &saveptr);
++		     token;
++		     token = strtok_r(NULL, " \n\t", &saveptr)) {
++			char libname[65];
++			void *h;
++			if (strcmp(token, "files") == 0) {
++				subid_nss = NULL;
++				goto done;
++			}
++			if (strlen(token) > 50) {
++				fprintf(stderr, "Subid NSS module name too long (longer than 50 characters): %s\n", token);
++				fprintf(stderr, "Using files\n");
++				subid_nss = NULL;
++				goto done;
++			}
++			snprintf(libname, 64,  "libsubid_%s.so", token);
++			h = dlopen(libname, RTLD_LAZY);
++			if (!h) {
++				fprintf(stderr, "Error opening %s: %s\n", libname, dlerror());
++				fprintf(stderr, "Using files\n");
++				subid_nss = NULL;
++				goto done;
++			}
++			subid_nss = malloc(sizeof(*subid_nss));
++			if (!subid_nss) {
++				dlclose(h);
++				goto done;
++			}
++			subid_nss->has_range = dlsym(h, "shadow_subid_has_range");
++			if (!subid_nss->has_range) {
++				fprintf(stderr, "%s did not provide @has_range@\n", libname);
++				dlclose(h);
++				free(subid_nss);
++				subid_nss = NULL;
++				goto done;
++			}
++			subid_nss->list_owner_ranges = dlsym(h, "shadow_subid_list_owner_ranges");
++			if (!subid_nss->list_owner_ranges) {
++				fprintf(stderr, "%s did not provide @list_owner_ranges@\n", libname);
++				dlclose(h);
++				free(subid_nss);
++				subid_nss = NULL;
++				goto done;
++			}
++			subid_nss->has_any_range = dlsym(h, "shadow_subid_has_any_range");
++			if (!subid_nss->has_any_range) {
++				fprintf(stderr, "%s did not provide @has_any_range@\n", libname);
++				dlclose(h);
++				free(subid_nss);
++				subid_nss = NULL;
++				goto done;
++			}
++			subid_nss->find_subid_owners = dlsym(h, "shadow_subid_find_subid_owners");
++			if (!subid_nss->find_subid_owners) {
++				fprintf(stderr, "%s did not provide @find_subid_owners@\n", libname);
++				dlclose(h);
++				free(subid_nss);
++				subid_nss = NULL;
++				goto done;
++			}
++			subid_nss->handle = h;
++			goto done;
++		}
++		fprintf(stderr, "No usable subid NSS module found, using files\n");
++		// subid_nss has to be null here, but to ease reviews:
++		free(subid_nss);
++		subid_nss = NULL;
++		goto done;
++	}
++
++done:
++	atomic_store(&nss_init_completed, true);
++	free(line);
++	if (nssfp) {
++		atexit(nss_exit);
++		fclose(nssfp);
++	}
++}
++
++struct subid_nss_ops *get_subid_nss_handle() {
++	nss_init(NULL);
++	return subid_nss;
++}
+diff --git a/lib/prototypes.h b/lib/prototypes.h
+index ac9ad274..0c42bcc2 100644
+--- a/lib/prototypes.h
++++ b/lib/prototypes.h
+@@ -262,6 +262,75 @@ extern void motd (void);
+ /* myname.c */
+ extern /*@null@*//*@only@*/struct passwd *get_my_pwent (void);
+ 
++/* nss.c */
++#include <libsubid/subid.h>
++extern void nss_init(char *nsswitch_path);
++extern bool nss_is_initialized();
++
++struct subid_nss_ops {
++	/*
++	 * nss_has_any_range: does a user own any subid range
++	 *
++	 * @owner: username
++	 * @idtype: subuid or subgid
++	 * @result: true if a subid allocation was found for @owner
++	 *
++	 * returns success if the module was able to determine an answer (true or false),
++	 * else an error status.
++	 */
++	enum subid_status (*has_any_range)(const char *owner, enum subid_type idtype, bool *result);
++
++	/*
++	 * nss_has_range: does a user own a given subid range
++	 *
++	 * @owner: username
++	 * @start: first subid in queried range
++	 * @count: number of subids in queried range
++	 * @idtype: subuid or subgid
++	 * @result: true if @owner has been allocated the subid range.
++	 *
++	 * returns success if the module was able to determine an answer (true or false),
++	 * else an error status.
++	 */
++	enum subid_status (*has_range)(const char *owner, unsigned long start, unsigned long count, enum subid_type idtype, bool *result);
++
++	/*
++	 * nss_list_owner_ranges: list the subid ranges delegated to a user.
++	 *
++	 * @owner - string representing username being queried
++	 * @id_type - subuid or subgid
++	 * @ranges - pointer to an array of struct subordinate_range pointers, or
++	 *           NULL.  The returned array of struct subordinate_range and its
++	 *           members must be freed by the caller.
++	 * @count - pointer to an integer into which the number of returned ranges
++	 *          is written.
++
++	 * returns success if the module was able to determine an answer,
++	 * else an error status.
++	 */
++	enum subid_status (*list_owner_ranges)(const char *owner, enum subid_type id_type, struct subordinate_range ***ranges, int *count);
++
++	/*
++	 * nss_find_subid_owners: find uids who own a given subuid or subgid.
++	 *
++	 * @id - the delegated id (subuid or subgid) being queried
++	 * @id_type - subuid or subgid
++	 * @uids - pointer to an array of uids which will be allocated by
++	 *         nss_find_subid_owners()
++	 * @count - number of uids found
++	 *
++	 * returns success if the module was able to determine an answer,
++	 * else an error status.
++	 */
++	enum subid_status (*find_subid_owners)(unsigned long id, enum subid_type id_type, uid_t **uids, int *count);
++
++	/* The dlsym handle to close */
++	void *handle;
++};
++
++extern struct subid_nss_ops *get_subid_nss_handle();
++
++
+ /* pam_pass_non_interactive.c */
+ #ifdef USE_PAM
+ extern int do_pam_passwd_non_interactive (const char *pam_service,
+diff --git a/lib/subordinateio.c b/lib/subordinateio.c
+index 67202c98..0bb29958 100644
+--- a/lib/subordinateio.c
++++ b/lib/subordinateio.c
+@@ -14,6 +14,7 @@
+ #include <sys/types.h>
+ #include <pwd.h>
+ #include <ctype.h>
++#include <fcntl.h>
+ 
+ /*
+  * subordinate_dup: create a duplicate range
+@@ -311,17 +312,17 @@ static bool append_range(struct subordinate_range ***ranges, const struct subord
+ {
+ 	struct subordinate_range *tmp;
+ 	if (!*ranges) {
+-		*ranges = malloc(2 * sizeof(struct subordinate_range **));
++		*ranges = malloc(sizeof(struct subordinate_range *));
+ 		if (!*ranges)
+ 			return false;
+ 	} else {
+ 		struct subordinate_range **new;
+-		new = realloc(*ranges, (n + 2) * (sizeof(struct subordinate_range **)));
++		new = realloc(*ranges, (n + 1) * (sizeof(struct subordinate_range *)));
+ 		if (!new)
+ 			return false;
+ 		*ranges = new;
+ 	}
+-	(*ranges)[n] = (*ranges)[n+1] = NULL;
++	(*ranges)[n] = NULL;
+ 	tmp = subordinate_dup(new);
+ 	if (!tmp)
+ 		return false;
+@@ -329,13 +330,13 @@ static bool append_range(struct subordinate_range ***ranges, const struct subord
+ 	return true;
+ }
+ 
+-void free_subordinate_ranges(struct subordinate_range **ranges)
++void free_subordinate_ranges(struct subordinate_range **ranges, int count)
+ {
+ 	int i;
+ 
+ 	if (!ranges)
+ 		return;
+-	for (i = 0; ranges[i]; i++)
++	for (i = 0; i < count; i++)
+ 		subordinate_free(ranges[i]);
+ 	free(ranges);
+ }
+@@ -602,21 +603,46 @@ int sub_uid_open (int mode)
+ 
+ bool sub_uid_assigned(const char *owner)
+ {
++	struct subid_nss_ops *h;
++	bool found;
++	enum subid_status status;
++	h = get_subid_nss_handle();
++	if (h) {
++		status = h->has_any_range(owner, ID_TYPE_UID, &found);
++		if (status == SUBID_STATUS_SUCCESS && found)
++			return true;
++		return false;
++	}
++
+ 	return range_exists (&subordinate_uid_db, owner);
+ }
+ 
+ bool have_sub_uids(const char *owner, uid_t start, unsigned long count)
+ {
++	struct subid_nss_ops *h;
++	bool found;
++	enum subid_status status;
++	h = get_subid_nss_handle();
++	if (h) {
++		status = h->has_range(owner, start, count, ID_TYPE_UID, &found);
++		if (status == SUBID_STATUS_SUCCESS && found)
++			return true;
++		return false;
++	}
+ 	return have_range (&subordinate_uid_db, owner, start, count);
+ }
+ 
+ int sub_uid_add (const char *owner, uid_t start, unsigned long count)
+ {
++	if (get_subid_nss_handle())
++		return -EOPNOTSUPP;
+ 	return add_range (&subordinate_uid_db, owner, start, count);
+ }
+ 
+ int sub_uid_remove (const char *owner, uid_t start, unsigned long count)
+ {
++	if (get_subid_nss_handle())
++		return -EOPNOTSUPP;
+ 	return remove_range (&subordinate_uid_db, owner, start, count);
+ }
+ 
+@@ -684,21 +710,45 @@ int sub_gid_open (int mode)
+ 
+ bool have_sub_gids(const char *owner, gid_t start, unsigned long count)
+ {
++	struct subid_nss_ops *h;
++	bool found;
++	enum subid_status status;
++	h = get_subid_nss_handle();
++	if (h) {
++		status = h->has_range(owner, start, count, ID_TYPE_GID, &found);
++		if (status == SUBID_STATUS_SUCCESS && found)
++			return true;
++		return false;
++	}
+ 	return have_range(&subordinate_gid_db, owner, start, count);
+ }
+ 
+ bool sub_gid_assigned(const char *owner)
+ {
++	struct subid_nss_ops *h;
++	bool found;
++	enum subid_status status;
++	h = get_subid_nss_handle();
++	if (h) {
++		status = h->has_any_range(owner, ID_TYPE_GID, &found);
++		if (status == SUBID_STATUS_SUCCESS && found)
++			return true;
++		return false;
++	}
+ 	return range_exists (&subordinate_gid_db, owner);
+ }
+ 
+ int sub_gid_add (const char *owner, gid_t start, unsigned long count)
+ {
++	if (get_subid_nss_handle())
++		return -EOPNOTSUPP;
+ 	return add_range (&subordinate_gid_db, owner, start, count);
+ }
+ 
+ int sub_gid_remove (const char *owner, gid_t start, unsigned long count)
+ {
++	if (get_subid_nss_handle())
++		return -EOPNOTSUPP;
+ 	return remove_range (&subordinate_gid_db, owner, start, count);
+ }
+ 
+@@ -720,42 +770,78 @@ gid_t sub_gid_find_free_range(gid_t min, gid_t max, unsigned long count)
+ }
+ 
+ /*
+- struct subordinate_range **list_owner_ranges(const char *owner, enum subid_type id_type)
++ * int list_owner_ranges(const char *owner, enum subid_type id_type, struct subordinate_range ***ranges)
+  *
+  * @owner: username
+  * @id_type: UID or GUID
++ * @ranges: pointer to array of ranges into which results will be placed.
+  *
+- * Returns the subuid or subgid ranges which are owned by the specified
++ * Fills in the subuid or subgid ranges which are owned by the specified
+  * user.  Username may be a username or a string representation of a
+  * UID number.  If id_type is UID, then subuids are returned, else
+- * subgids are returned.  If there is an error, < 0 is returned.
++ * subgids are given.
++
++ * Returns the number of ranges found, or < 0 on error.
+  *
+  * The caller must free the subordinate range list.
+  */
+-struct subordinate_range **list_owner_ranges(const char *owner, enum subid_type id_type)
++int list_owner_ranges(const char *owner, enum subid_type id_type, struct subordinate_range ***in_ranges)
+ {
+ 	// TODO - need to handle owner being either uid or username
+-	const struct subordinate_range *range;
+ 	struct subordinate_range **ranges = NULL;
++	const struct subordinate_range *range;
+ 	struct commonio_db *db;
+-	int size = 0;
++	enum subid_status status;
++	int count = 0;
++	struct subid_nss_ops *h;
+ 
+-	if (id_type == ID_TYPE_UID)
++	*in_ranges = NULL;
++
++	h = get_subid_nss_handle();
++	if (h) {
++		status = h->list_owner_ranges(owner, id_type, in_ranges, &count);
++		if (status == SUBID_STATUS_SUCCESS)
++			return count;
++		return -1;
++	}
++
++	switch (id_type) {
++	case ID_TYPE_UID:
++		if (!sub_uid_open(O_RDONLY)) {
++			return -1;
++		}
+ 		db = &subordinate_uid_db;
+-	else
++		break;
++	case ID_TYPE_GID:
++		if (!sub_gid_open(O_RDONLY)) {
++			return -1;
++		}
+ 		db = &subordinate_gid_db;
++		break;
++	default:
++		return -1;
++	}
+ 
+ 	commonio_rewind(db);
+ 	while ((range = commonio_next(db)) != NULL) {
+ 		if (0 == strcmp(range->owner, owner)) {
+-			if (!append_range(&ranges, range, size++)) {
+-				free_subordinate_ranges(ranges);
+-				return NULL;
++			if (!append_range(&ranges, range, count++)) {
++				free_subordinate_ranges(ranges, count-1);
++				ranges = NULL;
++				count = -1;
++				goto out;
+ 			}
+ 		}
+ 	}
+ 
+-	return ranges;
++out:
++	if (id_type == ID_TYPE_UID)
++		sub_uid_close();
++	else
++		sub_gid_close();
++
++	*in_ranges = ranges;
++	return count;
+ }
+ 
+ static bool all_digits(const char *str)
+@@ -808,17 +894,41 @@ static int append_uids(uid_t **uids, const char *owner, int n)
+ 	return n+1;
+ }
+ 
+-int find_subid_owners(unsigned long id, uid_t **uids, enum subid_type id_type)
++int find_subid_owners(unsigned long id, enum subid_type id_type, uid_t **uids)
+ {
+ 	const struct subordinate_range *range;
++	struct subid_nss_ops *h;
++	enum subid_status status;
+ 	struct commonio_db *db;
+ 	int n = 0;
+ 
+-	*uids = NULL;
+-	if (id_type == ID_TYPE_UID)
++	h = get_subid_nss_handle();
++	if (h) {
++		status = h->find_subid_owners(id, id_type, uids, &n);
++		// Several ways we could handle the error cases here.
++		if (status != SUBID_STATUS_SUCCESS)
++			return -1;
++		return n;
++	}
++
++	switch (id_type) {
++	case ID_TYPE_UID:
++		if (!sub_uid_open(O_RDONLY)) {
++			return -1;
++		}
+ 		db = &subordinate_uid_db;
+-	else
++		break;
++	case ID_TYPE_GID:
++		if (!sub_gid_open(O_RDONLY)) {
++			return -1;
++		}
+ 		db = &subordinate_gid_db;
++		break;
++	default:
++		return -1;
++	}
++
++	*uids = NULL;
+ 
+ 	commonio_rewind(db);
+ 	while ((range = commonio_next(db)) != NULL) {
+@@ -829,6 +939,11 @@ int find_subid_owners(unsigned long id, uid_t **uids, enum subid_type id_type)
+ 		}
+ 	}
+ 
++	if (id_type == ID_TYPE_UID)
++		sub_uid_close();
++	else
++		sub_gid_close();
++
+ 	return n;
+ }
+ 
+@@ -836,11 +951,40 @@ bool new_subid_range(struct subordinate_range *range, enum subid_type id_type, b
+ {
+ 	struct commonio_db *db;
+ 	const struct subordinate_range *r;
++	bool ret;
+ 
+-	if (id_type == ID_TYPE_UID)
++	if (get_subid_nss_handle())
++		return false;
++
++	switch (id_type) {
++	case ID_TYPE_UID:
++		if (!sub_uid_lock()) {
++			printf("Failed loging subuids (errno %d)\n", errno);
++			return false;
++		}
++		if (!sub_uid_open(O_CREAT | O_RDWR)) {
++			printf("Failed opening subuids (errno %d)\n", errno);
++			sub_uid_unlock();
++			return false;
++		}
+ 		db = &subordinate_uid_db;
+-	else
++		break;
++	case ID_TYPE_GID:
++		if (!sub_gid_lock()) {
++			printf("Failed loging subgids (errno %d)\n", errno);
++			return false;
++		}
++		if (!sub_gid_open(O_CREAT | O_RDWR)) {
++			printf("Failed opening subgids (errno %d)\n", errno);
++			sub_gid_unlock();
++			return false;
++		}
+ 		db = &subordinate_gid_db;
++		break;
++	default:
++		return false;
++	}
++
+ 	commonio_rewind(db);
+ 	if (reuse) {
+ 		while ((r = commonio_next(db)) != NULL) {
+@@ -856,20 +1000,74 @@ bool new_subid_range(struct subordinate_range *range, enum subid_type id_type, b
+ 	}
+ 
+ 	range->start = find_free_range(db, range->start, ULONG_MAX, range->count);
+-	if (range->start == ULONG_MAX)
+-		return false;
+ 
+-	return add_range(db, range->owner, range->start, range->count) == 1;
++	if (range->start == ULONG_MAX) {
++		ret = false;
++		goto out;
++	}
++
++	ret = add_range(db, range->owner, range->start, range->count) == 1;
++
++out:
++	if (id_type == ID_TYPE_UID) {
++		sub_uid_close();
++		sub_uid_unlock();
++	} else {
++		sub_gid_close();
++		sub_gid_unlock();
++	}
++
++	return ret;
+ }
+ 
+ bool release_subid_range(struct subordinate_range *range, enum subid_type id_type)
+ {
+ 	struct commonio_db *db;
+-	if (id_type == ID_TYPE_UID)
++	bool ret;
++
++	if (get_subid_nss_handle())
++		return false;
++
++	switch (id_type) {
++	case ID_TYPE_UID:
++		if (!sub_uid_lock()) {
++			printf("Failed loging subuids (errno %d)\n", errno);
++			return false;
++		}
++		if (!sub_uid_open(O_CREAT | O_RDWR)) {
++			printf("Failed opening subuids (errno %d)\n", errno);
++			sub_uid_unlock();
++			return false;
++		}
+ 		db = &subordinate_uid_db;
+-	else
++		break;
++	case ID_TYPE_GID:
++		if (!sub_gid_lock()) {
++			printf("Failed loging subgids (errno %d)\n", errno);
++			return false;
++		}
++		if (!sub_gid_open(O_CREAT | O_RDWR)) {
++			printf("Failed opening subgids (errno %d)\n", errno);
++			sub_gid_unlock();
++			return false;
++		}
+ 		db = &subordinate_gid_db;
+-	return remove_range(db, range->owner, range->start, range->count) == 1;
++		break;
++	default:
++		return false;
++	}
++
++	ret = remove_range(db, range->owner, range->start, range->count) == 1;
++
++	if (id_type == ID_TYPE_UID) {
++		sub_uid_close();
++		sub_uid_unlock();
++	} else {
++		sub_gid_close();
++		sub_gid_unlock();
++	}
++
++	return ret;
+ }
+ 
+ #else				/* !ENABLE_SUBIDS */
+diff --git a/lib/subordinateio.h b/lib/subordinateio.h
+index 13a21341..e4be482c 100644
+--- a/lib/subordinateio.h
++++ b/lib/subordinateio.h
+@@ -25,11 +25,11 @@ extern int sub_uid_unlock (void);
+ extern int sub_uid_add (const char *owner, uid_t start, unsigned long count);
+ extern int sub_uid_remove (const char *owner, uid_t start, unsigned long count);
+ extern uid_t sub_uid_find_free_range(uid_t min, uid_t max, unsigned long count);
+-extern struct subordinate_range **list_owner_ranges(const char *owner, enum subid_type id_type);
++extern int list_owner_ranges(const char *owner, enum subid_type id_type, struct subordinate_range ***ranges);
+ extern bool new_subid_range(struct subordinate_range *range, enum subid_type id_type, bool reuse);
+ extern bool release_subid_range(struct subordinate_range *range, enum subid_type id_type);
+-extern int find_subid_owners(unsigned long id, uid_t **uids, enum subid_type id_type);
+-extern void free_subordinate_ranges(struct subordinate_range **ranges);
++extern int find_subid_owners(unsigned long id, enum subid_type id_type, uid_t **uids);
++extern void free_subordinate_ranges(struct subordinate_range **ranges, int count);
+ 
+ extern int sub_gid_close(void);
+ extern bool have_sub_gids(const char *owner, gid_t start, unsigned long count);
+diff --git a/libmisc/idmapping.h b/libmisc/idmapping.h
+index 3f32db68..1a8efe68 100644
+--- a/libmisc/idmapping.h
++++ b/libmisc/idmapping.h
+@@ -40,5 +40,7 @@ extern struct map_range *get_map_ranges(int ranges, int argc, char **argv);
+ extern void write_mapping(int proc_dir_fd, int ranges,
+ 	struct map_range *mappings, const char *map_file, uid_t ruid);
+ 
++extern void nss_init(char *nsswitch_path);
++
+ #endif /* _ID_MAPPING_H_ */
+ 
+diff --git a/libsubid/Makefile.am b/libsubid/Makefile.am
+index f24dbb94..f543b5eb 100644
+--- a/libsubid/Makefile.am
++++ b/libsubid/Makefile.am
+@@ -19,7 +19,7 @@ MISCLIBS = \
+ libsubid_la_LIBADD = \
+ 	$(top_srcdir)/lib/libshadow.la \
+ 	$(top_srcdir)/libmisc/libmisc.la \
+-	$(MISCLIBS)
++	$(MISCLIBS) -ldl
+ 
+ AM_CPPFLAGS = \
+ 	-I${top_srcdir}/lib \
+diff --git a/libsubid/api.c b/libsubid/api.c
+index 91d73bed..737e1c8b 100644
+--- a/libsubid/api.c
++++ b/libsubid/api.c
+@@ -38,132 +38,48 @@
+ #include "idmapping.h"
+ #include "api.h"
+ 
+-static struct subordinate_range **get_subid_ranges(const char *owner, enum subid_type id_type)
++static
++int get_subid_ranges(const char *owner, enum subid_type id_type, struct subordinate_range ***ranges)
+ {
+-	struct subordinate_range **ranges = NULL;
+-
+-	switch (id_type) {
+-	case ID_TYPE_UID:
+-		if (!sub_uid_open(O_RDONLY)) {
+-			return NULL;
+-		}
+-		break;
+-	case ID_TYPE_GID:
+-		if (!sub_gid_open(O_RDONLY)) {
+-			return NULL;
+-		}
+-		break;
+-	default:
+-		return NULL;
+-	}
+-
+-	ranges = list_owner_ranges(owner, id_type);
+-
+-	if (id_type == ID_TYPE_UID)
+-		sub_uid_close();
+-	else
+-		sub_gid_close();
+-
+-	return ranges;
++	return list_owner_ranges(owner, id_type, ranges);
+ }
+ 
+-struct subordinate_range **get_subuid_ranges(const char *owner)
++int get_subuid_ranges(const char *owner, struct subordinate_range ***ranges)
+ {
+-	return get_subid_ranges(owner, ID_TYPE_UID);
++	return get_subid_ranges(owner, ID_TYPE_UID, ranges);
+ }
+ 
+-struct subordinate_range **get_subgid_ranges(const char *owner)
++int get_subgid_ranges(const char *owner, struct subordinate_range ***ranges)
+ {
+-	return get_subid_ranges(owner, ID_TYPE_GID);
++	return get_subid_ranges(owner, ID_TYPE_GID, ranges);
+ }
+ 
+-void subid_free_ranges(struct subordinate_range **ranges)
++void subid_free_ranges(struct subordinate_range **ranges, int count)
+ {
+-	return free_subordinate_ranges(ranges);
++	return free_subordinate_ranges(ranges, count);
+ }
+ 
+-int get_subid_owner(unsigned long id, uid_t **owner, enum subid_type id_type)
++static
++int get_subid_owner(unsigned long id, enum subid_type id_type, uid_t **owner)
+ {
+-	int ret = -1;
+-
+-	switch (id_type) {
+-	case ID_TYPE_UID:
+-		if (!sub_uid_open(O_RDONLY)) {
+-			return -1;
+-		}
+-		break;
+-	case ID_TYPE_GID:
+-		if (!sub_gid_open(O_RDONLY)) {
+-			return -1;
+-		}
+-		break;
+-	default:
+-		return -1;
+-	}
+-
+-	ret = find_subid_owners(id, owner, id_type);
+-
+-	if (id_type == ID_TYPE_UID)
+-		sub_uid_close();
+-	else
+-		sub_gid_close();
+-
+-	return ret;
++	return find_subid_owners(id, id_type, owner);
+ }
+ 
+ int get_subuid_owners(uid_t uid, uid_t **owner)
+ {
+-	return get_subid_owner((unsigned long)uid, owner, ID_TYPE_UID);
++	return get_subid_owner((unsigned long)uid, ID_TYPE_UID, owner);
+ }
+ 
+ int get_subgid_owners(gid_t gid, uid_t **owner)
+ {
+-	return get_subid_owner((unsigned long)gid, owner, ID_TYPE_GID);
++	return get_subid_owner((unsigned long)gid, ID_TYPE_GID, owner);
+ }
+ 
++static
+ bool grant_subid_range(struct subordinate_range *range, bool reuse,
+ 		       enum subid_type id_type)
+ {
+-	bool ret;
+-
+-	switch (id_type) {
+-	case ID_TYPE_UID:
+-		if (!sub_uid_lock()) {
+-			printf("Failed loging subuids (errno %d)\n", errno);
+-			return false;
+-		}
+-		if (!sub_uid_open(O_CREAT | O_RDWR)) {
+-			printf("Failed opening subuids (errno %d)\n", errno);
+-			sub_uid_unlock();
+-			return false;
+-		}
+-		break;
+-	case ID_TYPE_GID:
+-		if (!sub_gid_lock()) {
+-			printf("Failed loging subgids (errno %d)\n", errno);
+-			return false;
+-		}
+-		if (!sub_gid_open(O_CREAT | O_RDWR)) {
+-			printf("Failed opening subgids (errno %d)\n", errno);
+-			sub_gid_unlock();
+-			return false;
+-		}
+-		break;
+-	default:
+-		return false;
+-	}
+-
+-	ret = new_subid_range(range, id_type, reuse);
+-
+-	if (id_type == ID_TYPE_UID) {
+-		sub_uid_close();
+-		sub_uid_unlock();
+-	} else {
+-		sub_gid_close();
+-		sub_gid_unlock();
+-	}
+-
+-	return ret;
++	return new_subid_range(range, id_type, reuse);
+ }
+ 
+ bool grant_subuid_range(struct subordinate_range *range, bool reuse)
+@@ -176,56 +92,18 @@ bool grant_subgid_range(struct subordinate_range *range, bool reuse)
+ 	return grant_subid_range(range, reuse, ID_TYPE_GID);
+ }
+ 
+-bool free_subid_range(struct subordinate_range *range, enum subid_type id_type)
++static
++bool ungrant_subid_range(struct subordinate_range *range, enum subid_type id_type)
+ {
+-	bool ret;
+-
+-	switch (id_type) {
+-	case ID_TYPE_UID:
+-		if (!sub_uid_lock()) {
+-			printf("Failed loging subuids (errno %d)\n", errno);
+-			return false;
+-		}
+-		if (!sub_uid_open(O_CREAT | O_RDWR)) {
+-			printf("Failed opening subuids (errno %d)\n", errno);
+-			sub_uid_unlock();
+-			return false;
+-		}
+-		break;
+-	case ID_TYPE_GID:
+-		if (!sub_gid_lock()) {
+-			printf("Failed loging subgids (errno %d)\n", errno);
+-			return false;
+-		}
+-		if (!sub_gid_open(O_CREAT | O_RDWR)) {
+-			printf("Failed opening subgids (errno %d)\n", errno);
+-			sub_gid_unlock();
+-			return false;
+-		}
+-		break;
+-	default:
+-		return false;
+-	}
+-
+-	ret = release_subid_range(range, id_type);
+-
+-	if (id_type == ID_TYPE_UID) {
+-		sub_uid_close();
+-		sub_uid_unlock();
+-	} else {
+-		sub_gid_close();
+-		sub_gid_unlock();
+-	}
+-
+-	return ret;
++	return release_subid_range(range, id_type);
+ }
+ 
+-bool free_subuid_range(struct subordinate_range *range)
++bool ungrant_subuid_range(struct subordinate_range *range)
+ {
+-	return free_subid_range(range, ID_TYPE_UID);
++	return ungrant_subid_range(range, ID_TYPE_UID);
+ }
+ 
+-bool free_subgid_range(struct subordinate_range *range)
++bool ungrant_subgid_range(struct subordinate_range *range)
+ {
+-	return free_subid_range(range, ID_TYPE_GID);
++	return ungrant_subid_range(range, ID_TYPE_GID);
+ }
+diff --git a/libsubid/api.h b/libsubid/api.h
+index fbdf0f9e..97b04e25 100644
+--- a/libsubid/api.h
++++ b/libsubid/api.h
+@@ -1,9 +1,9 @@
+ #include "subid.h"
+ #include <stdbool.h>
+ 
+-struct subordinate_range **get_subuid_ranges(const char *owner);
+-struct subordinate_range **get_subgid_ranges(const char *owner);
+-void subid_free_ranges(struct subordinate_range **ranges);
++int get_subuid_ranges(const char *owner, struct subordinate_range ***ranges);
++int get_subgid_ranges(const char *owner, struct subordinate_range ***ranges);
++void subid_free_ranges(struct subordinate_range **ranges, int count);
+ 
+ int get_subuid_owners(uid_t uid, uid_t **owner);
+ int get_subgid_owners(gid_t gid, uid_t **owner);
+@@ -13,5 +13,5 @@ int get_subgid_owners(gid_t gid, uid_t **owner);
+ bool grant_subuid_range(struct subordinate_range *range, bool reuse);
+ bool grant_subgid_range(struct subordinate_range *range, bool reuse);
+ 
+-bool free_subuid_range(struct subordinate_range *range);
+-bool free_subgid_range(struct subordinate_range *range);
++bool ungrant_subuid_range(struct subordinate_range *range);
++bool ungrant_subgid_range(struct subordinate_range *range);
+diff --git a/libsubid/subid.h b/libsubid/subid.h
+index ba9a2f6f..2f27ad8a 100644
+--- a/libsubid/subid.h
++++ b/libsubid/subid.h
+@@ -1,4 +1,5 @@
+ #include <sys/types.h>
++#include <stdbool.h>
+ 
+ #ifndef SUBID_RANGE_DEFINED
+ #define SUBID_RANGE_DEFINED 1
+@@ -13,5 +14,12 @@ enum subid_type {
+ 	ID_TYPE_GID = 2
+ };
+ 
++enum subid_status {
++	SUBID_STATUS_SUCCESS = 0,
++	SUBID_STATUS_UNKNOWN_USER = 1,
++	SUBID_STATUS_ERROR_CONN = 2,
++	SUBID_STATUS_ERROR = 3,
++};
++
+ #define SUBID_NFIELDS 3
+ #endif
+diff --git a/src/Makefile.am b/src/Makefile.am
+index e9d354fd..35027013 100644
+--- a/src/Makefile.am
++++ b/src/Makefile.am
+@@ -111,15 +111,6 @@ grpck_LDADD    = $(LDADD) $(LIBAUDIT) $(LIBSELINUX) $(LIBECONF)
+ grpconv_LDADD  = $(LDADD) $(LIBAUDIT) $(LIBSELINUX) $(LIBECONF)
+ grpunconv_LDADD = $(LDADD) $(LIBAUDIT) $(LIBSELINUX) $(LIBECONF)
+ lastlog_LDADD   = $(LDADD) $(LIBAUDIT) $(LIBECONF)
+-newuidmap_SOURCES = newuidmap.c ../libmisc/nss.c
+-newgidmap_SOURCES = newgidmap.c ../libmisc/nss.c
+-groupadd_SOURCES = groupadd.c ../libmisc/nss.c
+-groupmod_SOURCES = groupmod.c ../libmisc/nss.c
+-groupdel_SOURCES = groupdel.c ../libmisc/nss.c
+-newusers_SOURCES = newusers.c ../libmisc/nss.c
+-useradd_SOURCES = useradd.c ../libmisc/nss.c
+-usermod_SOURCES = usermod.c ../libmisc/nss.c
+-userdel_SOURCES = userdel.c ../libmisc/nss.c
+ login_SOURCES  = \
+ 	login.c \
+ 	login_nopam.c
+@@ -169,7 +160,8 @@ endif
+ noinst_PROGRAMS += list_subid_ranges  \
+ 					get_subid_owners \
+ 					new_subid_range \
+-					free_subid_range
++					free_subid_range \
++					check_subid_range
+ 
+ MISCLIBS = \
+ 	$(LIBAUDIT) \
+@@ -186,7 +178,7 @@ list_subid_ranges_LDADD = \
+ 	$(top_builddir)/lib/libshadow.la \
+ 	$(top_builddir)/libmisc/libmisc.la \
+ 	$(top_builddir)/libsubid/libsubid.la \
+-	$(MISCLIBS)
++	$(MISCLIBS) -ldl
+ 
+ list_subid_ranges_CPPFLAGS = \
+ 	-I$(top_srcdir)/lib \
+@@ -197,7 +189,7 @@ get_subid_owners_LDADD = \
+ 	$(top_builddir)/lib/libshadow.la \
+ 	$(top_builddir)/libmisc/libmisc.la \
+ 	$(top_builddir)/libsubid/libsubid.la \
+-	$(MISCLIBS)
++	$(MISCLIBS) -ldl
+ 
+ get_subid_owners_CPPFLAGS = \
+ 	-I$(top_srcdir)/lib \
+@@ -213,7 +205,7 @@ new_subid_range_LDADD = \
+ 	$(top_builddir)/lib/libshadow.la \
+ 	$(top_builddir)/libmisc/libmisc.la \
+ 	$(top_builddir)/libsubid/libsubid.la \
+-	$(MISCLIBS)
++	$(MISCLIBS) -ldl
+ 
+ free_subid_range_CPPFLAGS = \
+ 	-I$(top_srcdir)/lib \
+@@ -224,5 +216,14 @@ free_subid_range_LDADD = \
+ 	$(top_builddir)/lib/libshadow.la \
+ 	$(top_builddir)/libmisc/libmisc.la \
+ 	$(top_builddir)/libsubid/libsubid.la \
+-	$(MISCLIBS)
++	$(MISCLIBS) -ldl
++
++check_subid_range_CPPFLAGS = \
++	-I$(top_srcdir)/lib \
++	-I$(top_srcdir)/libmisc
++
++check_subid_range_LDADD = \
++	$(top_builddir)/lib/libshadow.la \
++	$(top_builddir)/libmisc/libmisc.la \
++	$(MISCLIBS) -ldl
+ endif
+diff --git a/src/check_subid_range.c b/src/check_subid_range.c
+new file mode 100644
+index 00000000..fb1c2cfc
+--- /dev/null
++++ b/src/check_subid_range.c
+@@ -0,0 +1,48 @@
++// This program is for testing purposes only.
++// usage is "[program] owner [u|g] start count
++// Exits 0 if owner has subid range starting start, of size count
++// Exits 1 otherwise.
++
++#include <config.h>
++#include <stdio.h>
++#include <string.h>
++#include <errno.h>
++#include <stdbool.h>
++#include <stdlib.h>
++#include <sys/types.h>
++#include <sys/stat.h>
++#include <fcntl.h>
++#include "defines.h"
++#include "prototypes.h"
++#include "subordinateio.h"
++#include "idmapping.h"
++
++const char *Prog;
++
++int main(int argc, char **argv)
++{
++	char *owner;
++	unsigned long start, count;
++	bool check_uids;
++	Prog = Basename (argv[0]);
++
++	if (argc != 5)
++		exit(1);
++
++	owner = argv[1];
++	check_uids = argv[2][0] == 'u';
++	start = strtoul(argv[3], NULL, 10);
++	if (start == ULONG_MAX && errno == ERANGE)
++		exit(1);
++	count = strtoul(argv[4], NULL, 10);
++	if (count == ULONG_MAX && errno == ERANGE)
++		exit(1);
++	if (check_uids) {
++		if (have_sub_uids(owner, start, count))
++			exit(0);
++		exit(1);
++	}
++	if (have_sub_gids(owner, start, count))
++		exit(0);
++	exit(1);
++}
+diff --git a/src/free_subid_range.c b/src/free_subid_range.c
+index 36858875..de6bc58f 100644
+--- a/src/free_subid_range.c
++++ b/src/free_subid_range.c
+@@ -37,9 +37,9 @@ int main(int argc, char *argv[])
+ 	range.start = atoi(argv[1]);
+ 	range.count = atoi(argv[2]);
+ 	if (group)
+-		ok = free_subgid_range(&range);
++		ok = ungrant_subgid_range(&range);
+ 	else
+-		ok = free_subuid_range(&range);
++		ok = ungrant_subuid_range(&range);
+ 
+ 	if (!ok) {
+ 		fprintf(stderr, "Failed freeing id range\n");
+diff --git a/src/list_subid_ranges.c b/src/list_subid_ranges.c
+index cdba610e..440ef911 100644
+--- a/src/list_subid_ranges.c
++++ b/src/list_subid_ranges.c
+@@ -15,7 +15,7 @@ void usage(void)
+ 
+ int main(int argc, char *argv[])
+ {
+-	int i;
++	int i, count=0;
+ 	struct subordinate_range **ranges;
+ 
+ 	Prog = Basename (argv[0]);
+@@ -23,19 +23,19 @@ int main(int argc, char *argv[])
+ 		usage();
+ 	}
+ 	if (argc == 3 && strcmp(argv[1], "-g") == 0)
+-		ranges = get_subgid_ranges(argv[2]);
++		count = get_subgid_ranges(argv[2], &ranges);
+ 	else if (argc == 2 && strcmp(argv[1], "-h") == 0)
+ 		usage();
+ 	else
+-		ranges = get_subuid_ranges(argv[1]);
++		count = get_subuid_ranges(argv[1], &ranges);
+ 	if (!ranges) {
+ 		fprintf(stderr, "Error fetching ranges\n");
+ 		exit(1);
+ 	}
+-	for (i = 0; ranges[i]; i++) {
++	for (i = 0; i < count; i++) {
+ 		printf("%d: %s %lu %lu\n", i, ranges[i]->owner,
+ 			ranges[i]->start, ranges[i]->count);
+ 	}
+-	subid_free_ranges(ranges);
++	subid_free_ranges(ranges, count);
+ 	return 0;
+ }
+diff --git a/tests/libsubid/04_nss/Makefile b/tests/libsubid/04_nss/Makefile
+new file mode 100644
+index 00000000..6cd3225f
+--- /dev/null
++++ b/tests/libsubid/04_nss/Makefile
+@@ -0,0 +1,12 @@
++all: test_nss libsubid_zzz.so
++
++test_nss: test_nss.c ../../../lib/nss.c
++	gcc -c -I../../../lib/ -I../../.. -o test_nss.o test_nss.c
++	gcc -o test_nss test_nss.o ../../../libmisc/.libs/libmisc.a ../../../lib/.libs/libshadow.a -ldl
++
++libsubid_zzz.so: libsubid_zzz.c
++	gcc -c -I../../../lib/ -I../../.. -I../../../libmisc -I../../../libsubid libsubid_zzz.c
++	gcc -L../../../libsubid -shared -o libsubid_zzz.so libsubid_zzz.o ../../../lib/.libs/libshadow.a -ldl
++
++clean:
++	rm -f *.o *.so test_nss
+diff --git a/tests/libsubid/04_nss/empty b/tests/libsubid/04_nss/empty
+new file mode 100644
+index 00000000..e69de29b
+diff --git a/tests/libsubid/04_nss/libsubid_zzz.c b/tests/libsubid/04_nss/libsubid_zzz.c
+new file mode 100644
+index 00000000..b56a4bae
+--- /dev/null
++++ b/tests/libsubid/04_nss/libsubid_zzz.c
+@@ -0,0 +1,146 @@
++#include <sys/types.h>
++#include <pwd.h>
++#include <stdlib.h>
++#include <stdbool.h>
++#include <subid.h>
++#include <string.h>
++
++enum subid_status shadow_subid_has_any_range(const char *owner, enum subid_type t, bool *result)
++{
++	if (strcmp(owner, "ubuntu") == 0) {
++		*result = true;
++		return SUBID_STATUS_SUCCESS;
++	}
++	if (strcmp(owner, "error") == 0) {
++		*result = false;
++		return SUBID_STATUS_ERROR;
++	}
++	if (strcmp(owner, "unknown") == 0) {
++		*result = false;
++		return SUBID_STATUS_UNKNOWN_USER;
++	}
++	if (strcmp(owner, "conn") == 0) {
++		*result = false;
++		return SUBID_STATUS_ERROR_CONN;
++	}
++	if (t == ID_TYPE_UID) {
++		*result = strcmp(owner, "user1") == 0;
++		return SUBID_STATUS_SUCCESS;
++	}
++
++	*result = strcmp(owner, "group1") == 0;
++	return SUBID_STATUS_SUCCESS;
++}
++
++enum subid_status shadow_subid_has_range(const char *owner, unsigned long start, unsigned long count, enum subid_type t, bool *result)
++{
++	if (strcmp(owner, "ubuntu") == 0 &&
++	    start >= 200000 &&
++	    count <= 100000) {
++		*result = true;
++		return SUBID_STATUS_SUCCESS;
++	}
++	*result = false;
++	if (strcmp(owner, "error") == 0)
++		return SUBID_STATUS_ERROR;
++	if (strcmp(owner, "unknown") == 0)
++		return SUBID_STATUS_UNKNOWN_USER;
++	if (strcmp(owner, "conn") == 0)
++		return SUBID_STATUS_ERROR_CONN;
++
++	if (t == ID_TYPE_UID && strcmp(owner, "user1") != 0)
++		return SUBID_STATUS_SUCCESS;
++	if (t == ID_TYPE_GID && strcmp(owner, "group1") != 0)
++		return SUBID_STATUS_SUCCESS;
++
++	if (start < 100000)
++		return SUBID_STATUS_SUCCESS;
++	if (count >= 65536)
++		return SUBID_STATUS_SUCCESS;
++	*result = true;
++	return SUBID_STATUS_SUCCESS;
++}
++
++// So if 'user1' or 'ubuntu' is defined in passwd, we'll return those values,
++// to ease manual testing.  For automated testing, if you return those values,
++// we'll return 1000 for ubuntu and 1001 otherwise.
++static uid_t getnamuid(const char *name) {
++	struct passwd *pw;
++
++	pw = getpwnam(name);
++	if (pw)
++		return pw->pw_uid;
++
++	// For testing purposes
++	return strcmp(name, "ubuntu") == 0 ? (uid_t)1000 : (uid_t)1001;
++}
++
++static int alloc_uid(uid_t **uids, uid_t id) {
++	*uids = malloc(sizeof(uid_t));
++	if (!*uids)
++		return -1;
++	*uids[0] = id;
++	return 1;
++}
++
++enum subid_status shadow_subid_find_subid_owners(unsigned long id, enum subid_type id_type, uid_t **uids, int *count)
++{
++	if (id >= 100000 && id < 165536) {
++		*count = alloc_uid(uids, getnamuid("user1"));
++		if (*count == 1)
++			return SUBID_STATUS_SUCCESS;
++		return SUBID_STATUS_ERROR; // out of memory
++	}
++	if (id >= 200000 && id < 300000) {
++		*count = alloc_uid(uids, getnamuid("ubuntu"));
++		if (*count == 1)
++			return SUBID_STATUS_SUCCESS;
++		return SUBID_STATUS_ERROR; // out of memory
++	}
++	*count = 0; // nothing found
++	return SUBID_STATUS_SUCCESS;
++}
++
++enum subid_status shadow_subid_list_owner_ranges(const char *owner, enum subid_type id_type, struct subordinate_range ***in_ranges, int *count)
++{
++	struct subordinate_range **ranges;
++
++	*count = 0;
++	if (strcmp(owner, "error") == 0)
++		return SUBID_STATUS_ERROR;
++	if (strcmp(owner, "unknown") == 0)
++		return SUBID_STATUS_UNKNOWN_USER;
++	if (strcmp(owner, "conn") == 0)
++		return SUBID_STATUS_ERROR_CONN;
++
++	*ranges = NULL;
++	if (strcmp(owner, "user1") != 0 && strcmp(owner, "ubuntu") != 0 &&
++	    strcmp(owner, "group1") != 0)
++		return SUBID_STATUS_SUCCESS;
++	if (id_type == ID_TYPE_GID && strcmp(owner, "user1") == 0)
++		return SUBID_STATUS_SUCCESS;
++	if (id_type == ID_TYPE_UID && strcmp(owner, "group1") == 0)
++		return SUBID_STATUS_SUCCESS;
++	ranges = (struct subordinate_range **)malloc(sizeof(struct subordinate_range *));
++	if (!*ranges)
++		return SUBID_STATUS_ERROR;
++	ranges[0] = (struct subordinate_range *)malloc(sizeof(struct subordinate_range));
++	if (!ranges[0]) {
++		free(*ranges);
++		*ranges = NULL;
++		return SUBID_STATUS_ERROR;
++	}
++	ranges[0]->owner = strdup(owner);
++	if (strcmp(owner, "user1") == 0 || strcmp(owner, "group1") == 0) {
++		ranges[0]->start = 100000;
++		ranges[0]->count = 65536;
++	} else {
++		ranges[0]->start = 200000;
++		ranges[0]->count = 100000;
++	}
++
++	*count = 1;
++	*in_ranges = ranges;
++
++	return SUBID_STATUS_SUCCESS;
++}
+diff --git a/tests/libsubid/04_nss/nsswitch1.conf b/tests/libsubid/04_nss/nsswitch1.conf
+new file mode 100644
+index 00000000..43764a39
+--- /dev/null
++++ b/tests/libsubid/04_nss/nsswitch1.conf
+@@ -0,0 +1,20 @@
++# /etc/nsswitch.conf
++#
++# Example configuration of GNU Name Service Switch functionality.
++# If you have the `glibc-doc-reference' and `info' packages installed, try:
++# `info libc "Name Service Switch"' for information about this file.
++
++passwd:         files systemd
++group:          files systemd
++shadow:         files
++gshadow:        files
++
++hosts:          files mdns4_minimal [NOTFOUND=return] dns
++networks:       files
++
++protocols:      db files
++services:       db files
++ethers:         db files
++rpc:            db files
++
++netgroup:       nis
+diff --git a/tests/libsubid/04_nss/nsswitch2.conf b/tests/libsubid/04_nss/nsswitch2.conf
+new file mode 100644
+index 00000000..d371a36c
+--- /dev/null
++++ b/tests/libsubid/04_nss/nsswitch2.conf
+@@ -0,0 +1,22 @@
++# /etc/nsswitch.conf
++#
++# Example configuration of GNU Name Service Switch functionality.
++# If you have the `glibc-doc-reference' and `info' packages installed, try:
++# `info libc "Name Service Switch"' for information about this file.
++
++passwd:         files systemd
++group:          files systemd
++shadow:         files
++gshadow:        files
++
++hosts:          files mdns4_minimal [NOTFOUND=return] dns
++networks:       files
++
++protocols:      db files
++services:       db files
++ethers:         db files
++rpc:            db files
++
++netgroup:       nis
++
++subid:          files
+diff --git a/tests/libsubid/04_nss/nsswitch3.conf b/tests/libsubid/04_nss/nsswitch3.conf
+new file mode 100644
+index 00000000..19f2d934
+--- /dev/null
++++ b/tests/libsubid/04_nss/nsswitch3.conf
+@@ -0,0 +1,22 @@
++# /etc/nsswitch.conf
++#
++# Example configuration of GNU Name Service Switch functionality.
++# If you have the `glibc-doc-reference' and `info' packages installed, try:
++# `info libc "Name Service Switch"' for information about this file.
++
++passwd:         files systemd
++group:          files systemd
++shadow:         files
++gshadow:        files
++
++hosts:          files mdns4_minimal [NOTFOUND=return] dns
++networks:       files
++
++protocols:      db files
++services:       db files
++ethers:         db files
++rpc:            db files
++
++netgroup:       nis
++
++subid:          zzz
+diff --git a/tests/libsubid/04_nss/subidnss.test b/tests/libsubid/04_nss/subidnss.test
+new file mode 100755
+index 00000000..3d40dc8c
+--- /dev/null
++++ b/tests/libsubid/04_nss/subidnss.test
+@@ -0,0 +1,22 @@
++#!/bin/sh
++
++set -e
++
++cd $(dirname $0)
++
++. ../../common/config.sh
++. ../../common/log.sh
++
++make
++
++export LD_LIBRARY_PATH=.:../../../lib/.libs:$LD_LIBRARY_PATH
++
++./test_nss 1
++./test_nss 2
++./test_nss 3
++
++unshare -Urm ./test_range
++
++log_status "$0" "SUCCESS"
++
++trap '' 0
+diff --git a/tests/libsubid/04_nss/test_nss.c b/tests/libsubid/04_nss/test_nss.c
+new file mode 100644
+index 00000000..5d903ab4
+--- /dev/null
++++ b/tests/libsubid/04_nss/test_nss.c
+@@ -0,0 +1,72 @@
++#include <stdio.h>
++#include <stdlib.h>
++#include <unistd.h>
++#include <prototypes.h>
++#include <stdbool.h>
++#include <dlfcn.h>
++
++extern bool nss_is_initialized();
++extern struct subid_nss_ops *get_subid_nss_handle();
++
++void test1() {
++	// nsswitch1 has no subid: entry
++	setenv("LD_LIBRARY_PATH", ".", 1);
++	printf("Test with no subid entry\n");
++	nss_init("./nsswitch1.conf");
++	if (!nss_is_initialized() || get_subid_nss_handle())
++		exit(1);
++	// second run should change nothing
++	printf("Test with no subid entry, second run\n");
++	nss_init("./nsswitch1.conf");
++	if (!nss_is_initialized() || get_subid_nss_handle())
++		exit(1);
++}
++
++void test2() {
++	// nsswitch2 has a subid: files entry
++	printf("test with 'files' subid entry\n");
++	nss_init("./nsswitch2.conf");
++	if (!nss_is_initialized() || get_subid_nss_handle())
++		exit(1);
++	// second run should change nothing
++	printf("test with 'files' subid entry, second run\n");
++	nss_init("./nsswitch2.conf");
++	if (!nss_is_initialized() || get_subid_nss_handle())
++		exit(1);
++}
++
++void test3() {
++	// nsswitch3 has a subid: testnss entry
++	printf("test with 'test' subid entry\n");
++	nss_init("./nsswitch3.conf");
++	if (!nss_is_initialized() || !get_subid_nss_handle())
++		exit(1);
++	// second run should change nothing
++	printf("test with 'test' subid entry, second run\n");
++	nss_init("./nsswitch3.conf");
++	if (!nss_is_initialized() || !get_subid_nss_handle())
++		exit(1);
++}
++
++const char *Prog;
++
++int main(int argc, char *argv[])
++{
++	int which;
++
++	Prog = Basename(argv[0]);
++
++	if (argc < 1)
++		exit(1);
++
++	which = atoi(argv[1]);
++	switch(which) {
++	case 1: test1(); break;
++	case 2: test2(); break;
++	case 3: test3(); break;
++	default: exit(1);
++	}
++
++	printf("nss parsing tests done\n");
++	exit(0);
++}
+diff --git a/tests/libsubid/04_nss/test_range b/tests/libsubid/04_nss/test_range
+new file mode 100755
+index 00000000..356764fb
+--- /dev/null
++++ b/tests/libsubid/04_nss/test_range
+@@ -0,0 +1,50 @@
++#!/bin/sh
++
++set -x
++
++echo "starting check_range tests"
++
++export LD_LIBRARY_PATH=.:$LD_LIBRARY_PATH
++mount --bind ./nsswitch3.conf /etc/nsswitch.conf
++cleanup1() {
++    umount /etc/nsswitch.conf
++}
++trap cleanup1 EXIT HUP INT TERM
++../../../src/check_subid_range user1 u 100000 65535
++if [ $? -ne 0 ]; then
++    exit 1
++fi
++../../../src/check_subid_range user2 u 100000 65535
++if [ $? -eq 0 ]; then
++    exit 1
++fi
++../../../src/check_subid_range unknown u 100000 65535
++if [ $? -eq 0 ]; then
++    exit 1
++fi
++../../../src/check_subid_range error u 100000 65535
++if [ $? -eq 0 ]; then
++    exit 1
++fi
++../../../src/check_subid_range user1 u 1000 65535
++if [ $? -eq 0 ]; then
++    exit 1
++fi
++
++umount /etc/nsswitch.conf
++
++mount --bind ./nsswitch1.conf /etc/nsswitch.conf
++mount --bind ./empty /etc/subuid
++
++cleanup2() {
++    umount /etc/subuid
++    umount /etc/nsswitch.conf
++}
++trap cleanup2 EXIT HUP INT TERM
++../../../src/check_subid_range user1 u 100000 65535
++if [ $? -eq 0 ]; then
++    exit 1
++fi
++
++echo "check_range tests complete"
++exit 0
+diff --git a/tests/run_some b/tests/run_some
+index 15b4816a..e6f6eb5a 100755
+--- a/tests/run_some
++++ b/tests/run_some
+@@ -127,6 +127,7 @@ run_test ./newuidmap/01_newuidmap/newuidmap.test
+ run_test ./libsubid/01_list_ranges/list_ranges.test
+ run_test ./libsubid/02_get_subid_owners/get_subid_owners.test
+ run_test ./libsubid/03_add_remove/add_remove_subids.test
++run_test ./libsubid/04_nss/subidnss.test
+ 
+ echo
+ echo "$succeeded test(s) passed"
+-- 
+2.30.2
+
+
+From 0f4347d1483191b2142546416a9eefe0c9459600 Mon Sep 17 00:00:00 2001
+From: Serge Hallyn <serge@hallyn.com>
+Date: Thu, 15 Apr 2021 09:52:29 -0500
+Subject: [PATCH 3/6] clean up libsubid headers
+
+Move libsubid/api.h into libsubid/subid.h, and document the api in subid.h
+
+Signed-off-by: Serge Hallyn <serge@hallyn.com>
+---
+ libsubid/api.c          |   2 +-
+ libsubid/api.h          |  17 -------
+ libsubid/subid.h        | 105 ++++++++++++++++++++++++++++++++++++++++
+ src/free_subid_range.c  |   2 +-
+ src/get_subid_owners.c  |   2 +-
+ src/list_subid_ranges.c |   2 +-
+ src/new_subid_range.c   |   2 +-
+ 7 files changed, 110 insertions(+), 22 deletions(-)
+ delete mode 100644 libsubid/api.h
+
+diff --git a/libsubid/api.c b/libsubid/api.c
+index 737e1c8b..a1b5bb3f 100644
+--- a/libsubid/api.c
++++ b/libsubid/api.c
+@@ -36,7 +36,7 @@
+ #include <stdbool.h>
+ #include "subordinateio.h"
+ #include "idmapping.h"
+-#include "api.h"
++#include "subid.h"
+ 
+ static
+ int get_subid_ranges(const char *owner, enum subid_type id_type, struct subordinate_range ***ranges)
+diff --git a/libsubid/api.h b/libsubid/api.h
+deleted file mode 100644
+index 97b04e25..00000000
+--- a/libsubid/api.h
++++ /dev/null
+@@ -1,17 +0,0 @@
+-#include "subid.h"
+-#include <stdbool.h>
+-
+-int get_subuid_ranges(const char *owner, struct subordinate_range ***ranges);
+-int get_subgid_ranges(const char *owner, struct subordinate_range ***ranges);
+-void subid_free_ranges(struct subordinate_range **ranges, int count);
+-
+-int get_subuid_owners(uid_t uid, uid_t **owner);
+-int get_subgid_owners(gid_t gid, uid_t **owner);
+-
+-/* range should be pre-allocated with owner and count filled in, start is
+- * ignored, can be 0 */
+-bool grant_subuid_range(struct subordinate_range *range, bool reuse);
+-bool grant_subgid_range(struct subordinate_range *range, bool reuse);
+-
+-bool ungrant_subuid_range(struct subordinate_range *range);
+-bool ungrant_subgid_range(struct subordinate_range *range);
+diff --git a/libsubid/subid.h b/libsubid/subid.h
+index 2f27ad8a..769463f6 100644
+--- a/libsubid/subid.h
++++ b/libsubid/subid.h
+@@ -21,5 +21,110 @@ enum subid_status {
+ 	SUBID_STATUS_ERROR = 3,
+ };
+ 
++/*
++ * get_subuid_ranges: return a list of UID ranges for a user
++ *
++ * @owner: username being queried
++ * @ranges: a pointer to a subordinate range ** in which the result will be
++ *          returned.
++ *
++ * returns: number of ranges found, ir < 0 on error.
++ */
++int get_subuid_ranges(const char *owner, struct subordinate_range ***ranges);
++
++/*
++ * get_subgid_ranges: return a list of GID ranges for a user
++ *
++ * @owner: username being queried
++ * @ranges: a pointer to a subordinate range ** in which the result will be
++ *          returned.
++ *
++ * returns: number of ranges found, ir < 0 on error.
++ */
++int get_subgid_ranges(const char *owner, struct subordinate_range ***ranges);
++
++/*
++ * subid_free_ranges: free an array of subordinate_ranges returned by either
++ *                    get_subuid_ranges() or get_subgid_ranges().
++ *
++ * @ranges: the ranges to free
++ * @count: the number of ranges in @ranges
++ */
++void subid_free_ranges(struct subordinate_range **ranges, int count);
++
++/*
++ * get_subuid_owners: return a list of uids to which the given uid has been
++ *                    delegated.
++ *
++ * @uid: The subuid being queried
++ * @owners: a pointer to an array of uids into which the results are placed.
++ *          The returned array must be freed by the caller.
++ *
++ * Returns the number of uids returned, or < 0 on error.
++ */
++int get_subuid_owners(uid_t uid, uid_t **owner);
++
++/*
++ * get_subgid_owners: return a list of uids to which the given gid has been
++ *                    delegated.
++ *
++ * @uid: The subgid being queried
++ * @owners: a pointer to an array of uids into which the results are placed.
++ *          The returned array must be freed by the caller.
++ *
++ * Returns the number of uids returned, or < 0 on error.
++ */
++int get_subgid_owners(gid_t gid, uid_t **owner);
++
++/*
++ * grant_subuid_range: assign a subuid range to a user
++ *
++ * @range: pointer to a struct subordinate_range detailing the UID range
++ *         to allocate.  ->owner must be the username, and ->count must be
++ *         filled in.  ->start is ignored, and will contain the start
++ *         of the newly allocated range, upon success.
++ *
++ * Returns true if the delegation succeeded, false otherwise.  If true,
++ * then the range from (range->start, range->start + range->count) will
++ * be delegated to range->owner.
++ */
++bool grant_subuid_range(struct subordinate_range *range, bool reuse);
++
++/*
++ * grant_subsid_range: assign a subgid range to a user
++ *
++ * @range: pointer to a struct subordinate_range detailing the GID range
++ *         to allocate.  ->owner must be the username, and ->count must be
++ *         filled in.  ->start is ignored, and will contain the start
++ *         of the newly allocated range, upon success.
++ *
++ * Returns true if the delegation succeeded, false otherwise.  If true,
++ * then the range from (range->start, range->start + range->count) will
++ * be delegated to range->owner.
++ */
++bool grant_subgid_range(struct subordinate_range *range, bool reuse);
++
++/*
++ * ungrant_subuid_range: remove a subuid allocation.
++ *
++ * @range: pointer to a struct subordinate_range detailing the UID allocation
++ *         to remove.
++ *
++ * Returns true if successful, false if it failed, for instance if the
++ * delegation did not exist.
++ */
++bool ungrant_subuid_range(struct subordinate_range *range);
++
++/*
++ * ungrant_subuid_range: remove a subgid allocation.
++ *
++ * @range: pointer to a struct subordinate_range detailing the GID allocation
++ *         to remove.
++ *
++ * Returns true if successful, false if it failed, for instance if the
++ * delegation did not exist.
++ */
++bool ungrant_subgid_range(struct subordinate_range *range);
++
+ #define SUBID_NFIELDS 3
+ #endif
+diff --git a/src/free_subid_range.c b/src/free_subid_range.c
+index de6bc58f..3701a262 100644
+--- a/src/free_subid_range.c
++++ b/src/free_subid_range.c
+@@ -1,6 +1,6 @@
+ #include <stdio.h>
+ #include <unistd.h>
+-#include "api.h"
++#include "subid.h"
+ #include "stdlib.h"
+ #include "prototypes.h"
+ 
+diff --git a/src/get_subid_owners.c b/src/get_subid_owners.c
+index a4385540..409e3fea 100644
+--- a/src/get_subid_owners.c
++++ b/src/get_subid_owners.c
+@@ -1,5 +1,5 @@
+ #include <stdio.h>
+-#include "api.h"
++#include "subid.h"
+ #include "stdlib.h"
+ #include "prototypes.h"
+ 
+diff --git a/src/list_subid_ranges.c b/src/list_subid_ranges.c
+index 440ef911..21b2c192 100644
+--- a/src/list_subid_ranges.c
++++ b/src/list_subid_ranges.c
+@@ -1,5 +1,5 @@
+ #include <stdio.h>
+-#include "api.h"
++#include "subid.h"
+ #include "stdlib.h"
+ #include "prototypes.h"
+ 
+diff --git a/src/new_subid_range.c b/src/new_subid_range.c
+index 6d7b033b..dde196b3 100644
+--- a/src/new_subid_range.c
++++ b/src/new_subid_range.c
+@@ -1,6 +1,6 @@
+ #include <stdio.h>
+ #include <unistd.h>
+-#include "api.h"
++#include "subid.h"
+ #include "stdlib.h"
+ #include "prototypes.h"
+ 
+-- 
+2.30.2
+
