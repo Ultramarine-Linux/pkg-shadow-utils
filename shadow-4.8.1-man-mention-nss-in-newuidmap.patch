@@ -1,0 +1,44 @@
+From 186b1b7ac1a68d0fcc618a22da1a99232b420911 Mon Sep 17 00:00:00 2001
+From: Serge Hallyn <serge@hallyn.com>
+Date: Tue, 4 May 2021 14:39:26 -0500
+Subject: [PATCH] manpages: mention NSS in new[ug]idmap manpages
+
+Closes #328
+
+Signed-off-by: Serge Hallyn <serge@hallyn.com>
+---
+ man/newgidmap.1.xml | 3 ++-
+ man/newuidmap.1.xml | 3 ++-
+ 2 files changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/man/newgidmap.1.xml b/man/newgidmap.1.xml
+index 71b03e56..76fc1e30 100644
+--- a/man/newgidmap.1.xml
++++ b/man/newgidmap.1.xml
+@@ -88,7 +88,8 @@
+     <title>DESCRIPTION</title>
+     <para>
+       The <command>newgidmap</command> sets <filename>/proc/[pid]/gid_map</filename> based on its
+-      command line arguments and the gids allowed in <filename>/etc/subgid</filename>.
++      command line arguments and the gids allowed (either in <filename>/etc/subgid</filename> or
++      through the configured NSS subid module).
+       Note that the root user is not exempted from the requirement for a valid
+       <filename>/etc/subgid</filename> entry.
+     </para>
+diff --git a/man/newuidmap.1.xml b/man/newuidmap.1.xml
+index a6f1f085..44eca50a 100644
+--- a/man/newuidmap.1.xml
++++ b/man/newuidmap.1.xml
+@@ -88,7 +88,8 @@
+     <title>DESCRIPTION</title>
+     <para>
+       The <command>newuidmap</command> sets <filename>/proc/[pid]/uid_map</filename> based on its
+-      command line arguments and the uids allowed in <filename>/etc/subuid</filename>.
++      command line arguments and the uids allowed (either in <filename>/etc/subuid</filename> or
++      through the configured NSS subid module).
+       Note that the root user is not exempted from the requirement for a valid
+       <filename>/etc/subuid</filename> entry.
+     </para>
+-- 
+2.30.2
+

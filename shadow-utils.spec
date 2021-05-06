@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.8.1
-Release: 9%{?dist}
+Release: 10%{?dist}
 Epoch: 2
 URL: https://github.com/shadow-maint/shadow
 Source0: https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz
@@ -13,7 +13,7 @@ Source5: https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
 Source6: shadow-utils.HOME_MODE.xml
 
 ### Globals ###
-%global includesubiddir %{_includedir}/subid
+%global includesubiddir %{_includedir}/shadow
 
 ### Patches ###
 # Misc small changes - most probably non-upstreamable
@@ -76,6 +76,8 @@ Patch47: shadow-4.8.1-libsubid_creation.patch
 # https://github.com/shadow-maint/shadow/commit/8492dee6632e340dee76eee895c3e30877bebf45
 # https://github.com/shadow-maint/shadow/commit/0f4347d1483191b2142546416a9eefe0c9459600
 Patch48: shadow-4.8.1-libsubid_nsswitch_support.patch
+# https://github.com/shadow-maint/shadow/commit/186b1b7ac1a68d0fcc618a22da1a99232b420911
+Patch49: shadow-4.8.1-man-mention-nss-in-newuidmap.patch
 
 License: BSD and GPLv2+
 BuildRequires: make
@@ -149,6 +151,7 @@ Development files for shadow-utils-subid.
 %patch46 -p1 -b .man-include-lastlog-file-caveat
 %patch47 -p1 -b .libsubid_creation
 %patch48 -p1 -b .libsubid_nsswitch_support
+%patch49 -p1 -b .man-mention-nss-in-newuidmap
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -317,6 +320,10 @@ rm -f $RPM_BUILD_ROOT/%{_libdir}/libsubid.la
 %{_libdir}/libsubid.so
 
 %changelog
+* Thu May  6 2021 Iker Pedrosa <ipedrosa@redhat.com> - 2:4.8.1-10
+- man: mention NSS in new[ug]idmap manpages
+- libsubid: move development header to shadow folder
+
 * Fri Apr 16 2021 Iker Pedrosa <ipedrosa@redhat.com> - 2:4.8.1-9
 - libsubid: creation and nsswitch support
 - Creation of subid and subid-devel subpackages
