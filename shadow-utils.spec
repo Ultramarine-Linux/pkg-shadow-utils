@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.8.1
-Release: 11%{?dist}
+Release: 12%{?dist}
 Epoch: 2
 URL: https://github.com/shadow-maint/shadow
 Source0: https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz
@@ -95,6 +95,8 @@ Patch55: shadow-4.8.1-libsubid_fix_newusers_nss_provides_subids.patch
 Patch56: shadow-4.8.1-man_clarify_subid_delegation.patch
 # https://github.com/shadow-maint/shadow/commit/bd920ab36a6c641e4a8769f8c7f8ca738ec61820
 Patch57: shadow-4.8.1-libsubid_make_logfd_not_extern.patch
+# https://github.com/shadow-maint/shadow/commit/5cd04d03f94622c12220d4a6352824af081b8531
+Patch58: shadow-4.8.1-yescrypt-support.patch
 
 License: BSD and GPLv2+
 BuildRequires: make
@@ -177,6 +179,7 @@ Development files for shadow-utils-subid.
 %patch55 -p1 -b .libsubid_fix_newusers_nss_provides_subids
 %patch56 -p1 -b .man_clarify_subid_delegation
 %patch57 -p1 -b .libsubid_make_logfd_not_extern
+%patch58 -p1 -b .yescrypt
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -203,6 +206,7 @@ autoreconf
         --enable-man \
         --with-audit \
         --with-sha-crypt \
+        --with-yescrypt \
         --with-selinux \
         --without-libcrack \
         --without-libpam \
@@ -345,6 +349,9 @@ rm -f $RPM_BUILD_ROOT/%{_libdir}/libsubid.la
 %{_libdir}/libsubid.so
 
 %changelog
+* Mon Jun 21 2021 Björn Esser <besser82@fedoraproject.org> - 2:4.8.1-12
+- Backport support for yescrypt hash method
+
 * Mon Jun 21 2021 Iker Pedrosa <ipedrosa@redhat.com> - 2:4.8.1-11
 - libsubid: don't print error messages on stderr by default
 - libsubid: libsubid_init return false if out of memory

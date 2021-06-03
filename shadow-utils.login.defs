@@ -198,10 +198,11 @@ SUB_GID_COUNT		    65536
 # If set to MD5, MD5-based algorithm will be used for encrypting password
 # If set to SHA256, SHA256-based algorithm will be used for encrypting password
 # If set to SHA512, SHA512-based algorithm will be used for encrypting password
-# If set to BLOWFISH, BLOWFISH-based algorithm will be used for encrypting password
+# If set to BCRYPT, BCRYPT-based algorithm will be used for encrypting password
+# If set to YESCRYPT, YESCRYPT-based algorithm will be used for encrypting password
 # If set to DES, DES-based algorithm will be used for encrypting password (default)
 #
-ENCRYPT_METHOD SHA512
+ENCRYPT_METHOD YESCRYPT
 
 #
 # Only works if ENCRYPT_METHOD is set to SHA256 or SHA512.
@@ -219,6 +220,19 @@ ENCRYPT_METHOD SHA512
 # Currently SHA_CRYPT_MIN_ROUNDS is not supported
 
 # Currently BCRYPT_MIN_ROUNDS and BCRYPT_MAX_ROUNDS are not supported
+
+#
+# Only works if ENCRYPT_METHOD is set to YESCRYPT.
+#
+# Define the YESCRYPT cost factor.
+# With a higher cost factor, it is more difficult to brute-force the password.
+# However, more CPU time and more memory will be needed to authenticate users
+# if this value is increased.
+#
+# If not specified, a cost factor of 5 will be used.
+# The value must be within the 1-11 range.
+#
+#YESCRYPT_COST_FACTOR 5
 
 # Currently CONSOLE_GROUPS is not supported
 

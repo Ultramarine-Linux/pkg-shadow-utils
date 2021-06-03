@@ -1,0 +1,960 @@
+From 5cd04d03f94622c12220d4a6352824af081b8531 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Rodolphe=20Br=C3=A9ard?= <rodolphe@what.tf>
+Date: Sun, 27 Dec 2020 21:09:25 +0100
+Subject: [PATCH] Add yescrypt support
+
+---
+ configure.ac      |  13 +++++
+ etc/login.defs    |  14 +++++
+ lib/encrypt.c     |   3 ++
+ lib/getdef.c      |   3 ++
+ libmisc/obscure.c |   3 ++
+ libmisc/salt.c    |  94 +++++++++++++++++++++++++++++++-
+ src/chgpasswd.c   | 113 ++++++++++++++++++++------------------
+ src/chpasswd.c    | 107 +++++++++++++++++++-----------------
+ src/newusers.c    | 134 +++++++++++++++++++++++++---------------------
+ src/passwd.c      |   3 ++
+ 10 files changed, 322 insertions(+), 165 deletions(-)
+
+Index: shadow-4.8.1/configure.ac
+===================================================================
+--- shadow-4.8.1.orig/configure.ac
++++ shadow-4.8.1/configure.ac
+@@ -290,6 +290,9 @@ AC_ARG_WITH(sha-crypt,
+ AC_ARG_WITH(bcrypt,
+ 	[AC_HELP_STRING([--with-bcrypt], [allow the bcrypt password encryption algorithm @<:@default=no@:>@])],
+ 	[with_bcrypt=$withval], [with_bcrypt=no])
++AC_ARG_WITH(yescrypt,
++	[AC_HELP_STRING([--with-yescrypt], [allow the yescrypt password encryption algorithm @<:@default=no@:>@])],
++	[with_yescrypt=$withval], [with_yescrypt=no])
+ AC_ARG_WITH(nscd,
+ 	[AC_HELP_STRING([--with-nscd], [enable support for nscd @<:@default=yes@:>@])],
+ 	[with_nscd=$withval], [with_nscd=yes])
+@@ -322,6 +325,11 @@ if test "$with_bcrypt" = "yes"; then
+ 	AC_DEFINE(USE_BCRYPT, 1, [Define to allow the bcrypt password encryption algorithm])
+ fi
+ 
++AM_CONDITIONAL(USE_YESCRYPT, test "x$with_yescrypt" = "xyes")
++if test "$with_yescrypt" = "yes"; then
++	AC_DEFINE(USE_YESCRYPT, 1, [Define to allow the yescrypt password encryption algorithm])
++fi
++
+ if test "$with_nscd" = "yes"; then
+ 	AC_CHECK_FUNC(posix_spawn,
+ 	              [AC_DEFINE(USE_NSCD, 1, [Define to support flushing of nscd caches])],
+@@ -402,6 +410,10 @@ AC_SUBST(LIBCRYPT)
+ AC_CHECK_LIB(crypt, crypt, [LIBCRYPT=-lcrypt],
+ 	[AC_MSG_ERROR([crypt() not found])])
+ 
++AC_SUBST(LIYESCRYPT)
++AC_CHECK_LIB(crypt, crypt, [LIYESCRYPT=-lcrypt],
++	[AC_MSG_ERROR([crypt() not found])])
++
+ AC_SUBST(LIBACL)
+ if test "$with_acl" != "no"; then
+ 	AC_CHECK_HEADERS(acl/libacl.h attr/error_context.h, [acl_header="yes"], [acl_header="no"])
+@@ -752,6 +764,7 @@ echo "	shadow group support:		$enable_sh
+ echo "	S/Key support:			$with_skey"
+ echo "	SHA passwords encryption:	$with_sha_crypt"
+ echo "	bcrypt passwords encryption:	$with_bcrypt"
++echo "	yescrypt passwords encryption:	$with_yescrypt"
+ echo "	nscd support:			$with_nscd"
+ echo "	sssd support:			$with_sssd"
+ echo "	subordinate IDs support:	$enable_subids"
+Index: shadow-4.8.1/etc/login.defs
+===================================================================
+--- shadow-4.8.1.orig/etc/login.defs
++++ shadow-4.8.1/etc/login.defs
+@@ -326,6 +326,7 @@ CHFN_RESTRICT		rwh
+ # If set to SHA256, SHA256-based algorithm will be used for encrypting password
+ # If set to SHA512, SHA512-based algorithm will be used for encrypting password
+ # If set to BCRYPT, BCRYPT-based algorithm will be used for encrypting password
++# If set to YESCRYPT, YESCRYPT-based algorithm will be used for encrypting password
+ # If set to DES, DES-based algorithm will be used for encrypting password (default)
+ # Overrides the MD5_CRYPT_ENAB option
+ #
+@@ -366,6 +367,19 @@ CHFN_RESTRICT		rwh
+ #BCRYPT_MAX_ROUNDS 13
+ 
+ #
++# Only works if ENCRYPT_METHOD is set to YESCRYPT.
++#
++# Define the YESCRYPT cost factor.
++# With a higher cost factor, it is more difficult to brute-force the password.
++# However, more CPU time and more memory will be needed to authenticate users
++# if this value is increased.
++#
++# If not specified, a cost factor of 5 will be used.
++# The value must be within the 1-11 range.
++#
++#YESCRYPT_COST_FACTOR 5
++
++#
+ # List of groups to add to the user's supplementary group set
+ # when logging in from the console (as determined by the CONSOLE
+ # setting).  Default is none.
+Index: shadow-4.8.1/lib/encrypt.c
+===================================================================
+--- shadow-4.8.1.orig/lib/encrypt.c
++++ shadow-4.8.1/lib/encrypt.c
+@@ -74,6 +74,9 @@
+ 			case '6':
+ 				method = "SHA512";
+ 				break;
++			case 'y':
++				method = "YESCRYPT";
++				break;
+ 			default:
+ 			{
+ 				static char nummethod[4] = "$x$";
+Index: shadow-4.8.1/lib/getdef.c
+===================================================================
+--- shadow-4.8.1.orig/lib/getdef.c
++++ shadow-4.8.1/lib/getdef.c
+@@ -117,6 +117,9 @@ static struct itemdef def_table[] = {
+ 	{"BCRYPT_MAX_ROUNDS", NULL},
+ 	{"BCRYPT_MIN_ROUNDS", NULL},
+ #endif
++#ifdef USE_YESCRYPT
++	{"YESCRYPT_COST_FACTOR", NULL},
++#endif
+ 	{"SUB_GID_COUNT", NULL},
+ 	{"SUB_GID_MAX", NULL},
+ 	{"SUB_GID_MIN", NULL},
+Index: shadow-4.8.1/libmisc/obscure.c
+===================================================================
+--- shadow-4.8.1.orig/libmisc/obscure.c
++++ shadow-4.8.1/libmisc/obscure.c
+@@ -272,6 +272,9 @@ static /*@observer@*//*@null@*/const cha
+ #ifdef USE_BCRYPT
+ 		    || (strcmp (result, "BCRYPT") == 0)
+ #endif
++#ifdef USE_YESCRYPT
++		    || (strcmp (result, "YESCRYPT") == 0)
++#endif
+ 		    ) {
+ 			return NULL;
+ 		}
+Index: shadow-4.8.1/libmisc/salt.c
+===================================================================
+--- shadow-4.8.1.orig/libmisc/salt.c
++++ shadow-4.8.1/libmisc/salt.c
+@@ -32,6 +32,10 @@ static /*@observer@*/const char *SHA_sal
+ static /*@observer@*/const char *gensalt_bcrypt (void);
+ static /*@observer@*/const char *BCRYPT_salt_rounds (/*@null@*/int *prefered_rounds);
+ #endif /* USE_BCRYPT */
++#ifdef USE_YESCRYPT
++static /*@observer@*/const char *gensalt_yescrypt (void);
++static /*@observer@*/const char *YESCRYPT_salt_cost (/*@null@*/long *prefered_rounds);
++#endif /* USE_YESCRYPT */
+ 
+ #ifndef HAVE_L64A
+ static /*@observer@*/char *l64a(long value)
+@@ -263,6 +267,78 @@ static /*@observer@*/const char *gensalt
+ }
+ #endif /* USE_BCRYPT */
+ 
++#ifdef USE_YESCRYPT
++/* Default cost if not explicitly specified.  */
++#define Y_COST_DEFAULT 5
++/* Minimum cost.  */
++#define Y_COST_MIN 1
++/* Maximum cost.  */
++#define Y_COST_MAX 11
++/*
++ * Return a salt prefix specifying the cost for the YESCRYPT method.
++ */
++static /*@observer@*/const char *YESCRYPT_salt_cost (/*@null@*/long *prefered_cost)
++{
++	static char cost_prefix[5];
++	long cost;
++
++	if (NULL == prefered_cost) {
++		cost = getdef_num ("YESCRYPT_COST_FACTOR", Y_COST_DEFAULT);
++	} else {
++		cost = *prefered_cost;
++	}
++
++	if (cost < Y_COST_MIN) {
++		cost = Y_COST_MIN;
++	}
++	if (cost > Y_COST_MAX) {
++		cost = Y_COST_MAX;
++	}
++
++	cost_prefix[0] = 'j';
++	if (cost < 3) {
++		cost_prefix[1] = 0x36 + cost;
++	} else if (cost < 6) {
++		cost_prefix[1] = 0x34 + cost;
++	} else {
++		cost_prefix[1] = 0x3b + cost;
++	}
++	cost_prefix[2] = cost >= 3 ? 'T' : '5';
++	cost_prefix[3] = '$';
++	cost_prefix[4] = 0;
++
++	return cost_prefix;
++}
++
++/*
++ * Default number of base64 characters used for the salt.
++ * 24 characters gives a 144 bits (18 bytes) salt. Unlike the more
++ * traditional 128 bits (16 bytes) salt, this 144 bits salt is always
++ * represented by the same number of base64 characters without padding
++ * issue, even with a non-standard base64 encoding scheme.
++ */
++#define YESCRYPT_SALT_SIZE 24
++/*
++ *  Generate a 22 character salt string for yescrypt.
++ */
++static /*@observer@*/const char *gensalt_yescrypt (void)
++{
++	static char salt[32];
++
++	salt[0] = '\0';
++
++	seedRNG ();
++	strcat (salt, l64a (random()));
++	do {
++		strcat (salt, l64a (random()));
++	} while (strlen (salt) < YESCRYPT_SALT_SIZE);
++
++	salt[YESCRYPT_SALT_SIZE] = '\0';
++
++	return salt;
++}
++#endif /* USE_YESCRYPT */
++
+ /*
+  *  Generate salt of size salt_size.
+  */
+@@ -302,6 +378,7 @@ static /*@observer@*/const char *gensalt
+  * If meth is specified, an additional parameter can be provided.
+  *  * For the SHA256 and SHA512 method, this specifies the number of rounds
+  *    (if not NULL).
++ *  * For the YESCRYPT method, this specifies the cost factor (if not NULL).
+  */
+ /*@observer@*/const char *crypt_make_salt (/*@null@*//*@observer@*/const char *meth, /*@null@*/void *arg)
+ {
+@@ -333,6 +410,11 @@ static /*@observer@*/const char *gensalt
+ 		BCRYPTMAGNUM(result);
+ 		strcat(result, BCRYPT_salt_rounds((int *)arg));
+ #endif /* USE_BCRYPT */
++#ifdef USE_YESCRYPT
++	} else if (0 == strcmp (method, "YESCRYPT")) {
++		MAGNUM(result, 'y');
++		strcat(result, YESCRYPT_salt_cost((int *)arg));
++#endif /* USE_YESCRYPT */
+ #ifdef USE_SHA_CRYPT
+ 	} else if (0 == strcmp (method, "SHA256")) {
+ 		MAGNUM(result, '5');
+@@ -362,11 +444,21 @@ static /*@observer@*/const char *gensalt
+ 		return result;
+ 	} else {
+ #endif /* USE_BCRYPT */	
++#ifdef USE_YESCRYPT
++	if (0 == strcmp (method, "YESCRYPT")) {
++		strncat (result, gensalt_yescrypt (),
++				 sizeof (result) - strlen (result) - 1);
++		return result;
++	} else {
++#endif /* USE_YESCRYPT */
+ 		strncat (result, gensalt (salt_len),
+ 			 sizeof (result) - strlen (result) - 1);
++#ifdef USE_YESCRYPT
++	}
++#endif /* USE_YESCRYPT */
+ #ifdef USE_BCRYPT
+ 	}
+-#endif /* USE_BCRYPT */	
++#endif /* USE_BCRYPT */
+ 
+ 	return result;
+ }
+Index: shadow-4.8.1/src/chgpasswd.c
+===================================================================
+--- shadow-4.8.1.orig/src/chgpasswd.c
++++ shadow-4.8.1/src/chgpasswd.c
+@@ -69,9 +69,9 @@ const char *Prog;
+ FILE *shadow_logfd = NULL;
+ static bool eflg   = false;
+ static bool md5flg = false;
+-#if defined(USE_SHA_CRYPT) || defined(USE_BCRYPT)
++#if defined(USE_SHA_CRYPT) || defined(USE_BCRYPT) || defined(USE_YESCRYPT)
+ static bool sflg   = false;
+-#endif /* USE_SHA_CRYPT || USE_BCRYPT */
++#endif /* USE_SHA_CRYPT || USE_BCRYPT || USE_YESCRYPT */
+ 
+ static /*@null@*//*@observer@*/const char *crypt_method = NULL;
+ #define cflg (NULL != crypt_method)
+@@ -81,6 +81,9 @@ static long sha_rounds = 5000;
+ #ifdef USE_BCRYPT
+ static long bcrypt_rounds = 13;
+ #endif
++#ifdef USE_YESCRYPT
++static long yescrypt_cost = 5;
++#endif
+ 
+ #ifdef SHADOWGRP
+ static bool is_shadow_grp;
+@@ -139,14 +142,15 @@ static /*@noreturn@*/void usage (int sta
+ 	                Prog);
+ 	(void) fprintf (usageout,
+ 	                _("  -c, --crypt-method METHOD     the crypt method (one of %s)\n"),
+-#if !defined(USE_SHA_CRYPT) && !defined(USE_BCRYPT)
+ 	                "NONE DES MD5"
+-#elif defined(USE_SHA_CRYPT) && defined(USE_BCRYPT)
+-	                "NONE DES MD5 SHA256 SHA512 BCRYPT"
+-#elif defined(USE_SHA_CRYPT)
+-	                "NONE DES MD5 SHA256 SHA512"
+-#else
+-	                "NONE DES MD5 BCRYPT"
++#if defined(USE_SHA_CRYPT)
++	                " SHA256 SHA512"
++#endif
++#if defined(USE_BCRYPT)
++	                " BCRYPT"
++#endif
++#if defined(USE_YESCRYPT)
++	                " YESCRYPT"
+ #endif
+ 	               );
+ 	(void) fputs (_("  -e, --encrypted               supplied passwords are encrypted\n"), usageout);
+@@ -155,11 +159,11 @@ static /*@noreturn@*/void usage (int sta
+ 	                "                                the MD5 algorithm\n"),
+ 	              usageout);
+ 	(void) fputs (_("  -R, --root CHROOT_DIR         directory to chroot into\n"), usageout);
+-#if defined(USE_SHA_CRYPT) || defined(USE_BCRYPT)
+-	(void) fputs (_("  -s, --sha-rounds              number of rounds for the SHA or BCRYPT\n"
+-	                "                                crypt algorithms\n"),
++#if defined(USE_SHA_CRYPT) || defined(USE_BCRYPT) || defined(USE_YESCRYPT)
++	(void) fputs (_("  -s, --sha-rounds              number of rounds for the SHA, BCRYPT\n"
++	                "                                or YESCRYPT crypt algorithms\n"),
+ 	              usageout);
+-#endif				/* USE_SHA_CRYPT || USE_BCRYPT */
++#endif				/* USE_SHA_CRYPT || USE_BCRYPT || USE_YESCRYPT */
+ 	(void) fputs ("\n", usageout);
+ 
+ 	exit (status);
+@@ -173,19 +177,22 @@ static /*@noreturn@*/void usage (int sta
+ static void process_flags (int argc, char **argv)
+ {
+ 	int c;
++#if defined(USE_SHA_CRYPT) || defined(USE_BCRYPT) || defined(USE_YESCRYPT)
++	int bad_s;
++#endif				/* USE_SHA_CRYPT || USE_BCRYPT || USE_YESCRYPT */
+ 	static struct option long_options[] = {
+ 		{"crypt-method", required_argument, NULL, 'c'},
+ 		{"encrypted",    no_argument,       NULL, 'e'},
+ 		{"help",         no_argument,       NULL, 'h'},
+ 		{"md5",          no_argument,       NULL, 'm'},
+ 		{"root",         required_argument, NULL, 'R'},
+-#if defined(USE_SHA_CRYPT) || defined(USE_BCRYPT)
++#if defined(USE_SHA_CRYPT) || defined(USE_BCRYPT) || defined(USE_YESCRYPT)
+ 		{"sha-rounds",   required_argument, NULL, 's'},
+-#endif				/* USE_SHA_CRYPT || USE_BCRYPT */
++#endif				/* USE_SHA_CRYPT || USE_BCRYPT || USE_YESCRYPT */
+ 		{NULL, 0, NULL, '\0'}
+ 	};
+ 	while ((c = getopt_long (argc, argv,
+-#if defined(USE_SHA_CRYPT) || defined(USE_BCRYPT)
++#if defined(USE_SHA_CRYPT) || defined(USE_BCRYPT) || defined(USE_YESCRYPT)
+ 	                         "c:ehmR:s:",
+ #else
+ 	                         "c:ehmR:",
+@@ -206,40 +213,36 @@ static void process_flags (int argc, cha
+ 			break;
+ 		case 'R': /* no-op, handled in process_root_flag () */
+ 			break;
+-#if defined(USE_SHA_CRYPT) && defined(USE_BCRYPT)
++#if defined(USE_SHA_CRYPT) || defined(USE_BCRYPT) || defined(USE_YESCRYPT)
+ 		case 's':
+ 			sflg = true;
++                        bad_s = 0;
++#if defined(USE_SHA_CRYPT)
+ 			if (  (   ((0 == strcmp (crypt_method, "SHA256")) || (0 == strcmp (crypt_method, "SHA512")))
+-			       && (0 == getlong(optarg, &sha_rounds))) 
+-			   || (   (0 == strcmp (crypt_method, "BCRYPT"))
++			       && (0 == getlong(optarg, &sha_rounds)))) {
++                            bad_s = 1;
++                        }
++#endif				/* USE_SHA_CRYPT */
++#if defined(USE_BCRYPT)
++                        if ((   (0 == strcmp (crypt_method, "BCRYPT"))
+ 			       && (0 == getlong(optarg, &bcrypt_rounds)))) {
++                            bad_s = 1;
++                        }
++#endif				/* USE_BCRYPT */
++#if defined(USE_YESCRYPT)
++                        if ((   (0 == strcmp (crypt_method, "YESCRYPT"))
++			       && (0 == getlong(optarg, &yescrypt_cost)))) {
++                            bad_s = 1;
++                        }
++#endif				/* USE_YESCRYPT */
++                        if (bad_s != 0) {
+ 				fprintf (stderr,
+ 				         _("%s: invalid numeric argument '%s'\n"),
+ 				         Prog, optarg);
+ 				usage (E_USAGE);
+ 			}
+ 			break;
+-#elif defined(USE_SHA_CRYPT)
+-		case 's':
+-			sflg = true;
+-			if (0 == getlong(optarg, &sha_rounds)) { 
+-				fprintf (stderr,
+-				         _("%s: invalid numeric argument '%s'\n"),
+-				         Prog, optarg);
+-				usage (E_USAGE);
+-			}
+-			break;
+-#elif defined(USE_BCRYPT)
+-		case 's':
+-			sflg = true;
+-			if (0 == getlong(optarg, &bcrypt_rounds)) { 
+-				fprintf (stderr,
+-				         _("%s: invalid numeric argument '%s'\n"),
+-				         Prog, optarg);
+-				usage (E_USAGE);
+-			}
+-			break;
+-#endif
++#endif				/* USE_SHA_CRYPT || USE_BCRYPT || USE_YESCRYPT */
+ 
+ 		default:
+ 			usage (E_USAGE);
+@@ -258,7 +261,7 @@ static void process_flags (int argc, cha
+  */
+ static void check_flags (void)
+ {
+-#if defined(USE_SHA_CRYPT) || defined(USE_BCRYPT)
++#if defined(USE_SHA_CRYPT) || defined(USE_BCRYPT) || defined(USE_YESCRYPT)
+ 	if (sflg && !cflg) {
+ 		fprintf (stderr,
+ 		         _("%s: %s flag is only allowed with the %s flag\n"),
+@@ -282,10 +285,13 @@ static void check_flags (void)
+ #ifdef USE_SHA_CRYPT
+ 		    && (0 != strcmp (crypt_method, "SHA256"))
+ 		    && (0 != strcmp (crypt_method, "SHA512"))
+-#endif
++#endif				/* USE_SHA_CRYPT */
+ #ifdef USE_BCRYPT
+ 		    && (0 != strcmp (crypt_method, "BCRYPT"))
+-#endif
++#endif				/* USE_BCRYPT */
++#ifdef USE_YESCRYPT
++		    && (0 != strcmp (crypt_method, "YESCRYPT"))
++#endif				/* USE_YESCRYPT */
+ 		    ) {
+ 			fprintf (stderr,
+ 			         _("%s: unsupported crypt method: %s\n"),
+@@ -592,23 +598,24 @@ int main (int argc, char **argv)
+ 			if (md5flg) {
+ 				crypt_method = "MD5";
+ 			}
+-#if defined(USE_SHA_CRYPT) && defined(USE_BCRYPT)
++#if defined(USE_SHA_CRYPT) || defined(USE_BCRYPT) || defined(USE_YESCRYPT)
+ 			if (sflg) {
++#if defined(USE_SHA_CRYPT)
+ 				if (   (0 == strcmp (crypt_method, "SHA256"))
+ 					|| (0 == strcmp (crypt_method, "SHA512"))) {
+ 					arg = &sha_rounds;
+ 				}
+-				else if (0 == strcmp (crypt_method, "BCRYPT")) {
++#endif				/* USE_SHA_CRYPT */
++#if defined(USE_BCRYPT)
++				if (0 == strcmp (crypt_method, "BCRYPT")) {
+ 					arg = &bcrypt_rounds;
+ 				}
+-			}
+-#elif defined(USE_SHA_CRYPT)
+-			if (sflg) {
+-				arg = &sha_rounds;
+-			}
+-#elif defined(USE_BCRYPT)
+-			if (sflg) {
+-				arg = &bcrypt_rounds;
++#endif				/* USE_BCRYPT */
++#if defined(USE_YESCRYPT)
++				if (0 == strcmp (crypt_method, "YESCRYPT")) {
++					arg = &yescrypt_cost;
++				}
++#endif				/* USE_YESCRYPT */
+ 			}
+ #endif
+ 			salt = crypt_make_salt (crypt_method, arg);
+Index: shadow-4.8.1/src/chpasswd.c
+===================================================================
+--- shadow-4.8.1.orig/src/chpasswd.c
++++ shadow-4.8.1/src/chpasswd.c
+@@ -66,7 +66,7 @@ const char *Prog;
+ FILE *shadow_logfd = NULL;
+ static bool eflg   = false;
+ static bool md5flg = false;
+-#if defined(USE_SHA_CRYPT) || defined(USE_BCRYPT)
++#if defined(USE_SHA_CRYPT) || defined(USE_BCRYPT) || defined(USE_YESCRYPT)
+ static bool sflg   = false;
+ #endif
+ 
+@@ -78,6 +78,9 @@ static long sha_rounds = 5000;
+ #ifdef USE_BCRYPT
+ static long bcrypt_rounds = 13;
+ #endif
++#ifdef USE_YESCRYPT
++static long yescrypt_cost = 5;
++#endif
+ 
+ static bool is_shadow_pwd;
+ static bool pw_locked = false;
+@@ -129,14 +132,15 @@ static /*@noreturn@*/void usage (int sta
+ 	                Prog);
+ 	(void) fprintf (usageout,
+ 	                _("  -c, --crypt-method METHOD     the crypt method (one of %s)\n"),
+-#if !defined(USE_SHA_CRYPT) && !defined(USE_BCRYPT)
+ 	                "NONE DES MD5"
+-#elif defined(USE_SHA_CRYPT) && defined(USE_BCRYPT)
+-	                "NONE DES MD5 SHA256 SHA512 BCRYPT"
+-#elif defined(USE_SHA_CRYPT)
+-	                "NONE DES MD5 SHA256 SHA512"
+-#else
+-	                "NONE DES MD5 BCRYPT"
++#if defined(USE_SHA_CRYPT)
++	                " SHA256 SHA512"
++#endif
++#if defined(USE_BCRYPT)
++	                " BCRYPT"
++#endif
++#if defined(USE_YESCRYPT)
++	                " YESCRYPT"
+ #endif
+ 	               );
+ 	(void) fputs (_("  -e, --encrypted               supplied passwords are encrypted\n"), usageout);
+@@ -145,11 +149,11 @@ static /*@noreturn@*/void usage (int sta
+ 	                "                                the MD5 algorithm\n"),
+ 	              usageout);
+ 	(void) fputs (_("  -R, --root CHROOT_DIR         directory to chroot into\n"), usageout);
+-#if defined(USE_SHA_CRYPT) || defined(USE_BCRYPT)
+-	(void) fputs (_("  -s, --sha-rounds              number of rounds for the SHA or BCRYPT\n"
+-	                "                                crypt algorithms\n"),
++#if defined(USE_SHA_CRYPT) || defined(USE_BCRYPT) || defined(USE_YESCRYPT)
++	(void) fputs (_("  -s, --sha-rounds              number of rounds for the SHA, BCRYPT\n"
++	                "                                or YESCRYPT crypt algorithms\n"),
+ 	              usageout);
+-#endif				/* USE_SHA_CRYPT || USE_BCRYPT */
++#endif				/* USE_SHA_CRYPT || USE_BCRYPT || USE_YESCRYPT */
+ 	(void) fputs ("\n", usageout);
+ 
+ 	exit (status);
+@@ -163,20 +167,23 @@ static /*@noreturn@*/void usage (int sta
+ static void process_flags (int argc, char **argv)
+ {
+ 	int c;
++#if defined(USE_SHA_CRYPT) || defined(USE_BCRYPT) || defined(USE_YESCRYPT)
++        int bad_s;
++#endif				/* USE_SHA_CRYPT || USE_BCRYPT || USE_YESCRYPT */
+ 	static struct option long_options[] = {
+ 		{"crypt-method", required_argument, NULL, 'c'},
+ 		{"encrypted",    no_argument,       NULL, 'e'},
+ 		{"help",         no_argument,       NULL, 'h'},
+ 		{"md5",          no_argument,       NULL, 'm'},
+ 		{"root",         required_argument, NULL, 'R'},
+-#if defined(USE_SHA_CRYPT) || defined(USE_BCRYPT)
++#if defined(USE_SHA_CRYPT) || defined(USE_BCRYPT) || defined(USE_YESCRYPT)
+ 		{"sha-rounds",   required_argument, NULL, 's'},
+-#endif				/* USE_SHA_CRYPT || USE_BCRYPT */
++#endif				/* USE_SHA_CRYPT || USE_BCRYPT || USE_YESCRYPT */
+ 		{NULL, 0, NULL, '\0'}
+ 	};
+ 
+ 	while ((c = getopt_long (argc, argv,
+-#if defined(USE_SHA_CRYPT) || defined(USE_BCRYPT)
++#if defined(USE_SHA_CRYPT) || defined(USE_BCRYPT) || defined(USE_YESCRYPT)
+ 	                         "c:ehmR:s:",
+ #else
+ 	                         "c:ehmR:",
+@@ -197,40 +204,36 @@ static void process_flags (int argc, cha
+ 			break;
+ 		case 'R': /* no-op, handled in process_root_flag () */
+ 			break;
+-#if defined(USE_SHA_CRYPT) && defined(USE_BCRYPT)
++#if defined(USE_SHA_CRYPT) || defined(USE_BCRYPT) || defined(USE_YESCRYPT)
+ 		case 's':
+ 			sflg = true;
++                        bad_s = 0;
++#if defined(USE_SHA_CRYPT)
+ 			if (  (   ((0 == strcmp (crypt_method, "SHA256")) || (0 == strcmp (crypt_method, "SHA512")))
+-			       && (0 == getlong(optarg, &sha_rounds))) 
+-			   || (   (0 == strcmp (crypt_method, "BCRYPT"))
++			       && (0 == getlong(optarg, &sha_rounds)))) {
++                            bad_s = 1;
++                        }
++#endif				/* USE_SHA_CRYPT */
++#if defined(USE_BCRYPT)
++                        if ((   (0 == strcmp (crypt_method, "BCRYPT"))
+ 			       && (0 == getlong(optarg, &bcrypt_rounds)))) {
++                            bad_s = 1;
++                        }
++#endif				/* USE_BCRYPT */
++#if defined(USE_YESCRYPT)
++                        if ((   (0 == strcmp (crypt_method, "YESCRYPT"))
++			       && (0 == getlong(optarg, &yescrypt_cost)))) {
++                            bad_s = 1;
++                        }
++#endif				/* USE_YESCRYPT */
++                        if (bad_s != 0) {
+ 				fprintf (stderr,
+ 				         _("%s: invalid numeric argument '%s'\n"),
+ 				         Prog, optarg);
+ 				usage (E_USAGE);
+ 			}
+ 			break;
+-#elif defined(USE_SHA_CRYPT)
+-		case 's':
+-			sflg = true;
+-			if (0 == getlong(optarg, &sha_rounds)) { 
+-				fprintf (stderr,
+-				         _("%s: invalid numeric argument '%s'\n"),
+-				         Prog, optarg);
+-				usage (E_USAGE);
+-			}
+-			break;
+-#elif defined(USE_BCRYPT)
+-		case 's':
+-			sflg = true;
+-			if (0 == getlong(optarg, &bcrypt_rounds)) { 
+-				fprintf (stderr,
+-				         _("%s: invalid numeric argument '%s'\n"),
+-				         Prog, optarg);
+-				usage (E_USAGE);
+-			}
+-			break;
+-#endif
++#endif				/* USE_SHA_CRYPT || USE_BCRYPT || USE_YESCRYPT */
+ 
+ 		default:
+ 			usage (E_USAGE);
+@@ -249,7 +252,7 @@ static void process_flags (int argc, cha
+  */
+ static void check_flags (void)
+ {
+-#if defined(USE_SHA_CRYPT) || defined(USE_BCRYPT)
++#if defined(USE_SHA_CRYPT) || defined(USE_BCRYPT) || defined(USE_YESCRYPT)
+ 	if (sflg && !cflg) {
+ 		fprintf (stderr,
+ 		         _("%s: %s flag is only allowed with the %s flag\n"),
+@@ -277,6 +280,9 @@ static void check_flags (void)
+ #ifdef USE_BCRYPT
+ 		    && (0 != strcmp (crypt_method, "BCRYPT"))
+ #endif				/* USE_BCRYPT */
++#ifdef USE_YESCRYPT
++		    && (0 != strcmp (crypt_method, "YESCRYPT"))
++#endif				/* USE_YESCRYPT */
+ 		    ) {
+ 			fprintf (stderr,
+ 			         _("%s: unsupported crypt method: %s\n"),
+@@ -604,23 +610,24 @@ int main (int argc, char **argv)
+ 			if (md5flg) {
+ 				crypt_method = "MD5";
+ 			}
+-#if defined(USE_SHA_CRYPT) && defined(USE_BCRYPT)
++#if defined(USE_SHA_CRYPT) || defined(USE_BCRYPT) || defined(USE_YESCRYPT)
+ 			if (sflg) {
++#if defined(USE_SHA_CRYPT)
+ 				if (   (0 == strcmp (crypt_method, "SHA256"))
+ 					|| (0 == strcmp (crypt_method, "SHA512"))) {
+ 					arg = &sha_rounds;
+ 				}
+-				else if (0 == strcmp (crypt_method, "BCRYPT")) {
++#endif				/* USE_SHA_CRYPT */
++#if defined(USE_BCRYPT)
++				if (0 == strcmp (crypt_method, "BCRYPT")) {
+ 					arg = &bcrypt_rounds;
+ 				}
+-			}
+-#elif defined(USE_SHA_CRYPT)
+-			if (sflg) {
+-				arg = &sha_rounds;
+-			}
+-#elif defined(USE_BCRYPT)
+-			if (sflg) {
+-				arg = &bcrypt_rounds;
++#endif				/* USE_BCRYPT */
++#if defined(USE_YESCRYPT)
++				if (0 == strcmp (crypt_method, "YESCRYPT")) {
++					arg = &yescrypt_cost;
++				}
++#endif				/* USE_YESCRYPT */
+ 			}
+ #endif
+ 			salt = crypt_make_salt (crypt_method, arg);
+Index: shadow-4.8.1/src/newusers.c
+===================================================================
+--- shadow-4.8.1.orig/src/newusers.c
++++ shadow-4.8.1/src/newusers.c
+@@ -90,6 +90,9 @@ static long sha_rounds = 5000;
+ #ifdef USE_BCRYPT
+ static long bcrypt_rounds = 13;
+ #endif				/* USE_BCRYPT */
++#ifdef USE_YESCRYPT
++static long yescrypt_cost = 5;
++#endif				/* USE_YESCRYPT */
+ #endif				/* !USE_PAM */
+ 
+ static bool is_shadow;
+@@ -140,14 +143,15 @@ static void usage (int status)
+ #ifndef USE_PAM
+ 	(void) fprintf (usageout,
+ 	                _("  -c, --crypt-method METHOD     the crypt method (one of %s)\n"),
+-#if !defined(USE_SHA_CRYPT) && !defined(USE_BCRYPT)
+-	                "NONE DES MD5"
+-#elif defined(USE_SHA_CRYPT) && defined(USE_BCRYPT)
+-	                "NONE DES MD5 SHA256 SHA512 BCRYPT"
+-#elif defined(USE_SHA_CRYPT)
+-	                "NONE DES MD5 SHA256 SHA512"
+-#else
+-	                "NONE DES MD5 BCRYPT"
++                        "NONE DES MD5"
++#if defined(USE_SHA_CRYPT)
++	                " SHA256 SHA512"
++#endif
++#if defined(USE_BCRYPT)
++	                " BCRYPT"
++#endif
++#if defined(USE_YESCRYPT)
++	                " YESCRYPT"
+ #endif
+ 	               );
+ #endif				/* !USE_PAM */
+@@ -155,11 +159,11 @@ static void usage (int status)
+ 	(void) fputs (_("  -r, --system                  create system accounts\n"), usageout);
+ 	(void) fputs (_("  -R, --root CHROOT_DIR         directory to chroot into\n"), usageout);
+ #ifndef USE_PAM
+-#if defined(USE_SHA_CRYPT) || defined(USE_BCRYPT)
+-	(void) fputs (_("  -s, --sha-rounds              number of rounds for the SHA or BCRYPT\n"
+-	                "                                crypt algorithms\n"),
++#if defined(USE_SHA_CRYPT) || defined(USE_BCRYPT) || defined(USE_YESCRYPT)
++	(void) fputs (_("  -s, --sha-rounds              number of rounds for the SHA, BCRYPT\n"
++	                "                                or YESCRYPT crypt algorithms\n"),
+ 	              usageout);
+-#endif				/* USE_SHA_CRYPT || USE_BCRYPT */
++#endif				/* USE_SHA_CRYPT || USE_BCRYPT || USE_YESCRYPT */
+ #endif				/* !USE_PAM */
+ 	(void) fputs ("\n", usageout);
+ 
+@@ -434,25 +438,28 @@ static int update_passwd (struct passwd
+ 	void *crypt_arg = NULL;
+ 	char *cp;
+ 	if (NULL != crypt_method) {
+-#if defined(USE_SHA_CRYPT) && defined(USE_BCRYPT)
++#if defined(USE_SHA_CRYPT)
+ 		if (sflg) {
+ 			if (   (0 == strcmp (crypt_method, "SHA256"))
+ 				|| (0 == strcmp (crypt_method, "SHA512"))) {
+ 				crypt_arg = &sha_rounds;
+ 			}
+-			else if (0 == strcmp (crypt_method, "BCRYPT")) {
+-				crypt_arg = &bcrypt_rounds;
+-			}
+ 		}
+-#elif defined(USE_SHA_CRYPT)
++#endif				/* USE_SHA_CRYPT */
++#if defined(USE_BCRYPT)
+ 		if (sflg) {
+-			crypt_arg = &sha_rounds;
++			if (0 == strcmp (crypt_method, "BCRYPT")) {
++				crypt_arg = &bcrypt_rounds;
++			}
+ 		}
+-#elif defined(USE_BCRYPT)
++#endif				/* USE_BCRYPT */
++#if defined(USE_YESCRYPT)
+ 		if (sflg) {
+-			crypt_arg = &bcrypt_rounds;
++			if (0 == strcmp (crypt_method, "YESCRYPT")) {
++				crypt_arg = &yescrypt_cost;
++			}
+ 		}
+-#endif
++#endif				/* USE_YESCRYPT */
+ 	}
+ 
+ 	if ((NULL != crypt_method) && (0 == strcmp(crypt_method, "NONE"))) {
+@@ -485,25 +492,28 @@ static int add_passwd (struct passwd *pw
+ #ifndef USE_PAM
+ 	void *crypt_arg = NULL;
+ 	if (NULL != crypt_method) {
+-#if defined(USE_SHA_CRYPT) && defined(USE_BCRYPT)
++#if defined(USE_SHA_CRYPT)
+ 		if (sflg) {
+ 			if (   (0 == strcmp (crypt_method, "SHA256"))
+ 				|| (0 == strcmp (crypt_method, "SHA512"))) {
+ 				crypt_arg = &sha_rounds;
+ 			}
+-			else if (0 == strcmp (crypt_method, "BCRYPT")) {
+-				crypt_arg = &bcrypt_rounds;
+-			}
+ 		}
+-#elif defined(USE_SHA_CRYPT)
++#endif				/* USE_SHA_CRYPT */
++#if defined(USE_BCRYPT)
+ 		if (sflg) {
+-			crypt_arg = &sha_rounds;
++			if (0 == strcmp (crypt_method, "BCRYPT")) {
++				crypt_arg = &bcrypt_rounds;
++			}
+ 		}
+-#elif defined(USE_BCRYPT)
++#endif				/* USE_BCRYPT */
++#if defined(USE_YESCRYPT)
+ 		if (sflg) {
+-			crypt_arg = &bcrypt_rounds;
++			if (0 == strcmp (crypt_method, "YESCRYPT")) {
++				crypt_arg = &yescrypt_cost;
++			}
+ 		}
+-#endif
++#endif				/* USE_PAM */
+ 	}
+ 
+ 	/*
+@@ -620,6 +630,9 @@ static int add_passwd (struct passwd *pw
+ static void process_flags (int argc, char **argv)
+ {
+ 	int c;
++#if defined(USE_SHA_CRYPT) || defined(USE_BCRYPT) || defined(USE_YESCRYPT)
++        int bad_s;
++#endif				/* USE_SHA_CRYPT || USE_BCRYPT || USE_YESCRYPT */
+ 	static struct option long_options[] = {
+ 		{"badnames",     no_argument,       NULL, 'b'},
+ #ifndef USE_PAM
+@@ -629,20 +642,20 @@ static void process_flags (int argc, cha
+ 		{"system",       no_argument,       NULL, 'r'},
+ 		{"root",         required_argument, NULL, 'R'},
+ #ifndef USE_PAM
+-#if defined(USE_SHA_CRYPT) || defined(USE_BCRYPT)
++#if defined(USE_SHA_CRYPT) || defined(USE_BCRYPT) || defined(USE_YESCRYPT)
+ 		{"sha-rounds",   required_argument, NULL, 's'},
+-#endif				/* USE_SHA_CRYPT || USE_BCRYPT */
++#endif				/* USE_SHA_CRYPT || USE_BCRYPT || USE_YESCRYPT */
+ #endif				/* !USE_PAM */
+ 		{NULL, 0, NULL, '\0'}
+ 	};
+ 
+ 	while ((c = getopt_long (argc, argv,
+ #ifndef USE_PAM
+-#if defined(USE_SHA_CRYPT) || defined(USE_BCRYPT)
++#if defined(USE_SHA_CRYPT) || defined(USE_BCRYPT) || defined(USE_YESCRYPT)
+ 	                         "c:bhrs:",
+-#else				/* !USE_SHA_CRYPT && !USE_BCRYPT */
++#else				/* !USE_SHA_CRYPT && !USE_BCRYPT && !USE_YESCRYPT */
+ 	                         "c:bhr",
+-#endif				/* USE_SHA_CRYPT || USE_BCRYPT */
++#endif				/* USE_SHA_CRYPT || USE_BCRYPT || USE_YESCRYPT */
+ #else				/* USE_PAM */
+ 	                         "bhr",
+ #endif
+@@ -665,40 +678,36 @@ static void process_flags (int argc, cha
+ 		case 'R': /* no-op, handled in process_root_flag () */
+ 			break;
+ #ifndef USE_PAM
+-#if defined(USE_SHA_CRYPT) && defined(USE_BCRYPT)
++#if defined(USE_SHA_CRYPT) || defined(USE_BCRYPT) || defined(USE_YESCRYPT)
+ 		case 's':
+ 			sflg = true;
++                        bad_s = 0;
++#if defined(USE_SHA_CRYPT)
+ 			if (  (   ((0 == strcmp (crypt_method, "SHA256")) || (0 == strcmp (crypt_method, "SHA512")))
+-			       && (0 == getlong(optarg, &sha_rounds))) 
+-			   || (   (0 == strcmp (crypt_method, "BCRYPT"))
++			       && (0 == getlong(optarg, &sha_rounds)))) {
++                            bad_s = 1;
++                        }
++#endif				/* USE_SHA_CRYPT */
++#if defined(USE_BCRYPT)
++                        if ((   (0 == strcmp (crypt_method, "BCRYPT"))
+ 			       && (0 == getlong(optarg, &bcrypt_rounds)))) {
++                            bad_s = 1;
++                        }
++#endif				/* USE_BCRYPT */
++#if defined(USE_YESCRYPT)
++                        if ((   (0 == strcmp (crypt_method, "YESCRYPT"))
++			       && (0 == getlong(optarg, &yescrypt_cost)))) {
++                            bad_s = 1;
++                        }
++#endif				/* USE_YESCRYPT */
++                        if (bad_s != 0) {
+ 				fprintf (stderr,
+ 				         _("%s: invalid numeric argument '%s'\n"),
+ 				         Prog, optarg);
+ 				usage (EXIT_FAILURE);
+ 			}
+ 			break;
+-#elif defined(USE_SHA_CRYPT)
+-		case 's':
+-			sflg = true;
+-			if (0 == getlong(optarg, &sha_rounds)) { 
+-				fprintf (stderr,
+-				         _("%s: invalid numeric argument '%s'\n"),
+-				         Prog, optarg);
+-				usage (EXIT_FAILURE);
+-			}
+-			break;
+-#elif defined(USE_BCRYPT)
+-		case 's':
+-			sflg = true;
+-			if (0 == getlong(optarg, &bcrypt_rounds)) { 
+-				fprintf (stderr,
+-				         _("%s: invalid numeric argument '%s'\n"),
+-				         Prog, optarg);
+-				usage (EXIT_FAILURE);
+-			}
+-			break;
+-#endif
++#endif				/* USE_SHA_CRYPT || USE_BCRYPT || USE_YESCRYPT */
+ #endif				/* !USE_PAM */
+ 		default:
+ 			usage (EXIT_FAILURE);
+@@ -732,14 +741,14 @@ static void process_flags (int argc, cha
+ static void check_flags (void)
+ {
+ #ifndef USE_PAM
+-#if defined(USE_SHA_CRYPT) || defined(USE_BCRYPT)
++#if defined(USE_SHA_CRYPT) || defined(USE_BCRYPT) || defined(USE_YESCRYPT)
+ 	if (sflg && !cflg) {
+ 		fprintf (stderr,
+ 		         _("%s: %s flag is only allowed with the %s flag\n"),
+ 		         Prog, "-s", "-c");
+ 		usage (EXIT_FAILURE);
+ 	}
+-#endif
++#endif				/* USE_SHA_CRYPT || USE_BCRYPT || USE_YESCRYPT */
+ 
+ 	if (cflg) {
+ 		if (   (0 != strcmp (crypt_method, "DES"))
+@@ -752,6 +761,9 @@ static void check_flags (void)
+ #ifdef USE_BCRYPT
+ 		    && (0 != strcmp (crypt_method, "BCRYPT"))
+ #endif				/* USE_BCRYPT */
++#ifdef USE_YESCRYPT
++		    && (0 != strcmp (crypt_method, "YESCRYPT"))
++#endif				/* USE_YESCRYPT */
+ 		    ) {
+ 			fprintf (stderr,
+ 			         _("%s: unsupported crypt method: %s\n"),
+Index: shadow-4.8.1/src/passwd.c
+===================================================================
+--- shadow-4.8.1.orig/src/passwd.c
++++ shadow-4.8.1/src/passwd.c
+@@ -283,7 +283,10 @@ static int new_password (const struct pa
+ #endif /* USE_SHA_CRYPT */
+ #ifdef USE_BCRYPT
+ 		    || (strcmp (method, "BCRYPT") == 0)
+-#endif /* USE_SHA_CRYPT */
++#endif /* USE_BCRYPT*/
++#ifdef USE_YESCRYPT
++		    || (strcmp (method, "YESCRYPT") == 0)
++#endif /* USE_YESCRYPT*/
+ 
+ 		    ) {
+ 			pass_max_len = -1;
