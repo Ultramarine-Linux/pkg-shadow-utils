@@ -1,0 +1,40 @@
+From b0e86b959fe5c086ffb5e7eaf3c1b1e9219411e9 Mon Sep 17 00:00:00 2001
+From: Serge Hallyn <serge@hallyn.com>
+Date: Sun, 23 May 2021 08:03:10 -0500
+Subject: [PATCH] libsubid_init: don't print messages on error
+
+Signed-off-by: Serge Hallyn <serge@hallyn.com>
+---
+ libsubid/api.c | 7 ++-----
+ 1 file changed, 2 insertions(+), 5 deletions(-)
+
+diff --git a/libsubid/api.c b/libsubid/api.c
+index c4848142..b477b271 100644
+--- a/libsubid/api.c
++++ b/libsubid/api.c
+@@ -46,12 +46,10 @@ bool libsubid_init(const char *progname, FILE * logfd)
+ {
+ 	if (progname) {
+ 		progname = strdup(progname);
+-		if (progname) {
++		if (progname)
+ 			Prog = progname;
+-		} else {
+-			fprintf(stderr, "Out of memory");
++		else
+ 			return false;
+-		}
+ 	}
+ 
+ 	if (logfd) {
+@@ -60,7 +58,6 @@ bool libsubid_init(const char *progname, FILE * logfd)
+ 	}
+ 	shadow_logfd = fopen("/dev/null", "w");
+ 	if (!shadow_logfd) {
+-		fprintf(stderr, "ERROR opening /dev/null for error messages.  Using stderr.");
+ 		shadow_logfd = stderr;
+ 		return false;
+ 	}
+-- 
+2.30.2
+

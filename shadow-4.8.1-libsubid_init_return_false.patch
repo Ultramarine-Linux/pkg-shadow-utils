@@ -1,0 +1,37 @@
+From e34f49c1966fcaa9390a544a0136ec189a3c870e Mon Sep 17 00:00:00 2001
+From: Serge Hallyn <serge@hallyn.com>
+Date: Mon, 17 May 2021 08:48:03 -0500
+Subject: [PATCH] libsubid_init: return false if out of memory
+
+The rest of the run isn't likely to get much better, is it?
+
+Thanks to Alexey for pointing this out.
+
+Signed-off-by: Serge Hallyn <serge@hallyn.com>
+Cc: Alexey Tikhonov <atikhono@redhat.com>
+---
+ libsubid/api.c | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/libsubid/api.c b/libsubid/api.c
+index 8ca09859..8618e500 100644
+--- a/libsubid/api.c
++++ b/libsubid/api.c
+@@ -46,10 +46,12 @@ bool libsubid_init(const char *progname, FILE * logfd)
+ {
+ 	if (progname) {
+ 		progname = strdup(progname);
+-		if (progname)
++		if (progname) {
+ 			Prog = progname;
+-		else
++		} else {
+ 			fprintf(stderr, "Out of memory");
++			return false;
++		}
+ 	}
+ 
+ 	if (logfd) {
+-- 
+2.30.2
+

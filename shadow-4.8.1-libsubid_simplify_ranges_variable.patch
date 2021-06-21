@@ -1,0 +1,264 @@
+diff -up shadow-4.8.1/configure.ac.libsubid_simplify_ranges_variable shadow-4.8.1/configure.ac
+--- shadow-4.8.1/configure.ac.libsubid_simplify_ranges_variable	2021-05-24 15:02:56.165917066 +0200
++++ shadow-4.8.1/configure.ac	2021-05-24 15:02:56.184917324 +0200
+@@ -1,6 +1,6 @@
+ dnl Process this file with autoconf to produce a configure script.
+ AC_PREREQ([2.69])
+-m4_define([libsubid_abi_major], 2)
++m4_define([libsubid_abi_major], 3)
+ m4_define([libsubid_abi_minor], 0)
+ m4_define([libsubid_abi_micro], 0)
+ m4_define([libsubid_abi], [libsubid_abi_major.libsubid_abi_minor.libsubid_abi_micro])
+diff -up shadow-4.8.1/lib/prototypes.h.libsubid_simplify_ranges_variable shadow-4.8.1/lib/prototypes.h
+--- shadow-4.8.1/lib/prototypes.h.libsubid_simplify_ranges_variable	2021-05-24 15:02:56.184917324 +0200
++++ shadow-4.8.1/lib/prototypes.h	2021-05-24 16:38:57.610619467 +0200
+@@ -309,16 +309,15 @@ struct subid_nss_ops {
+ 	 *
+ 	 * @owner - string representing username being queried
+ 	 * @id_type - subuid or subgid
+-	 * @ranges - pointer to an array of struct subordinate_range pointers, or
+-	 *           NULL.  The returned array of struct subordinate_range and its
+-	 *           members must be freed by the caller.
++	 * @ranges - pointer to an array of struct subid_range, or NULL.  The
++	 *           returned array must be freed by the caller.
+ 	 * @count - pointer to an integer into which the number of returned ranges
+ 	 *          is written.
+ 
+ 	 * returns success if the module was able to determine an answer,
+ 	 * else an error status.
+ 	 */
+-	enum subid_status (*list_owner_ranges)(const char *owner, enum subid_type id_type, struct subordinate_range ***ranges, int *count);
++	enum subid_status (*list_owner_ranges)(const char *owner, enum subid_type id_type, struct subid_range **ranges, int *count);
+ 
+ 	/*
+ 	 * nss_find_subid_owners: find uids who own a given subuid or subgid.
+diff -up shadow-4.8.1/libsubid/api.c.libsubid_simplify_ranges_variable shadow-4.8.1/libsubid/api.c
+--- shadow-4.8.1/libsubid/api.c.libsubid_simplify_ranges_variable	2021-05-24 15:03:01.467989079 +0200
++++ shadow-4.8.1/libsubid/api.c	2021-05-24 16:42:32.091584531 +0200
+@@ -68,26 +68,21 @@ bool libsubid_init(const char *progname,
+ }
+ 
+ static
+-int get_subid_ranges(const char *owner, enum subid_type id_type, struct subordinate_range ***ranges)
++int get_subid_ranges(const char *owner, enum subid_type id_type, struct subid_range **ranges)
+ {
+ 	return list_owner_ranges(owner, id_type, ranges);
+ }
+ 
+-int get_subuid_ranges(const char *owner, struct subordinate_range ***ranges)
++int get_subuid_ranges(const char *owner, struct subid_range **ranges)
+ {
+ 	return get_subid_ranges(owner, ID_TYPE_UID, ranges);
+ }
+ 
+-int get_subgid_ranges(const char *owner, struct subordinate_range ***ranges)
++int get_subgid_ranges(const char *owner, struct subid_range **ranges)
+ {
+ 	return get_subid_ranges(owner, ID_TYPE_GID, ranges);
+ }
+ 
+-void subid_free_ranges(struct subordinate_range **ranges, int count)
+-{
+-	return free_subordinate_ranges(ranges, count);
+-}
+-
+ static
+ int get_subid_owner(unsigned long id, enum subid_type id_type, uid_t **owner)
+ {
+diff -up shadow-4.8.1/libsubid/subid.h.libsubid_simplify_ranges_variable shadow-4.8.1/libsubid/subid.h
+--- shadow-4.8.1/libsubid/subid.h.libsubid_simplify_ranges_variable	2021-05-24 15:03:01.468989093 +0200
++++ shadow-4.8.1/libsubid/subid.h	2021-05-24 16:43:49.697657383 +0200
+@@ -3,6 +3,15 @@
+ 
+ #ifndef SUBID_RANGE_DEFINED
+ #define SUBID_RANGE_DEFINED 1
++
++/* subid_range is just a starting point and size of a range */
++struct subid_range {
++	unsigned long start;
++	unsigned long count;
++};
++
++/* subordinage_range is a subid_range plus an owner, representing
++ * a range in /etc/subuid or /etc/subgid */
+ struct subordinate_range {
+ 	const char *owner;
+ 	unsigned long start;
+@@ -41,32 +50,27 @@ bool libsubid_init(const char *progname,
+  * get_subuid_ranges: return a list of UID ranges for a user
+  *
+  * @owner: username being queried
+- * @ranges: a pointer to a subordinate range ** in which the result will be
+- *          returned.
++ * @ranges: a pointer to an array of subid_range structs in which the result
++ *          will be returned.
++ *
++ * The caller must free(ranges) when done.
+  *
+  * returns: number of ranges found, ir < 0 on error.
+  */
+-int get_subuid_ranges(const char *owner, struct subordinate_range ***ranges);
++int get_subuid_ranges(const char *owner, struct subid_range **ranges);
+ 
+ /*
+  * get_subgid_ranges: return a list of GID ranges for a user
+  *
+  * @owner: username being queried
+- * @ranges: a pointer to a subordinate range ** in which the result will be
+- *          returned.
++ * @ranges: a pointer to an array of subid_range structs in which the result
++ *          will be returned.
+  *
+- * returns: number of ranges found, ir < 0 on error.
+- */
+-int get_subgid_ranges(const char *owner, struct subordinate_range ***ranges);
+-
+-/*
+- * subid_free_ranges: free an array of subordinate_ranges returned by either
+- *                    get_subuid_ranges() or get_subgid_ranges().
++ * The caller must free(ranges) when done.
+  *
+- * @ranges: the ranges to free
+- * @count: the number of ranges in @ranges
++ * returns: number of ranges found, ir < 0 on error.
+  */
+-void subid_free_ranges(struct subordinate_range **ranges, int count);
++int get_subgid_ranges(const char *owner, struct subid_range **ranges);
+ 
+ /*
+  * get_subuid_owners: return a list of uids to which the given uid has been
+diff -up shadow-4.8.1/lib/subordinateio.c.libsubid-simplify shadow-4.8.1/lib/subordinateio.c
+--- shadow-4.8.1/lib/subordinateio.c.libsubid-simplify	2021-05-24 17:27:38.721035241 +0200
++++ shadow-4.8.1/lib/subordinateio.c	2021-05-24 17:28:06.481420946 +0200
+@@ -11,6 +11,7 @@
+ #include <stdio.h>
+ #include "commonio.h"
+ #include "subordinateio.h"
++#include "../libsubid/subid.h"
+ #include <sys/types.h>
+ #include <pwd.h>
+ #include <ctype.h>
+@@ -308,25 +309,21 @@ static bool have_range(struct commonio_d
+ 	return false;
+ }
+ 
+-static bool append_range(struct subordinate_range ***ranges, const struct subordinate_range *new, int n)
++static bool append_range(struct subid_range **ranges, const struct subordinate_range *new, int n)
+ {
+-	struct subordinate_range *tmp;
+ 	if (!*ranges) {
+-		*ranges = malloc(sizeof(struct subordinate_range *));
++		*ranges = malloc(sizeof(struct subid_range));
+ 		if (!*ranges)
+ 			return false;
+ 	} else {
+-		struct subordinate_range **new;
+-		new = realloc(*ranges, (n + 1) * (sizeof(struct subordinate_range *)));
+-		if (!new)
++		struct subid_range *alloced;
++		alloced = realloc(*ranges, (n + 1) * (sizeof(struct subid_range)));
++		if (!alloced)
+ 			return false;
+-		*ranges = new;
++		*ranges = alloced;
+ 	}
+-	(*ranges)[n] = NULL;
+-	tmp = subordinate_dup(new);
+-	if (!tmp)
+-		return false;
+-	(*ranges)[n] = tmp;
++	(*ranges)[n].start = new->start;
++	(*ranges)[n].count = new->count;
+ 	return true;
+ }
+ 
+@@ -785,10 +782,10 @@ gid_t sub_gid_find_free_range(gid_t min,
+  *
+  * The caller must free the subordinate range list.
+  */
+-int list_owner_ranges(const char *owner, enum subid_type id_type, struct subordinate_range ***in_ranges)
++int list_owner_ranges(const char *owner, enum subid_type id_type, struct subid_range **in_ranges)
+ {
+ 	// TODO - need to handle owner being either uid or username
+-	struct subordinate_range **ranges = NULL;
++	struct subid_range *ranges = NULL;
+ 	const struct subordinate_range *range;
+ 	struct commonio_db *db;
+ 	enum subid_status status;
+@@ -826,7 +823,7 @@ int list_owner_ranges(const char *owner,
+ 	while ((range = commonio_next(db)) != NULL) {
+ 		if (0 == strcmp(range->owner, owner)) {
+ 			if (!append_range(&ranges, range, count++)) {
+-				free_subordinate_ranges(ranges, count-1);
++				free(ranges);
+ 				ranges = NULL;
+ 				count = -1;
+ 				goto out;
+diff -up shadow-4.8.1/lib/subordinateio.h.libsubid_simplify_ranges_variable shadow-4.8.1/lib/subordinateio.h
+--- shadow-4.8.1/lib/subordinateio.h.libsubid_simplify_ranges_variable	2021-05-24 15:03:01.467989079 +0200
++++ shadow-4.8.1/lib/subordinateio.h	2021-05-24 16:40:56.978269647 +0200
+@@ -25,7 +25,7 @@ extern int sub_uid_unlock (void);
+ extern int sub_uid_add (const char *owner, uid_t start, unsigned long count);
+ extern int sub_uid_remove (const char *owner, uid_t start, unsigned long count);
+ extern uid_t sub_uid_find_free_range(uid_t min, uid_t max, unsigned long count);
+-extern int list_owner_ranges(const char *owner, enum subid_type id_type, struct subordinate_range ***ranges);
++extern int list_owner_ranges(const char *owner, enum subid_type id_type, struct subid_range **ranges);
+ extern bool new_subid_range(struct subordinate_range *range, enum subid_type id_type, bool reuse);
+ extern bool release_subid_range(struct subordinate_range *range, enum subid_type id_type);
+ extern int find_subid_owners(unsigned long id, enum subid_type id_type, uid_t **uids);
+diff -up shadow-4.8.1/src/list_subid_ranges.c.libsubid_simplify_ranges_variable shadow-4.8.1/src/list_subid_ranges.c
+--- shadow-4.8.1/src/list_subid_ranges.c.libsubid_simplify_ranges_variable	2021-05-24 15:03:01.468989093 +0200
++++ shadow-4.8.1/src/list_subid_ranges.c	2021-05-24 16:45:10.884779740 +0200
+@@ -17,27 +17,29 @@ void usage(void)
+ int main(int argc, char *argv[])
+ {
+ 	int i, count=0;
+-	struct subordinate_range **ranges;
++	struct subid_range *ranges;
++	const char *owner;
+ 
+ 	Prog = Basename (argv[0]);
+ 	shadow_logfd = stderr;
+-	if (argc < 2) {
++	if (argc < 2)
+ 		usage();
+-	}
+-	if (argc == 3 && strcmp(argv[1], "-g") == 0)
+-		count = get_subgid_ranges(argv[2], &ranges);
+-	else if (argc == 2 && strcmp(argv[1], "-h") == 0)
++	owner = argv[1];
++	if (argc == 3 && strcmp(argv[1], "-g") == 0) {
++		owner = argv[2];
++		count = get_subgid_ranges(owner, &ranges);
++	} else if (argc == 2 && strcmp(argv[1], "-h") == 0) {
+ 		usage();
+-	else
+-		count = get_subuid_ranges(argv[1], &ranges);
++	} else {
++		count = get_subuid_ranges(owner, &ranges);
++	}
+ 	if (!ranges) {
+ 		fprintf(stderr, "Error fetching ranges\n");
+ 		exit(1);
+ 	}
+ 	for (i = 0; i < count; i++) {
+-		printf("%d: %s %lu %lu\n", i, ranges[i]->owner,
+-			ranges[i]->start, ranges[i]->count);
++		printf("%d: %s %lu %lu\n", i, owner,
++			ranges[i].start, ranges[i].count);
+ 	}
+-	subid_free_ranges(ranges, count);
+ 	return 0;
+ }
+diff -up shadow-4.8.1/tests/libsubid/04_nss/libsubid_zzz.c.libsubid_simplify_ranges_variable shadow-4.8.1/tests/libsubid/04_nss/libsubid_zzz.c
+--- shadow-4.8.1/tests/libsubid/04_nss/libsubid_zzz.c.libsubid_simplify_ranges_variable	2021-05-24 15:02:56.166917079 +0200
++++ shadow-4.8.1/tests/libsubid/04_nss/libsubid_zzz.c	2021-05-24 15:03:01.469989106 +0200
+@@ -113,7 +113,7 @@ enum subid_status shadow_subid_list_owne
+ 	if (strcmp(owner, "conn") == 0)
+ 		return SUBID_STATUS_ERROR_CONN;
+ 
+-	*ranges = NULL;
++	*in_ranges = NULL;
+ 	if (strcmp(owner, "user1") != 0 && strcmp(owner, "ubuntu") != 0 &&
+ 	    strcmp(owner, "group1") != 0)
+ 		return SUBID_STATUS_SUCCESS;

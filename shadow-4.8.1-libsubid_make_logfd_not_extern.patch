@@ -1,0 +1,41 @@
+From 1d767fb779d7b203ad609540d1dc605cf62d1050 Mon Sep 17 00:00:00 2001
+From: Serge Hallyn <serge@hallyn.com>
+Date: Fri, 28 May 2021 22:02:16 -0500
+Subject: [PATCH] libsubid/api.c: make shadow_logfd not extern
+
+Closes #346
+
+Also #include stdio.h
+
+Signed-off-by: Serge Hallyn <serge@hallyn.com>
+---
+ libsubid/api.c   | 2 +-
+ libsubid/subid.h | 1 +
+ 2 files changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/libsubid/api.c b/libsubid/api.c
+index b477b271..a7b904d0 100644
+--- a/libsubid/api.c
++++ b/libsubid/api.c
+@@ -40,7 +40,7 @@
+ #include "subid.h"
+ 
+ const char *Prog = "(libsubid)";
+-extern FILE * shadow_logfd;
++FILE *shadow_logfd;
+ 
+ bool libsubid_init(const char *progname, FILE * logfd)
+ {
+diff --git a/libsubid/subid.h b/libsubid/subid.h
+index 5fef2572..eabafe4d 100644
+--- a/libsubid/subid.h
++++ b/libsubid/subid.h
+@@ -1,4 +1,5 @@
+ #include <sys/types.h>
++#include <stdio.h>
+ #include <stdbool.h>
+ 
+ #ifndef SUBID_RANGE_DEFINED
+-- 
+2.31.1
+

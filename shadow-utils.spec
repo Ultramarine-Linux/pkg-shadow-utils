@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.8.1
-Release: 10%{?dist}
+Release: 11%{?dist}
 Epoch: 2
 URL: https://github.com/shadow-maint/shadow
 Source0: https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz
@@ -78,6 +78,23 @@ Patch47: shadow-4.8.1-libsubid_creation.patch
 Patch48: shadow-4.8.1-libsubid_nsswitch_support.patch
 # https://github.com/shadow-maint/shadow/commit/186b1b7ac1a68d0fcc618a22da1a99232b420911
 Patch49: shadow-4.8.1-man-mention-nss-in-newuidmap.patch
+# https://github.com/shadow-maint/shadow/commit/f9831a4a1a20b0e8fe47cc72ec20018ec04dbb90
+Patch50: shadow-4.8.1-libsubid_not_print_error_messages.patch
+# https://github.com/shadow-maint/shadow/commit/c6cab4a7bafa18d9d65a333cac1261e7b5e32bc9
+Patch51: shadow-4.8.1-libsubid_init_return_false.patch
+# https://github.com/shadow-maint/shadow/commit/2f1f45d64fc7c10e7a3cbe00e89f63714343e526
+Patch52: shadow-4.8.1-useradd_SUB_UID_COUNT-0.patch
+# https://github.com/shadow-maint/shadow/commit/ea7af4e1543c63590d4107ae075fea385028997d
+Patch53: shadow-4.8.1-libsubid_simplify_ranges_variable.patch
+# https://github.com/shadow-maint/shadow/commit/0fe42f571c69f0105d31305f995c9887aeb9525e
+Patch54: shadow-4.8.1-libsubid_init_not_print_error_messages.patch
+# https://github.com/shadow-maint/shadow/commit/ec1951c181faed188464396b2cfdd2efb726c7f3
+Patch55: shadow-4.8.1-libsubid_fix_newusers_nss_provides_subids.patch
+# https://github.com/shadow-maint/shadow/commit/087112244327be50abc24f9ec8afbf60ae8b2dec
+# https://github.com/shadow-maint/shadow/pull/353
+Patch56: shadow-4.8.1-man_clarify_subid_delegation.patch
+# https://github.com/shadow-maint/shadow/commit/bd920ab36a6c641e4a8769f8c7f8ca738ec61820
+Patch57: shadow-4.8.1-libsubid_make_logfd_not_extern.patch
 
 License: BSD and GPLv2+
 BuildRequires: make
@@ -152,6 +169,14 @@ Development files for shadow-utils-subid.
 %patch47 -p1 -b .libsubid_creation
 %patch48 -p1 -b .libsubid_nsswitch_support
 %patch49 -p1 -b .man-mention-nss-in-newuidmap
+%patch50 -p1 -b .libsubid_not_print_error_messages
+%patch51 -p1 -b .libsubid_init_return_false
+%patch52 -p1 -b .useradd_SUB_UID_COUNT-0
+%patch53 -p1 -b .libsubid_simplify_ranges_variable
+%patch54 -p1 -b .libsubid_init_not_print_error_messages
+%patch55 -p1 -b .libsubid_fix_newusers_nss_provides_subids
+%patch56 -p1 -b .man_clarify_subid_delegation
+%patch57 -p1 -b .libsubid_make_logfd_not_extern
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -320,6 +345,16 @@ rm -f $RPM_BUILD_ROOT/%{_libdir}/libsubid.la
 %{_libdir}/libsubid.so
 
 %changelog
+* Mon Jun 21 2021 Iker Pedrosa <ipedrosa@redhat.com> - 2:4.8.1-11
+- libsubid: don't print error messages on stderr by default
+- libsubid: libsubid_init return false if out of memory
+- useradd: fix SUB_UID_COUNT=0
+- libsubid: don't return owner in list_owner_ranges API call
+- libsubid: libsubid_init don't print messages on error
+- libsubid: fix newusers when nss provides subids
+- man: clarify subid delegation
+- libsubid: make shadow_logfd not extern
+
 * Thu May  6 2021 Iker Pedrosa <ipedrosa@redhat.com> - 2:4.8.1-10
 - man: mention NSS in new[ug]idmap manpages
 - libsubid: move development header to shadow folder

@@ -1,0 +1,151 @@
+diff -up shadow-4.8.1/lib/nss.c.libsubid_fix_newusers_nss_provides_subids shadow-4.8.1/lib/nss.c
+--- shadow-4.8.1/lib/nss.c.libsubid_fix_newusers_nss_provides_subids	2021-05-25 09:37:14.772741048 +0200
++++ shadow-4.8.1/lib/nss.c	2021-05-25 09:37:14.782741188 +0200
+@@ -116,14 +116,6 @@ void nss_init(char *nsswitch_path) {
+ 				subid_nss = NULL;
+ 				goto done;
+ 			}
+-			subid_nss->has_any_range = dlsym(h, "shadow_subid_has_any_range");
+-			if (!subid_nss->has_any_range) {
+-				fprintf(shadow_logfd, "%s did not provide @has_any_range@\n", libname);
+-				dlclose(h);
+-				free(subid_nss);
+-				subid_nss = NULL;
+-				goto done;
+-			}
+ 			subid_nss->find_subid_owners = dlsym(h, "shadow_subid_find_subid_owners");
+ 			if (!subid_nss->find_subid_owners) {
+ 				fprintf(shadow_logfd, "%s did not provide @find_subid_owners@\n", libname);
+diff -up shadow-4.8.1/lib/prototypes.h.libsubid_fix_newusers_nss_provides_subids shadow-4.8.1/lib/prototypes.h
+--- shadow-4.8.1/lib/prototypes.h.libsubid_fix_newusers_nss_provides_subids	2021-05-25 09:37:14.780741160 +0200
++++ shadow-4.8.1/lib/prototypes.h	2021-05-25 09:37:14.782741188 +0200
+@@ -279,18 +279,6 @@ extern bool nss_is_initialized();
+ 
+ struct subid_nss_ops {
+ 	/*
+-	 * nss_has_any_range: does a user own any subid range
+-	 *
+-	 * @owner: username
+-	 * @idtype: subuid or subgid
+-	 * @result: true if a subid allocation was found for @owner
+-	 *
+-	 * returns success if the module was able to determine an answer (true or false),
+-	 * else an error status.
+-	 */
+-	enum subid_status (*has_any_range)(const char *owner, enum subid_type idtype, bool *result);
+-
+-	/*
+ 	 * nss_has_range: does a user own a given subid range
+ 	 *
+ 	 * @owner: username
+diff -up shadow-4.8.1/lib/subordinateio.c.libsubid_fix_newusers_nss_provides_subids shadow-4.8.1/lib/subordinateio.c
+--- shadow-4.8.1/lib/subordinateio.c.libsubid_fix_newusers_nss_provides_subids	2021-05-25 09:37:14.780741160 +0200
++++ shadow-4.8.1/lib/subordinateio.c	2021-05-25 09:37:14.782741188 +0200
+@@ -598,19 +598,8 @@ int sub_uid_open (int mode)
+ 	return commonio_open (&subordinate_uid_db, mode);
+ }
+ 
+-bool sub_uid_assigned(const char *owner)
++bool local_sub_uid_assigned(const char *owner)
+ {
+-	struct subid_nss_ops *h;
+-	bool found;
+-	enum subid_status status;
+-	h = get_subid_nss_handle();
+-	if (h) {
+-		status = h->has_any_range(owner, ID_TYPE_UID, &found);
+-		if (status == SUBID_STATUS_SUCCESS && found)
+-			return true;
+-		return false;
+-	}
+-
+ 	return range_exists (&subordinate_uid_db, owner);
+ }
+ 
+@@ -720,18 +709,8 @@ bool have_sub_gids(const char *owner, gi
+ 	return have_range(&subordinate_gid_db, owner, start, count);
+ }
+ 
+-bool sub_gid_assigned(const char *owner)
++bool local_sub_gid_assigned(const char *owner)
+ {
+-	struct subid_nss_ops *h;
+-	bool found;
+-	enum subid_status status;
+-	h = get_subid_nss_handle();
+-	if (h) {
+-		status = h->has_any_range(owner, ID_TYPE_GID, &found);
+-		if (status == SUBID_STATUS_SUCCESS && found)
+-			return true;
+-		return false;
+-	}
+ 	return range_exists (&subordinate_gid_db, owner);
+ }
+ 
+diff -up shadow-4.8.1/lib/subordinateio.h.libsubid_fix_newusers_nss_provides_subids shadow-4.8.1/lib/subordinateio.h
+--- shadow-4.8.1/lib/subordinateio.h.libsubid_fix_newusers_nss_provides_subids	2021-05-25 09:37:14.780741160 +0200
++++ shadow-4.8.1/lib/subordinateio.h	2021-05-25 09:37:14.782741188 +0200
+@@ -16,7 +16,7 @@
+ extern int sub_uid_close(void);
+ extern bool have_sub_uids(const char *owner, uid_t start, unsigned long count);
+ extern bool sub_uid_file_present (void);
+-extern bool sub_uid_assigned(const char *owner);
++extern bool local_sub_uid_assigned(const char *owner);
+ extern int sub_uid_lock (void);
+ extern int sub_uid_setdbname (const char *filename);
+ extern /*@observer@*/const char *sub_uid_dbname (void);
+@@ -34,7 +34,7 @@ extern void free_subordinate_ranges(stru
+ extern int sub_gid_close(void);
+ extern bool have_sub_gids(const char *owner, gid_t start, unsigned long count);
+ extern bool sub_gid_file_present (void);
+-extern bool sub_gid_assigned(const char *owner);
++extern bool local_sub_gid_assigned(const char *owner);
+ extern int sub_gid_lock (void);
+ extern int sub_gid_setdbname (const char *filename);
+ extern /*@observer@*/const char *sub_gid_dbname (void);
+diff -up shadow-4.8.1/src/newusers.c.libsubid_fix_newusers_nss_provides_subids shadow-4.8.1/src/newusers.c
+--- shadow-4.8.1/src/newusers.c.libsubid_fix_newusers_nss_provides_subids	2021-05-25 09:37:14.776741104 +0200
++++ shadow-4.8.1/src/newusers.c	2021-05-25 09:37:25.955897160 +0200
+@@ -1021,6 +1021,24 @@ static void close_files (void)
+ #endif				/* ENABLE_SUBIDS */
+ }
+ 
++static bool want_subuids(void)
++{
++	if (get_subid_nss_handle() != NULL)
++		return false;
++	if (getdef_ulong ("SUB_UID_COUNT", 65536) == 0)
++		return false;
++	return true;
++}
++
++static bool want_subgids(void)
++{
++	if (get_subid_nss_handle() != NULL)
++		return false;
++	if (getdef_ulong ("SUB_GID_COUNT", 65536) == 0)
++		return false;
++	return true;
++}
++
+ int main (int argc, char **argv)
+ {
+ 	char buf[BUFSIZ];
+@@ -1250,7 +1268,7 @@ int main (int argc, char **argv)
+ 		/*
+ 		 * Add subordinate uids if the user does not have them.
+ 		 */
+-		if (is_sub_uid && !sub_uid_assigned(fields[0])) {
++		if (is_sub_uid && want_subuids() && !local_sub_uid_assigned(fields[0])) {
+ 			uid_t sub_uid_start = 0;
+ 			unsigned long sub_uid_count = 0;
+ 			if (find_new_sub_uids(fields[0], &sub_uid_start, &sub_uid_count) == 0) {
+@@ -1270,7 +1288,7 @@ int main (int argc, char **argv)
+ 		/*
+ 		 * Add subordinate gids if the user does not have them.
+ 		 */
+-		if (is_sub_gid && !sub_gid_assigned(fields[0])) {
++		if (is_sub_gid && want_subgids() && !local_sub_gid_assigned(fields[0])) {
+ 			gid_t sub_gid_start = 0;
+ 			unsigned long sub_gid_count = 0;
+ 			if (find_new_sub_gids(fields[0], &sub_gid_start, &sub_gid_count) == 0) {
