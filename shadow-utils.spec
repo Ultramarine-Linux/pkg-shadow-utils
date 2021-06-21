@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.8.1
-Release: 13%{?dist}
+Release: 14%{?dist}
 Epoch: 2
 URL: https://github.com/shadow-maint/shadow
 Source0: https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz
@@ -106,6 +106,8 @@ Patch59: shadow-4.8.1-fix_YESCRYPT_salt_cost_param_type.patch
 # https://github.com/shadow-maint/shadow/commit/5d0d7841971cc53d9a9d1aefe12f00204115bf6a
 # https://github.com/shadow-maint/shadow/commit/e65cc6aebcb4132fa413f00a905216a5b35b3d57
 Patch60: shadow-4.8.1-covscan_fixes.patch
+# https://github.com/shadow-maint/shadow/commit/738d92a4bd99a2038aa5f97b2fc85daa7011e403
+Patch61: shadow-4.8.1-fix_bcrypt_prefix.patch
 
 License: BSD and GPLv2+
 BuildRequires: make
@@ -191,6 +193,7 @@ Development files for shadow-utils-subid.
 %patch58 -p1 -b .yescrypt
 %patch59 -p1 -b .YESCRYPT_salt_cost_param_type
 %patch60 -p1 -b .covscan_fixes
+%patch61 -p1 -b .bcrypt_prefix
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -360,6 +363,9 @@ rm -f $RPM_BUILD_ROOT/%{_libdir}/libsubid.la
 %{_libdir}/libsubid.so
 
 %changelog
+* Mon Jun 28 2021 Björn Esser <besser82@fedoraproject.org> - 2:4.8.1-14
+- Add a patch to fix the used prefix for the bcrypt hash method
+
 * Mon Jun 28 2021 Iker Pedrosa <ipedrosa@redhat.com> - 2:4.8.1-13
 - Covscan fixes
 
