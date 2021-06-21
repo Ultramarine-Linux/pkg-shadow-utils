@@ -97,6 +97,8 @@ Patch56: shadow-4.8.1-man_clarify_subid_delegation.patch
 Patch57: shadow-4.8.1-libsubid_make_logfd_not_extern.patch
 # https://github.com/shadow-maint/shadow/commit/5cd04d03f94622c12220d4a6352824af081b8531
 Patch58: shadow-4.8.1-yescrypt-support.patch
+# https://github.com/shadow-maint/shadow/pull/358
+Patch59: shadow-4.8.1-fix_YESCRYPT_salt_cost_param_type.patch
 
 License: BSD and GPLv2+
 BuildRequires: make
@@ -180,6 +182,7 @@ Development files for shadow-utils-subid.
 %patch56 -p1 -b .man_clarify_subid_delegation
 %patch57 -p1 -b .libsubid_make_logfd_not_extern
 %patch58 -p1 -b .yescrypt
+%patch59 -p1 -b .YESCRYPT_salt_cost_param_type
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -351,6 +354,7 @@ rm -f $RPM_BUILD_ROOT/%{_libdir}/libsubid.la
 %changelog
 * Mon Jun 21 2021 Björn Esser <besser82@fedoraproject.org> - 2:4.8.1-12
 - Backport support for yescrypt hash method
+- Add a patch to fix the parameter type of YESCRYPT_salt_cost()
 
 * Mon Jun 21 2021 Iker Pedrosa <ipedrosa@redhat.com> - 2:4.8.1-11
 - libsubid: don't print error messages on stderr by default
