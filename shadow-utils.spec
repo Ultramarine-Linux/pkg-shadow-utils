@@ -97,7 +97,7 @@ Patch56: shadow-4.8.1-man_clarify_subid_delegation.patch
 Patch57: shadow-4.8.1-libsubid_make_logfd_not_extern.patch
 # https://github.com/shadow-maint/shadow/commit/5cd04d03f94622c12220d4a6352824af081b8531
 Patch58: shadow-4.8.1-yescrypt-support.patch
-# https://github.com/shadow-maint/shadow/pull/358
+# https://github.com/shadow-maint/shadow/commit/7a3bb4d0ea8166acc539c788a8ce943acf4a6aa7
 Patch59: shadow-4.8.1-fix_YESCRYPT_salt_cost_param_type.patch
 
 License: BSD and GPLv2+
