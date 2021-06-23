@@ -112,6 +112,8 @@ Patch61: shadow-4.8.1-fix_bcrypt_prefix.patch
 Patch62: shadow-4.8.1-salt_c_sanitize_code.patch
 # https://github.com/shadow-maint/shadow/commit/dbf230e4cf823dd6b6a3bad6d29dfad4f0ffa8fc
 Patch63: shadow-4.8.1-salt_c_comments.patch
+# https://github.com/shadow-maint/shadow/commit/bc8257cf73328e450511b13cbd35e1994feccb30
+Patch64: shadow-4.8.1-salt_c_use_dev_urandom.patch
 
 License: BSD and GPLv2+
 BuildRequires: make
@@ -200,6 +202,7 @@ Development files for shadow-utils-subid.
 %patch61 -p1 -b .bcrypt_prefix
 %patch62 -p1 -b .sanitize_code
 %patch63 -p1 -b .comments
+%patch64 -p1 -b .use_dev_urandom
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -373,6 +376,7 @@ rm -f $RPM_BUILD_ROOT/%{_libdir}/libsubid.la
 - Add a patch to fix the used prefix for the bcrypt hash method
 - Add a patch to cleanup the code in libmisc/salt.c
 - Add a patch adding some clarifying comments in libmisc/salt.c
+- Add a patch to obtain random bytes from /dev/urandom
 
 * Mon Jun 28 2021 Iker Pedrosa <ipedrosa@redhat.com> - 2:4.8.1-13
 - Covscan fixes
