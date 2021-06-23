@@ -110,6 +110,8 @@ Patch60: shadow-4.8.1-covscan_fixes.patch
 Patch61: shadow-4.8.1-fix_bcrypt_prefix.patch
 # https://github.com/shadow-maint/shadow/commit/14b108728a5d55c3d478a170c39f0e2ffd4de1b0
 Patch62: shadow-4.8.1-salt_c_sanitize_code.patch
+# https://github.com/shadow-maint/shadow/commit/dbf230e4cf823dd6b6a3bad6d29dfad4f0ffa8fc
+Patch63: shadow-4.8.1-salt_c_comments.patch
 
 License: BSD and GPLv2+
 BuildRequires: make
@@ -197,6 +199,7 @@ Development files for shadow-utils-subid.
 %patch60 -p1 -b .covscan_fixes
 %patch61 -p1 -b .bcrypt_prefix
 %patch62 -p1 -b .sanitize_code
+%patch63 -p1 -b .comments
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -369,6 +372,7 @@ rm -f $RPM_BUILD_ROOT/%{_libdir}/libsubid.la
 * Mon Jun 28 2021 Björn Esser <besser82@fedoraproject.org> - 2:4.8.1-14
 - Add a patch to fix the used prefix for the bcrypt hash method
 - Add a patch to cleanup the code in libmisc/salt.c
+- Add a patch adding some clarifying comments in libmisc/salt.c
 
 * Mon Jun 28 2021 Iker Pedrosa <ipedrosa@redhat.com> - 2:4.8.1-13
 - Covscan fixes

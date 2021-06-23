@@ -1,0 +1,75 @@
+From dbf230e4cf823dd6b6a3bad6d29dfad4f0ffa8fc Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Bj=C3=B6rn=20Esser?= <besser82@fedoraproject.org>
+Date: Mon, 14 Jun 2021 23:28:28 +0200
+Subject: [PATCH] libmisc/salt.c: Add comments how the minmum buffer length is
+ computed.
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+In the previous commit we refactored the functions converting the
+rounds number into a string for use with the crypt() function, to
+not require any static buffer anymore.
+
+Add some clarifying comments about how the minimum required buffer
+length is computed inside of these functions.
+
+Signed-off-by: Björn Esser <besser82@fedoraproject.org>
+---
+ libmisc/salt.c | 29 +++++++++++++++++++++++++----
+ 1 file changed, 25 insertions(+), 4 deletions(-)
+
+diff --git a/libmisc/salt.c b/libmisc/salt.c
+index 98982ed1..e17093fc 100644
+--- a/libmisc/salt.c
++++ b/libmisc/salt.c
+@@ -216,7 +216,14 @@ static /*@observer@*/void SHA_salt_rounds_to_buf (char *buf, /*@null@*/int *pref
+ 		return;
+ 	}
+ 
+-	/* Check if the result buffer is long enough. */
++	/*
++	 * Check if the result buffer is long enough.
++	 * We are going to write a maximum of 17 bytes,
++	 * plus one byte for the terminator.
++	 *    rounds=XXXXXXXXX$
++	 *    00000000011111111
++	 *    12345678901234567
++	 */
+ 	assert (GENSALT_SETTING_SIZE > buf_begin + 17);
+ 
+ 	(void) snprintf (buf + buf_begin, 18, "rounds=%lu$", rounds);
+@@ -274,7 +281,14 @@ static /*@observer@*/void BCRYPT_salt_rounds_to_buf (char *buf, /*@null@*/int *p
+ 		rounds = 19;
+ 	}
+ 
+-	/* Check if the result buffer is long enough. */
++	/*
++	 * Check if the result buffer is long enough.
++	 * We are going to write three bytes,
++	 * plus one byte for the terminator.
++	 *    XX$
++	 *    000
++	 *    123
++	 */
+ 	assert (GENSALT_SETTING_SIZE > buf_begin + 3);
+ 
+ 	(void) snprintf (buf + buf_begin, 4, "%2.2lu$", rounds);
+@@ -308,8 +322,15 @@ static /*@observer@*/void YESCRYPT_salt_cost_to_buf (char *buf, /*@null@*/int *p
+ 		cost = Y_COST_MAX;
+ 	}
+ 
+-	/* Check if the result buffer is long enough. */
+-	assert (GENSALT_SETTING_SIZE > buf_begin + 3);
++	/*
++	 * Check if the result buffer is long enough.
++	 * We are going to write four bytes,
++	 * plus one byte for the terminator.
++	 *    jXX$
++	 *    0000
++	 *    1234
++	 */
++	assert (GENSALT_SETTING_SIZE > buf_begin + 4);
+ 
+ 	buf[buf_begin + 0] = 'j';
+ 	if (cost < 3) {
