@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.8.1
-Release: 16%{?dist}
+Release: 17%{?dist}
 Epoch: 2
 URL: https://github.com/shadow-maint/shadow
 Source0: https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz
@@ -48,7 +48,7 @@ Patch28: shadow-4.8-selinux-perms.patch
 Patch29: shadow-4.2.1-null-tm.patch
 # SElinux related - upstreamability unknown
 Patch31: shadow-4.6-getenforce.patch
-# Handle include of crypt.h - could be upstreamed
+# https://github.com/shadow-maint/shadow/commit/c93897a8d71b9b1790caf3b2dee38dbe62518ae3
 Patch32: shadow-4.8-crypt_h.patch
 # Handle /etc/passwd corruption - could be upstreamed
 Patch33: shadow-4.8-long-entry.patch
@@ -118,6 +118,8 @@ Patch64: shadow-4.8.1-salt_c_use_dev_urandom.patch
 Patch65: shadow-4.8.1-useradd_create_relative_home_path_correctly.patch
 # https://github.com/shadow-maint/shadow/commit/c82ed0c15e0e9e47df0b4c22672b72e35f061a9d
 Patch66: shadow-4.8.1-getentropy_random_bytes.patch
+# https://github.com/shadow-maint/shadow/commit/ea04eb301d08c0c58f1120f87d4ec184d3983ce5
+Patch67: shadow-4.8.1-crypt_gensalt.patch
 
 License: BSD and GPLv2+
 BuildRequires: make
@@ -209,6 +211,7 @@ Development files for shadow-utils-subid.
 %patch64 -p1 -b .use_dev_urandom
 %patch65 -p1 -b .useradd_create_relative_home_path_correctly
 %patch66 -p1 -b .getentropy_random_bytes
+%patch67 -p1 -b .crypt_gensalt
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -380,6 +383,8 @@ rm -f $RPM_BUILD_ROOT/%{_libdir}/libsubid.la
 %changelog
 * Sun Jul 04 2021 Björn Esser <besser82@fedoraproject.org> - 2:4.8.1-16
 - Add a patch to obtain random bytes using getentropy()
+- Update shadow-4.8-crypt_h.patch with the upstreamed version
+- Add a patch to make use of crypt_gensalt() from libxcrypt
 
 * Tue Jun 29 2021 Iker Pedrosa <ipedrosa@redhat.com> - 2:4.8.1-15
 - useradd: free correct pointer (#1976809)
