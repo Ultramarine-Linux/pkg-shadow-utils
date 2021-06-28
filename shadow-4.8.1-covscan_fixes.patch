@@ -1,0 +1,802 @@
+From fd9d79a1a3438ba7703939cfcd45fc266782c64e Mon Sep 17 00:00:00 2001
+From: whzhe <wanghongzhe@huawei.com>
+Date: Thu, 17 Dec 2020 03:27:15 -0500
+Subject: [PATCH] useradd.c:fix memleak in get_groups
+
+Signed-off-by: whzhe <wanghongzhe@huawei.com>
+---
+ src/useradd.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/src/useradd.c b/src/useradd.c
+index 107e65f8..822b67f5 100644
+--- a/src/useradd.c
++++ b/src/useradd.c
+@@ -793,6 +793,7 @@ static int get_groups (char *list)
+ 			fprintf (stderr,
+ 			         _("%s: group '%s' is a NIS group.\n"),
+ 			         Prog, grp->gr_name);
++			gr_free(grp);
+ 			continue;
+ 		}
+ #endif
+@@ -801,6 +802,7 @@ static int get_groups (char *list)
+ 			fprintf (stderr,
+ 			         _("%s: too many groups specified (max %d).\n"),
+ 			         Prog, ngroups);
++			gr_free(grp);
+ 			break;
+ 		}
+ 
+@@ -808,6 +810,7 @@ static int get_groups (char *list)
+ 		 * Add the group name to the user's list of groups.
+ 		 */
+ 		user_groups[ngroups++] = xstrdup (grp->gr_name);
++		gr_free (grp);
+ 	} while (NULL != list);
+ 
+ 	close_group_files ();
+-- 
+2.31.1
+
+From c44b71cec25d60efc51aec9de3abce1f6efbfcf5 Mon Sep 17 00:00:00 2001
+From: whzhe51 <whzhe51@126.com>
+Date: Sat, 19 Dec 2020 04:29:06 -0500
+Subject: [PATCH] useradd.c:fix memleaks of grp Signed-off-by: whzhe51
+ <wanghongzhe@huawei.com>
+
+---
+ src/useradd.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/src/useradd.c b/src/useradd.c
+index 107e65f8..29c54e44 100644
+--- a/src/useradd.c
++++ b/src/useradd.c
+@@ -411,6 +411,7 @@ static void get_defaults (void)
+ 			} else {
+ 				def_group = grp->gr_gid;
+ 				def_gname = xstrdup (grp->gr_name);
++				gr_free(grp);
+ 			}
+ 		}
+ 
+-- 
+2.31.1
+
+From 1aed7ae945aafaeb253fc89a7ecedeaedf72654e Mon Sep 17 00:00:00 2001
+From: Iker Pedrosa <ipedrosa@redhat.com>
+Date: Thu, 10 Jun 2021 13:05:03 +0200
+Subject: [PATCH] useradd.c: fix covscan RESOURCE_LEAK
+
+Error: RESOURCE_LEAK (CWE-772): [#def28]
+shadow-4.8.1/src/useradd.c:1905: open_fn: Returning handle opened by "open". [Note: The source code implementation of the function has been overridden by a user model.]
+shadow-4.8.1/src/useradd.c:1905: var_assign: Assigning: "fd" = handle returned from "open("/var/log/faillog", 2)".
+shadow-4.8.1/src/useradd.c:1906: noescape: Resource "fd" is not freed or pointed-to in "lseek".
+shadow-4.8.1/src/useradd.c:1917: leaked_handle: Handle variable "fd" going out of scope leaks the handle.
+ 1915|   		/* continue */
+ 1916|   	}
+ 1917|-> }
+ 1918|
+ 1919|   static void lastlog_reset (uid_t uid)
+
+Error: RESOURCE_LEAK (CWE-772): [#def29]
+shadow-4.8.1/src/useradd.c:1938: open_fn: Returning handle opened by "open". [Note: The source code implementation of the function has been overridden by a user model.]
+shadow-4.8.1/src/useradd.c:1938: var_assign: Assigning: "fd" = handle returned from "open("/var/log/lastlog", 2)".
+shadow-4.8.1/src/useradd.c:1939: noescape: Resource "fd" is not freed or pointed-to in "lseek".
+shadow-4.8.1/src/useradd.c:1950: leaked_handle: Handle variable "fd" going out of scope leaks the handle.
+ 1948|   		/* continue */
+ 1949|   	}
+ 1950|-> }
+ 1951|
+ 1952|   static void tallylog_reset (const char *user_name)
+
+Error: RESOURCE_LEAK (CWE-772): [#def30]
+shadow-4.8.1/src/useradd.c:2109: alloc_fn: Storage is returned from allocation function "strdup".
+shadow-4.8.1/src/useradd.c:2109: var_assign: Assigning: "bhome" = storage returned from "strdup(prefix_user_home)".
+shadow-4.8.1/src/useradd.c:2131: noescape: Resource "bhome" is not freed or pointed-to in "strtok".
+shadow-4.8.1/src/useradd.c:2207: leaked_storage: Variable "bhome" going out of scope leaks the storage it points to.
+ 2205|   		}
+ 2206|   #endif
+ 2207|-> 	}
+ 2208|   }
+ 2209|
+---
+ src/useradd.c | 41 ++++++++++++++++++++++++++++++++---------
+ 1 file changed, 32 insertions(+), 9 deletions(-)
+
+diff --git a/src/useradd.c b/src/useradd.c
+index 4248b62c..127177e2 100644
+--- a/src/useradd.c
++++ b/src/useradd.c
+@@ -1964,16 +1964,26 @@ static void faillog_reset (uid_t uid)
+ 	memzero (&fl, sizeof (fl));
+ 
+ 	fd = open (FAILLOG_FILE, O_RDWR);
+-	if (   (-1 == fd)
+-	    || (lseek (fd, offset_uid, SEEK_SET) != offset_uid)
++	if (-1 == fd) {
++		fprintf (stderr,
++		         _("%s: failed to open the faillog file for UID %lu: %s\n"),
++		         Prog, (unsigned long) uid, strerror (errno));
++		SYSLOG ((LOG_WARN, "failed to open the faillog file for UID %lu", (unsigned long) uid));
++		return;
++	}
++	if (   (lseek (fd, offset_uid, SEEK_SET) != offset_uid)
+ 	    || (write (fd, &fl, sizeof (fl)) != (ssize_t) sizeof (fl))
+-	    || (fsync (fd) != 0)
+-	    || (close (fd) != 0)) {
++	    || (fsync (fd) != 0)) {
+ 		fprintf (stderr,
+ 		         _("%s: failed to reset the faillog entry of UID %lu: %s\n"),
+ 		         Prog, (unsigned long) uid, strerror (errno));
+ 		SYSLOG ((LOG_WARN, "failed to reset the faillog entry of UID %lu", (unsigned long) uid));
+-		/* continue */
++	}
++	if (close (fd) != 0) {
++		fprintf (stderr,
++		         _("%s: failed to close the faillog file for UID %lu: %s\n"),
++		         Prog, (unsigned long) uid, strerror (errno));
++		SYSLOG ((LOG_WARN, "failed to close the faillog file for UID %lu", (unsigned long) uid));
+ 	}
+ }
+ 
+@@ -1997,17 +2007,29 @@ static void lastlog_reset (uid_t uid)
+ 	memzero (&ll, sizeof (ll));
+ 
+ 	fd = open (LASTLOG_FILE, O_RDWR);
+-	if (   (-1 == fd)
+-	    || (lseek (fd, offset_uid, SEEK_SET) != offset_uid)
++	if (-1 == fd) {
++		fprintf (stderr,
++		         _("%s: failed to open the lastlog file for UID %lu: %s\n"),
++		         Prog, (unsigned long) uid, strerror (errno));
++		SYSLOG ((LOG_WARN, "failed to open the lastlog file for UID %lu", (unsigned long) uid));
++		return;
++	}
++	if (   (lseek (fd, offset_uid, SEEK_SET) != offset_uid)
+ 	    || (write (fd, &ll, sizeof (ll)) != (ssize_t) sizeof (ll))
+-	    || (fsync (fd) != 0)
+-	    || (close (fd) != 0)) {
++	    || (fsync (fd) != 0)) {
+ 		fprintf (stderr,
+ 		         _("%s: failed to reset the lastlog entry of UID %lu: %s\n"),
+ 		         Prog, (unsigned long) uid, strerror (errno));
+ 		SYSLOG ((LOG_WARN, "failed to reset the lastlog entry of UID %lu", (unsigned long) uid));
+ 		/* continue */
+ 	}
++	if (close (fd) != 0) {
++		fprintf (stderr,
++		         _("%s: failed to close the lastlog file for UID %lu: %s\n"),
++		         Prog, (unsigned long) uid, strerror (errno));
++		SYSLOG ((LOG_WARN, "failed to close the lastlog file for UID %lu", (unsigned long) uid));
++		/* continue */
++	}
+ }
+ 
+ static void tallylog_reset (const char *user_name)
+@@ -2254,6 +2276,7 @@ static void create_home (void)
+ 			}
+ 			cp = strtok (NULL, "/");
+ 		}
++		free (bhome);
+ 
+ 		(void) chown (prefix_user_home, user_id, user_gid);
+ 		mode_t mode = getdef_num ("HOME_MODE",
+-- 
+2.31.1
+
+From 8281c82e324b57b3a4b520afad26b43ce128d521 Mon Sep 17 00:00:00 2001
+From: Iker Pedrosa <ipedrosa@redhat.com>
+Date: Fri, 11 Jun 2021 11:50:49 +0200
+Subject: [PATCH] usermod.c: fix covscan RESOURCE_LEAK
+
+Error: RESOURCE_LEAK (CWE-772): [#def31]
+shadow-4.8.1/src/usermod.c:813: alloc_fn: Storage is returned from allocation function "__gr_dup".
+shadow-4.8.1/src/usermod.c:813: var_assign: Assigning: "ngrp" = storage returned from "__gr_dup(grp)".
+shadow-4.8.1/src/usermod.c:892: leaked_storage: Variable "ngrp" going out of scope leaks the storage it points to.
+  890|   		}
+  891|   	}
+  892|-> }
+  893|
+  894|   #ifdef SHADOWGRP
+
+Error: RESOURCE_LEAK (CWE-772): [#def32]
+shadow-4.8.1/src/usermod.c:933: alloc_fn: Storage is returned from allocation function "__sgr_dup".
+shadow-4.8.1/src/usermod.c:933: var_assign: Assigning: "nsgrp" = storage returned from "__sgr_dup(sgrp)".
+shadow-4.8.1/src/usermod.c:1031: leaked_storage: Variable "nsgrp" going out of scope leaks the storage it points to.
+ 1029|   		}
+ 1030|   	}
+ 1031|-> }
+ 1032|   #endif				/* SHADOWGRP */
+ 1033|
+
+Error: RESOURCE_LEAK (CWE-772): [#def34]
+shadow-4.8.1/src/usermod.c:1161: alloc_fn: Storage is returned from allocation function "getgr_nam_gid".
+shadow-4.8.1/src/usermod.c:1161: var_assign: Assigning: "grp" = storage returned from "getgr_nam_gid(optarg)".
+shadow-4.8.1/src/usermod.c:1495: leaked_storage: Variable "grp" going out of scope leaks the storage it points to.
+ 1493|   	}
+ 1494|   #endif				/* ENABLE_SUBIDS */
+ 1495|-> }
+ 1496|
+ 1497|   /*
+
+Error: RESOURCE_LEAK (CWE-772): [#def35]
+shadow-4.8.1/src/usermod.c:1991: open_fn: Returning handle opened by "open". [Note: The source code implementation of the function has been overridden by a user model.]
+shadow-4.8.1/src/usermod.c:1991: var_assign: Assigning: "fd" = handle returned from "open("/var/log/lastlog", 2)".
+shadow-4.8.1/src/usermod.c:2000: noescape: Resource "fd" is not freed or pointed-to in "lseek".
+shadow-4.8.1/src/usermod.c:2000: noescape: Resource "fd" is not freed or pointed-to in "read". [Note: The source code implementation of the function has been overridden by a builtin model.]
+shadow-4.8.1/src/usermod.c:2003: noescape: Resource "fd" is not freed or pointed-to in "lseek".
+shadow-4.8.1/src/usermod.c:2032: leaked_handle: Handle variable "fd" going out of scope leaks the handle.
+ 2030|   		}
+ 2031|   	}
+ 2032|-> }
+ 2033|
+ 2034|   /*
+
+Error: RESOURCE_LEAK (CWE-772): [#def36]
+shadow-4.8.1/src/usermod.c:2052: open_fn: Returning handle opened by "open". [Note: The source code implementation of the function has been overridden by a user model.]
+shadow-4.8.1/src/usermod.c:2052: var_assign: Assigning: "fd" = handle returned from "open("/var/log/faillog", 2)".
+shadow-4.8.1/src/usermod.c:2061: noescape: Resource "fd" is not freed or pointed-to in "lseek".
+shadow-4.8.1/src/usermod.c:2061: noescape: Resource "fd" is not freed or pointed-to in "read". [Note: The source code implementation of the function has been overridden by a builtin model.]
+shadow-4.8.1/src/usermod.c:2064: noescape: Resource "fd" is not freed or pointed-to in "lseek".
+shadow-4.8.1/src/usermod.c:2092: leaked_handle: Handle variable "fd" going out of scope leaks the handle.
+ 2090|   		}
+ 2091|   	}
+ 2092|-> }
+ 2093|
+ 2094|   #ifndef NO_MOVE_MAILBOX
+---
+ src/usermod.c | 25 +++++++++++++------------
+ 1 file changed, 13 insertions(+), 12 deletions(-)
+
+diff --git a/src/usermod.c b/src/usermod.c
+index 7870ba57..03bb9b9d 100644
+--- a/src/usermod.c
++++ b/src/usermod.c
+@@ -871,6 +871,8 @@ static void update_group (void)
+ 			SYSLOG ((LOG_WARN, "failed to prepare the new %s entry '%s'", gr_dbname (), ngrp->gr_name));
+ 			fail_exit (E_GRP_UPDATE);
+ 		}
++
++		gr_free(ngrp);
+ 	}
+ }
+ 
+@@ -1006,6 +1008,8 @@ static void update_gshadow (void)
+ 			         sgr_dbname (), nsgrp->sg_name));
+ 			fail_exit (E_GRP_UPDATE);
+ 		}
++
++		free (nsgrp);
+ 	}
+ }
+ #endif				/* SHADOWGRP */
+@@ -1152,6 +1156,7 @@ static void process_flags (int argc, char **argv)
+ 				}
+ 				user_newgid = grp->gr_gid;
+ 				gflg = true;
++				gr_free (grp);
+ 				break;
+ 			case 'G':
+ 				if (get_groups (optarg) != 0) {
+@@ -1995,8 +2000,7 @@ static void update_lastlog (void)
+ 		/* Copy the old entry to its new location */
+ 		if (   (lseek (fd, off_newuid, SEEK_SET) != off_newuid)
+ 		    || (write (fd, &ll, sizeof ll) != (ssize_t) sizeof ll)
+-		    || (fsync (fd) != 0)
+-		    || (close (fd) != 0)) {
++		    || (fsync (fd) != 0)) {
+ 			fprintf (stderr,
+ 			         _("%s: failed to copy the lastlog entry of user %lu to user %lu: %s\n"),
+ 			         Prog, (unsigned long) user_id, (unsigned long) user_newid, strerror (errno));
+@@ -2012,16 +2016,15 @@ static void update_lastlog (void)
+ 			memzero (&ll, sizeof (ll));
+ 			if (   (lseek (fd, off_newuid, SEEK_SET) != off_newuid)
+ 			    || (write (fd, &ll, sizeof ll) != (ssize_t) sizeof ll)
+-			    || (fsync (fd) != 0)
+-			    || (close (fd) != 0)) {
++			    || (fsync (fd) != 0)) {
+ 				fprintf (stderr,
+ 				         _("%s: failed to copy the lastlog entry of user %lu to user %lu: %s\n"),
+ 				         Prog, (unsigned long) user_id, (unsigned long) user_newid, strerror (errno));
+ 			}
+-		} else {
+-			(void) close (fd);
+ 		}
+ 	}
++
++	(void) close (fd);
+ }
+ 
+ /*
+@@ -2056,8 +2059,7 @@ static void update_faillog (void)
+ 		/* Copy the old entry to its new location */
+ 		if (   (lseek (fd, off_newuid, SEEK_SET) != off_newuid)
+ 		    || (write (fd, &fl, sizeof fl) != (ssize_t) sizeof fl)
+-		    || (fsync (fd) != 0)
+-		    || (close (fd) != 0)) {
++		    || (fsync (fd) != 0)) {
+ 			fprintf (stderr,
+ 			         _("%s: failed to copy the faillog entry of user %lu to user %lu: %s\n"),
+ 			         Prog, (unsigned long) user_id, (unsigned long) user_newid, strerror (errno));
+@@ -2072,16 +2074,15 @@ static void update_faillog (void)
+ 			/* Reset the new uid's faillog entry */
+ 			memzero (&fl, sizeof (fl));
+ 			if (   (lseek (fd, off_newuid, SEEK_SET) != off_newuid)
+-			    || (write (fd, &fl, sizeof fl) != (ssize_t) sizeof fl)
+-			    || (close (fd) != 0)) {
++			    || (write (fd, &fl, sizeof fl) != (ssize_t) sizeof fl)) {
+ 				fprintf (stderr,
+ 				         _("%s: failed to copy the faillog entry of user %lu to user %lu: %s\n"),
+ 				         Prog, (unsigned long) user_id, (unsigned long) user_newid, strerror (errno));
+ 			}
+-		} else {
+-			(void) close (fd);
+ 		}
+ 	}
++
++	(void) close (fd);
+ }
+ 
+ #ifndef NO_MOVE_MAILBOX
+-- 
+2.31.1
+
+From 5d0d7841971cc53d9a9d1aefe12f00204115bf6a Mon Sep 17 00:00:00 2001
+From: Iker Pedrosa <ipedrosa@redhat.com>
+Date: Wed, 16 Jun 2021 09:50:53 +0200
+Subject: [PATCH] Fix covscan BUFFER_SIZE
+
+Error: BUFFER_SIZE (CWE-170): [#def6]
+shadow-4.8.1/libmisc/failure.c:101: buffer_size_warning: Calling "strncpy" with a maximum size argument of 12 bytes on destination array "fl->fail_line" of size 12 bytes might leave the destination string unterminated.
+   99|   	}
+  100|
+  101|-> 	strncpy (fl->fail_line, tty, sizeof fl->fail_line);
+  102|   	(void) time (&fl->fail_time);
+  103|
+
+Error: BUFFER_SIZE (CWE-170): [#def9]
+shadow-4.8.1/libmisc/log.c:103: buffer_size_warning: Calling "strncpy" with a maximum size argument of 32 bytes on destination array "newlog.ll_line" of size 32 bytes might leave the destination string unterminated.
+  101|   	(void) time (&ll_time);
+  102|   	newlog.ll_time = ll_time;
+  103|-> 	strncpy (newlog.ll_line, line, sizeof newlog.ll_line);
+  104|   #if HAVE_LL_HOST
+  105|   	strncpy (newlog.ll_host, host, sizeof newlog.ll_host);
+
+Error: BUFFER_SIZE (CWE-170): [#def10]
+shadow-4.8.1/libmisc/log.c:105: buffer_size_warning: Calling "strncpy" with a maximum size argument of 256 bytes on destination array "newlog.ll_host" of size 256 bytes might leave the destination string unterminated.
+  103|   	strncpy (newlog.ll_line, line, sizeof newlog.ll_line);
+  104|   #if HAVE_LL_HOST
+  105|-> 	strncpy (newlog.ll_host, host, sizeof newlog.ll_host);
+  106|   #endif
+  107|   	if (   (lseek (fd, offset, SEEK_SET) != offset)
+
+Error: BUFFER_SIZE (CWE-170): [#def13]
+shadow-4.8.1/libmisc/utmp.c:260: buffer_size_warning: Calling "strncpy" with a maximum size argument of 32 bytes on destination array "utent->ut_line" of size 32 bytes might leave the destination string unterminated.
+  258|   #endif				/* HAVE_STRUCT_UTMP_UT_TYPE */
+  259|   	utent->ut_pid = getpid ();
+  260|-> 	strncpy (utent->ut_line, line,      sizeof (utent->ut_line));
+  261|   #ifdef HAVE_STRUCT_UTMP_UT_ID
+  262|   	if (NULL != ut) {
+
+Error: BUFFER_SIZE (CWE-170): [#def14]
+shadow-4.8.1/libmisc/utmp.c:266: buffer_size_warning: Calling "strncpy" with a maximum size argument of 4 bytes on destination array "utent->ut_id" of size 4 bytes might leave the destination string unterminated.
+  264|   	} else {
+  265|   		/* XXX - assumes /dev/tty?? */
+  266|-> 		strncpy (utent->ut_id, line + 3, sizeof (utent->ut_id));
+  267|   	}
+  268|   #endif				/* HAVE_STRUCT_UTMP_UT_ID */
+
+Error: BUFFER_SIZE (CWE-170): [#def15]
+shadow-4.8.1/libmisc/utmp.c:273: buffer_size_warning: Calling "strncpy" with a maximum size argument of 32 bytes on destination array "utent->ut_user" of size 32 bytes might leave the destination string unterminated.
+  271|   #endif				/* HAVE_STRUCT_UTMP_UT_NAME */
+  272|   #ifdef HAVE_STRUCT_UTMP_UT_USER
+  273|-> 	strncpy (utent->ut_user, name,      sizeof (utent->ut_user));
+  274|   #endif				/* HAVE_STRUCT_UTMP_UT_USER */
+  275|   	if (NULL != hostname) {
+
+Error: BUFFER_SIZE (CWE-170): [#def16]
+shadow-4.8.1/libmisc/utmp.c:278: buffer_size_warning: Calling "strncpy" with a maximum size argument of 256 bytes on destination array "utent->ut_host" of size 256 bytes might leave the destination string unterminated.
+  276|   		struct addrinfo *info = NULL;
+  277|   #ifdef HAVE_STRUCT_UTMP_UT_HOST
+  278|-> 		strncpy (utent->ut_host, hostname, sizeof (utent->ut_host));
+  279|   #endif				/* HAVE_STRUCT_UTMP_UT_HOST */
+  280|   #ifdef HAVE_STRUCT_UTMP_UT_SYSLEN
+
+Signed-off-by: Iker Pedrosa <ipedrosa@redhat.com>
+---
+ libmisc/failure.c | 2 +-
+ libmisc/log.c     | 4 ++--
+ libmisc/utmp.c    | 8 ++++----
+ 3 files changed, 7 insertions(+), 7 deletions(-)
+
+diff --git a/libmisc/failure.c b/libmisc/failure.c
+index f6390a79..a1f3ec79 100644
+--- a/libmisc/failure.c
++++ b/libmisc/failure.c
+@@ -98,7 +98,7 @@ void failure (uid_t uid, const char *tty, struct faillog *fl)
+ 		fl->fail_cnt++;
+ 	}
+ 
+-	strncpy (fl->fail_line, tty, sizeof fl->fail_line);
++	strncpy (fl->fail_line, tty, sizeof (fl->fail_line) - 1);
+ 	(void) time (&fl->fail_time);
+ 
+ 	/*
+diff --git a/libmisc/log.c b/libmisc/log.c
+index eb84859e..68a9d7e2 100644
+--- a/libmisc/log.c
++++ b/libmisc/log.c
+@@ -100,9 +100,9 @@ void dolastlog (
+ 	ll_time = newlog.ll_time;
+ 	(void) time (&ll_time);
+ 	newlog.ll_time = ll_time;
+-	strncpy (newlog.ll_line, line, sizeof newlog.ll_line);
++	strncpy (newlog.ll_line, line, sizeof (newlog.ll_line) - 1);
+ #if HAVE_LL_HOST
+-	strncpy (newlog.ll_host, host, sizeof newlog.ll_host);
++	strncpy (newlog.ll_host, host, sizeof (newlog.ll_host) - 1);
+ #endif
+ 	if (   (lseek (fd, offset, SEEK_SET) != offset)
+ 	    || (write (fd, (const void *) &newlog, sizeof newlog) != (ssize_t) sizeof newlog)
+diff --git a/libmisc/utmp.c b/libmisc/utmp.c
+index ba69cf61..5dcd419f 100644
+--- a/libmisc/utmp.c
++++ b/libmisc/utmp.c
+@@ -257,25 +257,25 @@ static void updwtmpx (const char *filename, const struct utmpx *utx)
+ 	utent->ut_type = USER_PROCESS;
+ #endif				/* HAVE_STRUCT_UTMP_UT_TYPE */
+ 	utent->ut_pid = getpid ();
+-	strncpy (utent->ut_line, line,      sizeof (utent->ut_line));
++	strncpy (utent->ut_line, line,      sizeof (utent->ut_line) - 1);
+ #ifdef HAVE_STRUCT_UTMP_UT_ID
+ 	if (NULL != ut) {
+ 		strncpy (utent->ut_id, ut->ut_id, sizeof (utent->ut_id));
+ 	} else {
+ 		/* XXX - assumes /dev/tty?? */
+-		strncpy (utent->ut_id, line + 3, sizeof (utent->ut_id));
++		strncpy (utent->ut_id, line + 3, sizeof (utent->ut_id) - 1);
+ 	}
+ #endif				/* HAVE_STRUCT_UTMP_UT_ID */
+ #ifdef HAVE_STRUCT_UTMP_UT_NAME
+ 	strncpy (utent->ut_name, name,      sizeof (utent->ut_name));
+ #endif				/* HAVE_STRUCT_UTMP_UT_NAME */
+ #ifdef HAVE_STRUCT_UTMP_UT_USER
+-	strncpy (utent->ut_user, name,      sizeof (utent->ut_user));
++	strncpy (utent->ut_user, name,      sizeof (utent->ut_user) - 1);
+ #endif				/* HAVE_STRUCT_UTMP_UT_USER */
+ 	if (NULL != hostname) {
+ 		struct addrinfo *info = NULL;
+ #ifdef HAVE_STRUCT_UTMP_UT_HOST
+-		strncpy (utent->ut_host, hostname, sizeof (utent->ut_host));
++		strncpy (utent->ut_host, hostname, sizeof (utent->ut_host) - 1);
+ #endif				/* HAVE_STRUCT_UTMP_UT_HOST */
+ #ifdef HAVE_STRUCT_UTMP_UT_SYSLEN
+ 		utent->ut_syslen = MIN (strlen (hostname),
+-- 
+2.31.1
+
+From e65cc6aebcb4132fa413f00a905216a5b35b3d57 Mon Sep 17 00:00:00 2001
+From: Iker Pedrosa <ipedrosa@redhat.com>
+Date: Mon, 14 Jun 2021 12:39:48 +0200
+Subject: [PATCH] Fix covscan RESOURCE_LEAK
+
+Error: RESOURCE_LEAK (CWE-772): [#def1]
+shadow-4.8.1/lib/commonio.c:320: alloc_fn: Storage is returned from allocation function "fopen_set_perms".
+shadow-4.8.1/lib/commonio.c:320: var_assign: Assigning: "bkfp" = storage returned from "fopen_set_perms(backup, "w", &sb)".
+shadow-4.8.1/lib/commonio.c:329: noescape: Resource "bkfp" is not freed or pointed-to in "putc".
+shadow-4.8.1/lib/commonio.c:334: noescape: Resource "bkfp" is not freed or pointed-to in "fflush".
+shadow-4.8.1/lib/commonio.c:339: noescape: Resource "bkfp" is not freed or pointed-to in "fileno".
+shadow-4.8.1/lib/commonio.c:342: leaked_storage: Variable "bkfp" going out of scope leaks the storage it points to.
+  340|   	    || (fclose (bkfp) != 0)) {
+  341|   		/* FIXME: unlink the backup file? */
+  342|-> 		return -1;
+  343|   	}
+  344|
+
+Error: RESOURCE_LEAK (CWE-772): [#def2]
+shadow-4.8.1/libmisc/addgrps.c:69: alloc_fn: Storage is returned from allocation function "malloc".
+shadow-4.8.1/libmisc/addgrps.c:69: var_assign: Assigning: "grouplist" = storage returned from "malloc(i * 4UL)".
+shadow-4.8.1/libmisc/addgrps.c:73: noescape: Resource "grouplist" is not freed or pointed-to in "getgroups". [Note: The source code implementation of the function has been overridden by a builtin model.]
+shadow-4.8.1/libmisc/addgrps.c:126: leaked_storage: Variable "grouplist" going out of scope leaks the storage it points to.
+  124|   	}
+  125|
+  126|-> 	return 0;
+  127|   }
+  128|   #else				/* HAVE_SETGROUPS && !USE_PAM */
+
+Error: RESOURCE_LEAK (CWE-772): [#def3]
+shadow-4.8.1/libmisc/chowntty.c:62: alloc_fn: Storage is returned from allocation function "getgr_nam_gid".
+shadow-4.8.1/libmisc/chowntty.c:62: var_assign: Assigning: "grent" = storage returned from "getgr_nam_gid(getdef_str("TTYGROUP"))".
+shadow-4.8.1/libmisc/chowntty.c:98: leaked_storage: Variable "grent" going out of scope leaks the storage it points to.
+   96|   	 */
+   97|   #endif
+   98|-> }
+   99|
+
+Error: RESOURCE_LEAK (CWE-772): [#def4]
+shadow-4.8.1/libmisc/copydir.c:742: open_fn: Returning handle opened by "open". [Note: The source code implementation of the function has been overridden by a user model.]
+shadow-4.8.1/libmisc/copydir.c:742: var_assign: Assigning: "ifd" = handle returned from "open(src, 0)".
+shadow-4.8.1/libmisc/copydir.c:748: leaked_handle: Handle variable "ifd" going out of scope leaks the handle.
+  746|   #ifdef WITH_SELINUX
+  747|   	if (set_selinux_file_context (dst, NULL) != 0) {
+  748|-> 		return -1;
+  749|   	}
+  750|   #endif				/* WITH_SELINUX */
+
+Error: RESOURCE_LEAK (CWE-772): [#def5]
+shadow-4.8.1/libmisc/copydir.c:751: open_fn: Returning handle opened by "open". [Note: The source code implementation of the function has been overridden by a user model.]
+shadow-4.8.1/libmisc/copydir.c:751: var_assign: Assigning: "ofd" = handle returned from "open(dst, 577, statp->st_mode & 0xfffU)".
+shadow-4.8.1/libmisc/copydir.c:752: noescape: Resource "ofd" is not freed or pointed-to in "fchown_if_needed".
+shadow-4.8.1/libmisc/copydir.c:775: leaked_handle: Handle variable "ofd" going out of scope leaks the handle.
+  773|   	   ) {
+  774|   		(void) close (ifd);
+  775|-> 		return -1;
+  776|   	}
+  777|
+
+Error: RESOURCE_LEAK (CWE-772): [#def7]
+shadow-4.8.1/libmisc/idmapping.c:188: alloc_fn: Storage is returned from allocation function "xmalloc".
+shadow-4.8.1/libmisc/idmapping.c:188: var_assign: Assigning: "buf" = storage returned from "xmalloc(bufsize)".
+shadow-4.8.1/libmisc/idmapping.c:188: var_assign: Assigning: "pos" = "buf".
+shadow-4.8.1/libmisc/idmapping.c:213: noescape: Resource "buf" is not freed or pointed-to in "write".
+shadow-4.8.1/libmisc/idmapping.c:219: leaked_storage: Variable "pos" going out of scope leaks the storage it points to.
+shadow-4.8.1/libmisc/idmapping.c:219: leaked_storage: Variable "buf" going out of scope leaks the storage it points to.
+  217|   	}
+  218|   	close(fd);
+  219|-> }
+
+Error: RESOURCE_LEAK (CWE-772): [#def8]
+shadow-4.8.1/libmisc/list.c:211: alloc_fn: Storage is returned from allocation function "xstrdup".
+shadow-4.8.1/libmisc/list.c:211: var_assign: Assigning: "members" = storage returned from "xstrdup(comma)".
+shadow-4.8.1/libmisc/list.c:217: var_assign: Assigning: "cp" = "members".
+shadow-4.8.1/libmisc/list.c:218: noescape: Resource "cp" is not freed or pointed-to in "strchr".
+shadow-4.8.1/libmisc/list.c:244: leaked_storage: Variable "cp" going out of scope leaks the storage it points to.
+shadow-4.8.1/libmisc/list.c:244: leaked_storage: Variable "members" going out of scope leaks the storage it points to.
+  242|   	if ('\0' == *members) {
+  243|   		*array = (char *) 0;
+  244|-> 		return array;
+  245|   	}
+  246|
+
+Error: RESOURCE_LEAK (CWE-772): [#def11]
+shadow-4.8.1/libmisc/myname.c:61: alloc_fn: Storage is returned from allocation function "xgetpwnam".
+shadow-4.8.1/libmisc/myname.c:61: var_assign: Assigning: "pw" = storage returned from "xgetpwnam(cp)".
+shadow-4.8.1/libmisc/myname.c:67: leaked_storage: Variable "pw" going out of scope leaks the storage it points to.
+   65|   	}
+   66|
+   67|-> 	return xgetpwuid (ruid);
+   68|   }
+   69|
+
+Error: RESOURCE_LEAK (CWE-772): [#def12]
+shadow-4.8.1/libmisc/user_busy.c:260: alloc_fn: Storage is returned from allocation function "opendir".
+shadow-4.8.1/libmisc/user_busy.c:260: var_assign: Assigning: "task_dir" = storage returned from "opendir(task_path)".
+shadow-4.8.1/libmisc/user_busy.c:262: noescape: Resource "task_dir" is not freed or pointed-to in "readdir".
+shadow-4.8.1/libmisc/user_busy.c:278: leaked_storage: Variable "task_dir" going out of scope leaks the storage it points to.
+  276|   					         _("%s: user %s is currently used by process %d\n"),
+  277|   					         Prog, name, pid);
+  278|-> 					return 1;
+  279|   				}
+  280|   			}
+
+Error: RESOURCE_LEAK (CWE-772): [#def20]
+shadow-4.8.1/src/newgrp.c:162: alloc_fn: Storage is returned from allocation function "xgetspnam".
+shadow-4.8.1/src/newgrp.c:162: var_assign: Assigning: "spwd" = storage returned from "xgetspnam(pwd->pw_name)".
+shadow-4.8.1/src/newgrp.c:234: leaked_storage: Variable "spwd" going out of scope leaks the storage it points to.
+  232|   	}
+  233|
+  234|-> 	return;
+  235|
+  236|   failure:
+
+Error: RESOURCE_LEAK (CWE-772): [#def21]
+shadow-4.8.1/src/passwd.c:530: alloc_fn: Storage is returned from allocation function "xstrdup".
+shadow-4.8.1/src/passwd.c:530: var_assign: Assigning: "cp" = storage returned from "xstrdup(crypt_passwd)".
+shadow-4.8.1/src/passwd.c:551: noescape: Resource "cp" is not freed or pointed-to in "strlen".
+shadow-4.8.1/src/passwd.c:554: noescape: Resource "cp" is not freed or pointed-to in "strcat". [Note: The source code implementation of the function has been overridden by a builtin model.]
+shadow-4.8.1/src/passwd.c:555: overwrite_var: Overwriting "cp" in "cp = newpw" leaks the storage that "cp" points to.
+  553|   		strcpy (newpw, "!");
+  554|   		strcat (newpw, cp);
+  555|-> 		cp = newpw;
+  556|   	}
+  557|   	return cp;
+---
+ lib/commonio.c      | 8 ++++++--
+ libmisc/addgrps.c   | 6 +++++-
+ libmisc/chowntty.c  | 1 +
+ libmisc/copydir.c   | 6 ++++++
+ libmisc/idmapping.c | 1 +
+ libmisc/list.c      | 3 +++
+ libmisc/myname.c    | 3 +++
+ libmisc/user_busy.c | 1 +
+ src/newgrp.c        | 3 ++-
+ src/passwd.c        | 5 +++++
+ 10 files changed, 33 insertions(+), 4 deletions(-)
+
+diff --git a/lib/commonio.c b/lib/commonio.c
+index 23ac91f9..cef404b9 100644
+--- a/lib/commonio.c
++++ b/lib/commonio.c
+@@ -336,8 +336,12 @@ static int create_backup (const char *backup, FILE * fp)
+ 		/* FIXME: unlink the backup file? */
+ 		return -1;
+ 	}
+-	if (   (fsync (fileno (bkfp)) != 0)
+-	    || (fclose (bkfp) != 0)) {
++	if (fsync (fileno (bkfp)) != 0) {
++		(void) fclose (bkfp);
++		/* FIXME: unlink the backup file? */
++		return -1;
++	}
++	if (fclose (bkfp) != 0) {
+ 		/* FIXME: unlink the backup file? */
+ 		return -1;
+ 	}
+diff --git a/libmisc/addgrps.c b/libmisc/addgrps.c
+index 2e38e340..76c172a5 100644
+--- a/libmisc/addgrps.c
++++ b/libmisc/addgrps.c
+@@ -57,6 +57,7 @@ int add_groups (const char *list)
+ 	bool added;
+ 	char *token;
+ 	char buf[1024];
++	int ret;
+ 
+ 	if (strlen (list) >= sizeof (buf)) {
+ 		errno = EINVAL;
+@@ -120,9 +121,12 @@ int add_groups (const char *list)
+ 	}
+ 
+ 	if (added) {
+-		return setgroups ((size_t)ngroups, grouplist);
++		ret = setgroups ((size_t)ngroups, grouplist);
++		free (grouplist);
++		return ret;
+ 	}
+ 
++	free (grouplist);
+ 	return 0;
+ }
+ #else				/* HAVE_SETGROUPS && !USE_PAM */
+diff --git a/libmisc/chowntty.c b/libmisc/chowntty.c
+index ea706c4f..a42ab622 100644
+--- a/libmisc/chowntty.c
++++ b/libmisc/chowntty.c
+@@ -62,6 +62,7 @@ void chown_tty (const struct passwd *info)
+ 	grent = getgr_nam_gid (getdef_str ("TTYGROUP"));
+ 	if (NULL != grent) {
+ 		gid = grent->gr_gid;
++		gr_free (grent);
+ 	} else {
+ 		gid = info->pw_gid;
+ 	}
+diff --git a/libmisc/copydir.c b/libmisc/copydir.c
+index 91d391f8..015e1b68 100644
+--- a/libmisc/copydir.c
++++ b/libmisc/copydir.c
+@@ -745,6 +745,7 @@ static int copy_file (const char *src, const char *dst,
+ 	}
+ #ifdef WITH_SELINUX
+ 	if (set_selinux_file_context (dst, NULL) != 0) {
++		(void) close (ifd);
+ 		return -1;
+ 	}
+ #endif				/* WITH_SELINUX */
+@@ -771,12 +772,16 @@ static int copy_file (const char *src, const char *dst,
+ 	        && (errno != 0))
+ #endif				/* WITH_ATTR */
+ 	   ) {
++		if (ofd >= 0) {
++			(void) close (ofd);
++		}
+ 		(void) close (ifd);
+ 		return -1;
+ 	}
+ 
+ 	while ((cnt = read (ifd, buf, sizeof buf)) > 0) {
+ 		if (write (ofd, buf, (size_t)cnt) != cnt) {
++			(void) close (ofd);
+ 			(void) close (ifd);
+ 			return -1;
+ 		}
+@@ -786,6 +791,7 @@ static int copy_file (const char *src, const char *dst,
+ 
+ #ifdef HAVE_FUTIMES
+ 	if (futimes (ofd, mt) != 0) {
++		(void) close (ofd);
+ 		return -1;
+ 	}
+ #endif				/* HAVE_FUTIMES */
+diff --git a/libmisc/idmapping.c b/libmisc/idmapping.c
+index b0ae488c..3324f671 100644
+--- a/libmisc/idmapping.c
++++ b/libmisc/idmapping.c
+@@ -241,4 +241,5 @@ void write_mapping(int proc_dir_fd, int ranges, struct map_range *mappings,
+ 		exit(EXIT_FAILURE);
+ 	}
+ 	close(fd);
++	free(buf);
+ }
+diff --git a/libmisc/list.c b/libmisc/list.c
+index 2da734a7..d85d5f20 100644
+--- a/libmisc/list.c
++++ b/libmisc/list.c
+@@ -241,6 +241,7 @@ bool is_on_list (char *const *list, const char *member)
+ 
+ 	if ('\0' == *members) {
+ 		*array = (char *) 0;
++		free (members);
+ 		return array;
+ 	}
+ 
+@@ -262,6 +263,8 @@ bool is_on_list (char *const *list, const char *member)
+ 		}
+ 	}
+ 
++	free (members);
++
+ 	/*
+ 	 * Return the new array of pointers
+ 	 */
+diff --git a/libmisc/myname.c b/libmisc/myname.c
+index 05efdad3..e1b7f702 100644
+--- a/libmisc/myname.c
++++ b/libmisc/myname.c
+@@ -62,6 +62,9 @@
+ 		if ((NULL != pw) && (pw->pw_uid == ruid)) {
+ 			return pw;
+ 		}
++		if (NULL != pw) {
++			pw_free (pw);
++		}
+ 	}
+ 
+ 	return xgetpwuid (ruid);
+diff --git a/libmisc/user_busy.c b/libmisc/user_busy.c
+index 4b507fe2..3deebfc3 100644
+--- a/libmisc/user_busy.c
++++ b/libmisc/user_busy.c
+@@ -269,6 +269,7 @@ static int user_busy_processes (const char *name, uid_t uid)
+ 				}
+ 				if (check_status (name, task_path+6, uid) != 0) {
+ 					(void) closedir (proc);
++					(void) closedir (task_dir);
+ #ifdef ENABLE_SUBIDS
+ 					sub_uid_close();
+ #endif
+diff --git a/src/newgrp.c b/src/newgrp.c
+index 2aa28b87..2b9293b4 100644
+--- a/src/newgrp.c
++++ b/src/newgrp.c
+@@ -162,8 +162,9 @@ static void check_perms (const struct group *grp,
+ 	 */
+ 	spwd = xgetspnam (pwd->pw_name);
+ 	if (NULL != spwd) {
+-		pwd->pw_passwd = spwd->sp_pwdp;
++		pwd->pw_passwd = xstrdup (spwd->sp_pwdp);
+ 	}
++	spw_free (spwd);
+ 
+ 	if ((pwd->pw_passwd[0] == '\0') && (grp->gr_passwd[0] != '\0')) {
+ 		needspasswd = true;
+diff --git a/src/passwd.c b/src/passwd.c
+index 3d4206f4..9d7df331 100644
+--- a/src/passwd.c
++++ b/src/passwd.c
+@@ -553,6 +553,11 @@ static char *update_crypt_pw (char *cp)
+ 
+ 		strcpy (newpw, "!");
+ 		strcat (newpw, cp);
++#ifndef USE_PAM
++		if (do_update_pwd) {
++			free (cp);
++		}
++#endif /* USE_PAM */
+ 		cp = newpw;
+ 	}
+ 	return cp;
+-- 
+2.31.1
+

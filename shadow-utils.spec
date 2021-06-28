@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.8.1
-Release: 12%{?dist}
+Release: 13%{?dist}
 Epoch: 2
 URL: https://github.com/shadow-maint/shadow
 Source0: https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz
@@ -99,6 +99,13 @@ Patch57: shadow-4.8.1-libsubid_make_logfd_not_extern.patch
 Patch58: shadow-4.8.1-yescrypt-support.patch
 # https://github.com/shadow-maint/shadow/commit/7a3bb4d0ea8166acc539c788a8ce943acf4a6aa7
 Patch59: shadow-4.8.1-fix_YESCRYPT_salt_cost_param_type.patch
+# https://github.com/shadow-maint/shadow/commit/c44b71cec25d60efc51aec9de3abce1f6efbfcf5
+# https://github.com/shadow-maint/shadow/commit/fd9d79a1a3438ba7703939cfcd45fc266782c64e
+# https://github.com/shadow-maint/shadow/commit/8281c82e324b57b3a4b520afad26b43ce128d521
+# https://github.com/shadow-maint/shadow/commit/1aed7ae945aafaeb253fc89a7ecedeaedf72654e
+# https://github.com/shadow-maint/shadow/commit/5d0d7841971cc53d9a9d1aefe12f00204115bf6a
+# https://github.com/shadow-maint/shadow/commit/e65cc6aebcb4132fa413f00a905216a5b35b3d57
+Patch60: shadow-4.8.1-covscan_fixes.patch
 
 License: BSD and GPLv2+
 BuildRequires: make
@@ -183,6 +190,7 @@ Development files for shadow-utils-subid.
 %patch57 -p1 -b .libsubid_make_logfd_not_extern
 %patch58 -p1 -b .yescrypt
 %patch59 -p1 -b .YESCRYPT_salt_cost_param_type
+%patch60 -p1 -b .covscan_fixes
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -352,6 +360,9 @@ rm -f $RPM_BUILD_ROOT/%{_libdir}/libsubid.la
 %{_libdir}/libsubid.so
 
 %changelog
+* Mon Jun 28 2021 Iker Pedrosa <ipedrosa@redhat.com> - 2:4.8.1-13
+- Covscan fixes
+
 * Mon Jun 21 2021 Björn Esser <besser82@fedoraproject.org> - 2:4.8.1-12
 - Backport support for yescrypt hash method
 - Add a patch to fix the parameter type of YESCRYPT_salt_cost()
