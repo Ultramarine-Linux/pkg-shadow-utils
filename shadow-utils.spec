@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.8.1
-Release: 14%{?dist}
+Release: 15%{?dist}
 Epoch: 2
 URL: https://github.com/shadow-maint/shadow
 Source0: https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz
@@ -114,6 +114,8 @@ Patch62: shadow-4.8.1-salt_c_sanitize_code.patch
 Patch63: shadow-4.8.1-salt_c_comments.patch
 # https://github.com/shadow-maint/shadow/commit/bc8257cf73328e450511b13cbd35e1994feccb30
 Patch64: shadow-4.8.1-salt_c_use_dev_urandom.patch
+# https://github.com/shadow-maint/shadow/commit/2c542f6c65f858b3dba20f58db4da56572f67a54
+Patch65: shadow-4.8.1-useradd_create_relative_home_path_correctly.patch
 
 License: BSD and GPLv2+
 BuildRequires: make
@@ -203,6 +205,7 @@ Development files for shadow-utils-subid.
 %patch62 -p1 -b .sanitize_code
 %patch63 -p1 -b .comments
 %patch64 -p1 -b .use_dev_urandom
+%patch65 -p1 -b .useradd_create_relative_home_path_correctly
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -372,6 +375,9 @@ rm -f $RPM_BUILD_ROOT/%{_libdir}/libsubid.la
 %{_libdir}/libsubid.so
 
 %changelog
+* Tue Jun 29 2021 Iker Pedrosa <ipedrosa@redhat.com> - 2:4.8.1-15
+- useradd: free correct pointer (#1976809)
+
 * Mon Jun 28 2021 Björn Esser <besser82@fedoraproject.org> - 2:4.8.1-14
 - Add a patch to fix the used prefix for the bcrypt hash method
 - Add a patch to cleanup the code in libmisc/salt.c
