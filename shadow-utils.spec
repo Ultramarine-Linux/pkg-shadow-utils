@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.8.1
-Release: 15%{?dist}
+Release: 16%{?dist}
 Epoch: 2
 URL: https://github.com/shadow-maint/shadow
 Source0: https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz
@@ -116,6 +116,8 @@ Patch63: shadow-4.8.1-salt_c_comments.patch
 Patch64: shadow-4.8.1-salt_c_use_dev_urandom.patch
 # https://github.com/shadow-maint/shadow/commit/2c542f6c65f858b3dba20f58db4da56572f67a54
 Patch65: shadow-4.8.1-useradd_create_relative_home_path_correctly.patch
+# https://github.com/shadow-maint/shadow/commit/c82ed0c15e0e9e47df0b4c22672b72e35f061a9d
+Patch66: shadow-4.8.1-getentropy_random_bytes.patch
 
 License: BSD and GPLv2+
 BuildRequires: make
@@ -206,6 +208,7 @@ Development files for shadow-utils-subid.
 %patch63 -p1 -b .comments
 %patch64 -p1 -b .use_dev_urandom
 %patch65 -p1 -b .useradd_create_relative_home_path_correctly
+%patch66 -p1 -b .getentropy_random_bytes
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -375,6 +378,9 @@ rm -f $RPM_BUILD_ROOT/%{_libdir}/libsubid.la
 %{_libdir}/libsubid.so
 
 %changelog
+* Sun Jul 04 2021 Björn Esser <besser82@fedoraproject.org> - 2:4.8.1-16
+- Add a patch to obtain random bytes using getentropy()
+
 * Tue Jun 29 2021 Iker Pedrosa <ipedrosa@redhat.com> - 2:4.8.1-15
 - useradd: free correct pointer (#1976809)
 
