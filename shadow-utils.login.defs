@@ -219,7 +219,20 @@ ENCRYPT_METHOD YESCRYPT
 
 # Currently SHA_CRYPT_MIN_ROUNDS is not supported
 
-# Currently BCRYPT_MIN_ROUNDS and BCRYPT_MAX_ROUNDS are not supported
+#
+# Only works if ENCRYPT_METHOD is set to BCRYPT.
+#
+# Define the number of BCRYPT rounds.
+# With a lot of rounds, it is more difficult to brute-force the password.
+# However, more CPU resources will be needed to authenticate users if
+# this value is increased.
+#
+# If not specified, 13 rounds will be attempted.
+# If only one of the MIN or MAX values is set, then this value will be used.
+# If MIN > MAX, the highest value will be used.
+#
+#BCRYPT_MIN_ROUNDS 13
+#BCRYPT_MAX_ROUNDS 31
 
 #
 # Only works if ENCRYPT_METHOD is set to YESCRYPT.

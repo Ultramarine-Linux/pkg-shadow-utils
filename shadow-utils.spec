@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.8.1
-Release: 16%{?dist}
+Release: 17%{?dist}
 Epoch: 2
 URL: https://github.com/shadow-maint/shadow
 Source0: https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz
@@ -238,6 +238,7 @@ autoreconf
         --enable-man \
         --with-audit \
         --with-sha-crypt \
+        --with-bcrypt \
         --with-yescrypt \
         --with-selinux \
         --without-libcrack \
@@ -381,6 +382,9 @@ rm -f $RPM_BUILD_ROOT/%{_libdir}/libsubid.la
 %{_libdir}/libsubid.so
 
 %changelog
+* Mon Jul 12 2021 Björn Esser <besser82@fedoraproject.org> - 2:4.8.1-17
+- Enable bcrypt support, as libxcrypt supports it well
+
 * Sun Jul 04 2021 Björn Esser <besser82@fedoraproject.org> - 2:4.8.1-16
 - Add a patch to obtain random bytes using getentropy()
 - Update shadow-4.8-crypt_h.patch with the upstreamed version
