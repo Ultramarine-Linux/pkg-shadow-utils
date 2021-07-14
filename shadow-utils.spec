@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.8.1
-Release: 18%{?dist}
+Release: 19%{?dist}
 Epoch: 2
 URL: https://github.com/shadow-maint/shadow
 Source0: https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz
@@ -120,6 +120,8 @@ Patch65: shadow-4.8.1-useradd_create_relative_home_path_correctly.patch
 Patch66: shadow-4.8.1-getentropy_random_bytes.patch
 # https://github.com/shadow-maint/shadow/commit/ea04eb301d08c0c58f1120f87d4ec184d3983ce5
 Patch67: shadow-4.8.1-crypt_gensalt.patch
+# https://github.com/shadow-maint/shadow/commit/ffd35d89021a9b8375a9246082afc6fc270a93ee
+Patch68: shadow-4.8.1-salt_c_fix_fread.patch
 
 License: BSD and GPLv2+
 BuildRequires: make
@@ -212,6 +214,7 @@ Development files for shadow-utils-subid.
 %patch65 -p1 -b .useradd_create_relative_home_path_correctly
 %patch66 -p1 -b .getentropy_random_bytes
 %patch67 -p1 -b .crypt_gensalt
+%patch68 -p1 -b .fix_fread
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -382,6 +385,9 @@ rm -f $RPM_BUILD_ROOT/%{_libdir}/libsubid.la
 %{_libdir}/libsubid.so
 
 %changelog
+* Wed Jul 14 2021 Björn Esser <besser82@fedoraproject.org> - 2:4.8.1-19
+- Add patch to fix 'fread returns element count, not element size'
+
 * Wed Jul 14 2021 Iker Pedrosa <ipedrosa@redhat.com> - 2:4.8.1-18
 - Fix regression issues detected in rhbz#667593 and rhbz#672510
 
