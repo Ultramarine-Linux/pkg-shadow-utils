@@ -731,15 +731,6 @@ index 2da734a7..d85d5f20 100644
  		return array;
  	}
  
-@@ -262,6 +263,8 @@ bool is_on_list (char *const *list, const char *member)
- 		}
- 	}
- 
-+	free (members);
-+
- 	/*
- 	 * Return the new array of pointers
- 	 */
 diff --git a/libmisc/myname.c b/libmisc/myname.c
 index 05efdad3..e1b7f702 100644
 --- a/libmisc/myname.c

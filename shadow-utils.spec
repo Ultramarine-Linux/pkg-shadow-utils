@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.8.1
-Release: 17%{?dist}
+Release: 18%{?dist}
 Epoch: 2
 URL: https://github.com/shadow-maint/shadow
 Source0: https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz
@@ -382,6 +382,9 @@ rm -f $RPM_BUILD_ROOT/%{_libdir}/libsubid.la
 %{_libdir}/libsubid.so
 
 %changelog
+* Wed Jul 14 2021 Iker Pedrosa <ipedrosa@redhat.com> - 2:4.8.1-18
+- Fix regression issues detected in rhbz#667593 and rhbz#672510
+
 * Mon Jul 12 2021 Björn Esser <besser82@fedoraproject.org> - 2:4.8.1-17
 - Enable bcrypt support, as libxcrypt supports it well
 
