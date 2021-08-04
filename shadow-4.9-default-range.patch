@@ -1,7 +1,6 @@
-Index: shadow-4.5/lib/semanage.c
-===================================================================
---- shadow-4.5.orig/lib/semanage.c
-+++ shadow-4.5/lib/semanage.c
+diff -up shadow-4.9/lib/semanage.c.default-range shadow-4.9/lib/semanage.c
+--- shadow-4.9/lib/semanage.c.default-range	2021-07-22 23:55:35.000000000 +0200
++++ shadow-4.9/lib/semanage.c	2021-08-02 12:43:16.822817392 +0200
 @@ -143,6 +143,7 @@ static int semanage_user_mod (semanage_h
  		goto done;
  	}
@@ -9,7 +8,7 @@ Index: shadow-4.5/lib/semanage.c
 +#if 0
  	ret = semanage_seuser_set_mlsrange (handle, seuser, DEFAULT_SERANGE);
  	if (ret != 0) {
- 		fprintf (stderr,
+ 		fprintf (shadow_logfd,
 @@ -150,6 +151,7 @@ static int semanage_user_mod (semanage_h
  		ret = 1;
  		goto done;
@@ -25,7 +24,7 @@ Index: shadow-4.5/lib/semanage.c
 +#if 0
  	ret = semanage_seuser_set_mlsrange (handle, seuser, DEFAULT_SERANGE);
  	if (ret != 0) {
- 		fprintf (stderr,
+ 		fprintf (shadow_logfd,
 @@ -208,6 +211,7 @@ static int semanage_user_add (semanage_h
  		ret = 1;
  		goto done;

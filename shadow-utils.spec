@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
-Version: 4.8.1
-Release: 20%{?dist}
+Version: 4.9
+Release: 1%{?dist}
 Epoch: 2
 URL: https://github.com/shadow-maint/shadow
 Source0: https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz
@@ -17,111 +17,37 @@ Source6: shadow-utils.HOME_MODE.xml
 
 ### Patches ###
 # Misc small changes - most probably non-upstreamable
-Patch0: shadow-4.6-redhat.patch
+Patch0: shadow-4.9-redhat.patch
 # Be more lenient with acceptable user/group names - non upstreamable
 Patch1: shadow-4.8-goodname.patch
-# https://github.com/shadow-maint/shadow/commit/7384865775b0203b9cf5337a047744f0a4555868
-Patch2: shadow-4.1.5.1-info-parent-dir.patch
-# Misc SElinux related changes - upstreamability unknown
-Patch6: shadow-4.8-selinux.patch
-# https://github.com/shadow-maint/shadow/commit/a8361e741040cd926c9c93aac89820052531b1a3
-Patch11: shadow-4.1.5.1-logmsg.patch
+# Move create home to the end of main - upstreamability unknown
+Patch2: shadow-4.9-move-create-home.patch
 # SElinux related - upstreamability unknown
-Patch14: shadow-4.1.5.1-default-range.patch
-# Misc manual page changes
-# https://github.com/shadow-maint/shadow/commit/c0818ab01d1896784245eedec9495e1e6e0260af
-# Changes in man/groupmems.8.xml, man/ja/man5/login.defs.5 and man/login.defs.5.xml not upstreamed
-Patch15: shadow-4.8.1-manfix.patch
-# https://github.com/shadow-maint/shadow/commit/f4cbf38ad7801bab6fae50e9b5a2effc3c48a1ea
-Patch17: shadow-4.1.5.1-userdel-helpfix.patch
+Patch3: shadow-4.9-default-range.patch
+# Misc manual page changes - non-upstreamable
+Patch4: shadow-4.9-manfix.patch
 # Date parsing improvement - could be upstreamed
-Patch19: shadow-4.2.1-date-parsing.patch
+Patch5: shadow-4.2.1-date-parsing.patch
 # Additional error message - could be upstreamed
-Patch21: shadow-4.6-move-home.patch
+Patch6: shadow-4.6-move-home.patch
 # Audit message changes - upstreamability unknown
-Patch22: shadow-4.8.1-audit-update.patch
+Patch7: shadow-4.9-audit-update.patch
 # Changes related to password unlocking - could be upstreamed
-Patch23: shadow-4.5-usermod-unlock.patch
+Patch8: shadow-4.5-usermod-unlock.patch
 # Additional SElinux related changes - upstreamability unknown
-Patch28: shadow-4.8-selinux-perms.patch
+Patch9: shadow-4.8-selinux-perms.patch
 # Handle NULL return from *time funcs - could be upstreamed
-Patch29: shadow-4.2.1-null-tm.patch
-# SElinux related - upstreamability unknown
-Patch31: shadow-4.6-getenforce.patch
-# https://github.com/shadow-maint/shadow/commit/c93897a8d71b9b1790caf3b2dee38dbe62518ae3
-Patch32: shadow-4.8-crypt_h.patch
+Patch10: shadow-4.9-null-tm.patch
 # Handle /etc/passwd corruption - could be upstreamed
-Patch33: shadow-4.8-long-entry.patch
+Patch11: shadow-4.8-long-entry.patch
 # Limit uid/gid allocation to non-zero - could be upstreamed
-Patch38: shadow-4.6-sysugid-min-limit.patch
+Patch12: shadow-4.6-sysugid-min-limit.patch
 # Ignore LOGIN_PLAIN_PROMPT in login.defs - upstreamability unknown
-Patch40: shadow-4.8-ignore-login-prompt.patch
-# Generate /var/spool/mail/$USER with the proper SELinux user identity - already upstreamed
-Patch42: shadow-4.8-useradd-selinux-mail.patch
-# Clarify useradd man regarding "-d" parameter - already upstreamed
-Patch43: shadow-4.8.1-useradd-man-clarification.patch
-# https://github.com/shadow-maint/shadow/commit/140510de9de4771feb3af1d859c09604043a4c9b
-# https://github.com/shadow-maint/shadow/commit/8762f465d487a52bf68f9c0b7c3c1eb3caea7bc9
-Patch44: shadow-4.8.1-check-local-groups.patch
-# https://github.com/shadow-maint/shadow/commit/599cc003daf833bffdc9cbe0d33dc8b3e7ec74c8
-Patch45: shadow-4.8.1-commonio-force-lock-file-sync.patch
-# https://github.com/shadow-maint/shadow/commit/df6ec1d1693c8c80c323b40d6fc82bb549363db3
-Patch46: shadow-4.8.1-man-include-lastlog-file-caveat.patch
-# https://github.com/shadow-maint/shadow/commit/0a7888b1fad613a052b988b01a71933b67296e68
-# https://github.com/shadow-maint/shadow/commit/607f1dd549cf9abc87af1cf29275f0d2d11eea29
-# https://github.com/shadow-maint/shadow/commit/b5fb1b38eea2fb0489ed088c82daf6700e72363e
-# https://github.com/shadow-maint/shadow/commit/43a917cce54019799a8de037fd63780a2b640afc
-Patch47: shadow-4.8.1-libsubid_creation.patch
-# https://github.com/shadow-maint/shadow/commit/514c1328b6c90d817ae0a9f7addfb3c9a11a275a
-# https://github.com/shadow-maint/shadow/commit/8492dee6632e340dee76eee895c3e30877bebf45
-# https://github.com/shadow-maint/shadow/commit/0f4347d1483191b2142546416a9eefe0c9459600
-Patch48: shadow-4.8.1-libsubid_nsswitch_support.patch
-# https://github.com/shadow-maint/shadow/commit/186b1b7ac1a68d0fcc618a22da1a99232b420911
-Patch49: shadow-4.8.1-man-mention-nss-in-newuidmap.patch
-# https://github.com/shadow-maint/shadow/commit/f9831a4a1a20b0e8fe47cc72ec20018ec04dbb90
-Patch50: shadow-4.8.1-libsubid_not_print_error_messages.patch
-# https://github.com/shadow-maint/shadow/commit/c6cab4a7bafa18d9d65a333cac1261e7b5e32bc9
-Patch51: shadow-4.8.1-libsubid_init_return_false.patch
-# https://github.com/shadow-maint/shadow/commit/2f1f45d64fc7c10e7a3cbe00e89f63714343e526
-Patch52: shadow-4.8.1-useradd_SUB_UID_COUNT-0.patch
-# https://github.com/shadow-maint/shadow/commit/ea7af4e1543c63590d4107ae075fea385028997d
-Patch53: shadow-4.8.1-libsubid_simplify_ranges_variable.patch
-# https://github.com/shadow-maint/shadow/commit/0fe42f571c69f0105d31305f995c9887aeb9525e
-Patch54: shadow-4.8.1-libsubid_init_not_print_error_messages.patch
-# https://github.com/shadow-maint/shadow/commit/ec1951c181faed188464396b2cfdd2efb726c7f3
-Patch55: shadow-4.8.1-libsubid_fix_newusers_nss_provides_subids.patch
-# https://github.com/shadow-maint/shadow/commit/087112244327be50abc24f9ec8afbf60ae8b2dec
-# https://github.com/shadow-maint/shadow/pull/353
-Patch56: shadow-4.8.1-man_clarify_subid_delegation.patch
-# https://github.com/shadow-maint/shadow/commit/bd920ab36a6c641e4a8769f8c7f8ca738ec61820
-Patch57: shadow-4.8.1-libsubid_make_logfd_not_extern.patch
-# https://github.com/shadow-maint/shadow/commit/5cd04d03f94622c12220d4a6352824af081b8531
-Patch58: shadow-4.8.1-yescrypt-support.patch
-# https://github.com/shadow-maint/shadow/commit/7a3bb4d0ea8166acc539c788a8ce943acf4a6aa7
-Patch59: shadow-4.8.1-fix_YESCRYPT_salt_cost_param_type.patch
-# https://github.com/shadow-maint/shadow/commit/c44b71cec25d60efc51aec9de3abce1f6efbfcf5
-# https://github.com/shadow-maint/shadow/commit/fd9d79a1a3438ba7703939cfcd45fc266782c64e
-# https://github.com/shadow-maint/shadow/commit/8281c82e324b57b3a4b520afad26b43ce128d521
-# https://github.com/shadow-maint/shadow/commit/1aed7ae945aafaeb253fc89a7ecedeaedf72654e
-# https://github.com/shadow-maint/shadow/commit/5d0d7841971cc53d9a9d1aefe12f00204115bf6a
-# https://github.com/shadow-maint/shadow/commit/e65cc6aebcb4132fa413f00a905216a5b35b3d57
-Patch60: shadow-4.8.1-covscan_fixes.patch
-# https://github.com/shadow-maint/shadow/commit/738d92a4bd99a2038aa5f97b2fc85daa7011e403
-Patch61: shadow-4.8.1-fix_bcrypt_prefix.patch
-# https://github.com/shadow-maint/shadow/commit/14b108728a5d55c3d478a170c39f0e2ffd4de1b0
-Patch62: shadow-4.8.1-salt_c_sanitize_code.patch
-# https://github.com/shadow-maint/shadow/commit/dbf230e4cf823dd6b6a3bad6d29dfad4f0ffa8fc
-Patch63: shadow-4.8.1-salt_c_comments.patch
-# https://github.com/shadow-maint/shadow/commit/bc8257cf73328e450511b13cbd35e1994feccb30
-Patch64: shadow-4.8.1-salt_c_use_dev_urandom.patch
-# https://github.com/shadow-maint/shadow/commit/2c542f6c65f858b3dba20f58db4da56572f67a54
-Patch65: shadow-4.8.1-useradd_create_relative_home_path_correctly.patch
-# https://github.com/shadow-maint/shadow/commit/c82ed0c15e0e9e47df0b4c22672b72e35f061a9d
-Patch66: shadow-4.8.1-getentropy_random_bytes.patch
-# https://github.com/shadow-maint/shadow/commit/ea04eb301d08c0c58f1120f87d4ec184d3983ce5
-Patch67: shadow-4.8.1-crypt_gensalt.patch
-# https://github.com/shadow-maint/shadow/commit/ffd35d89021a9b8375a9246082afc6fc270a93ee
-Patch68: shadow-4.8.1-salt_c_fix_fread.patch
+Patch13: shadow-4.8-ignore-login-prompt.patch
+# https://github.com/shadow-maint/shadow/pull/395
+Patch14: shadow-4.9-newuidmap-libeconf-dependency.patch
+# https://github.com/shadow-maint/shadow/pull/397
+Patch15: shadow-4.9-usermod-allow-all-group-types.patch
 
 License: BSD and GPLv2+
 BuildRequires: make
@@ -171,50 +97,20 @@ Development files for shadow-utils-subid.
 %setup -q -n shadow-%{version}
 %patch0 -p1 -b .redhat
 %patch1 -p1 -b .goodname
-%patch2 -p1 -b .info-parent-dir
-%patch6 -p1 -b .selinux
-%patch11 -p1 -b .logmsg
-%patch14 -p1 -b .default-range
-%patch15 -p1 -b .manfix
-%patch17 -p1 -b .userdel
-%patch19 -p1 -b .date-parsing
-%patch21 -p1 -b .move-home
-%patch22 -p1 -b .audit-update
-%patch23 -p1 -b .unlock
-%patch28 -p1 -b .selinux-perms
-%patch29 -p1 -b .null-tm
-%patch31 -p1 -b .getenforce
-%patch32 -p1 -b .crypt_h
-%patch33 -p1 -b .long-entry
-%patch38 -p1 -b .sysugid-min-limit
-%patch40 -p1 -b .login-prompt
-%patch42 -p1 -b .useradd-selinux-mail
-%patch43 -p1 -b .useradd-man-clarification
-%patch44 -p1 -b .check-local-groups
-%patch45 -p1 -b .commonio-force-lock-file-sync
-%patch46 -p1 -b .man-include-lastlog-file-caveat
-%patch47 -p1 -b .libsubid_creation
-%patch48 -p1 -b .libsubid_nsswitch_support
-%patch49 -p1 -b .man-mention-nss-in-newuidmap
-%patch50 -p1 -b .libsubid_not_print_error_messages
-%patch51 -p1 -b .libsubid_init_return_false
-%patch52 -p1 -b .useradd_SUB_UID_COUNT-0
-%patch53 -p1 -b .libsubid_simplify_ranges_variable
-%patch54 -p1 -b .libsubid_init_not_print_error_messages
-%patch55 -p1 -b .libsubid_fix_newusers_nss_provides_subids
-%patch56 -p1 -b .man_clarify_subid_delegation
-%patch57 -p1 -b .libsubid_make_logfd_not_extern
-%patch58 -p1 -b .yescrypt
-%patch59 -p1 -b .YESCRYPT_salt_cost_param_type
-%patch60 -p1 -b .covscan_fixes
-%patch61 -p1 -b .bcrypt_prefix
-%patch62 -p1 -b .sanitize_code
-%patch63 -p1 -b .comments
-%patch64 -p1 -b .use_dev_urandom
-%patch65 -p1 -b .useradd_create_relative_home_path_correctly
-%patch66 -p1 -b .getentropy_random_bytes
-%patch67 -p1 -b .crypt_gensalt
-%patch68 -p1 -b .fix_fread
+%patch2 -p1 -b .move-create-home
+%patch3 -p1 -b .default-range
+%patch4 -p1 -b .manfix
+%patch5 -p1 -b .date-parsing
+%patch6 -p1 -b .move-home
+%patch7 -p1 -b .audit-update
+%patch8 -p1 -b .unlock
+%patch9 -p1 -b .selinux-perms
+%patch10 -p1 -b .null-tm
+%patch11 -p1 -b .long-entry
+%patch12 -p1 -b .sysugid-min-limit
+%patch13 -p1 -b .login-prompt
+%patch14 -p1 -b .newuidmap-libeconf-dependency
+%patch15 -p1 -b .usermod-allow-all-group-types
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -385,6 +281,11 @@ rm -f $RPM_BUILD_ROOT/%{_libdir}/libsubid.la
 %{_libdir}/libsubid.so
 
 %changelog
+* Wed Aug  4 2021 Iker Pedrosa <ipedrosa@redhat.com> - 2:4.9-1
+- Rebase to version 4.9
+- usermod: allow all group types with -G option (#1975327)
+- Clean spec file
+
 * Fri Jul 23 2021 Fedora Release Engineering <releng@fedoraproject.org> - 2:4.8.1-20
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
 

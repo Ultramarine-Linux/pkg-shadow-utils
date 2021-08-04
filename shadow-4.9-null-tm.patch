@@ -1,24 +1,3 @@
-Index: shadow-4.5/src/faillog.c
-===================================================================
---- shadow-4.5.orig/src/faillog.c
-+++ shadow-4.5/src/faillog.c
-@@ -163,10 +163,14 @@ static void print_one (/*@null@*/const s
- 	}
- 
- 	tm = localtime (&fl.fail_time);
-+	if (tm == NULL) {
-+		cp = "(unknown)";
-+	} else {
- #ifdef HAVE_STRFTIME
--	strftime (ptime, sizeof (ptime), "%D %H:%M:%S %z", tm);
--	cp = ptime;
-+		strftime (ptime, sizeof (ptime), "%D %H:%M:%S %z", tm);
-+		cp = ptime;
- #endif
-+	}
- 	printf ("%-9s   %5d    %5d   ",
- 	        pw->pw_name, fl.fail_cnt, fl.fail_max);
- 	/* FIXME: cp is not defined ifndef HAVE_STRFTIME */
 Index: shadow-4.5/src/chage.c
 ===================================================================
 --- shadow-4.5.orig/src/chage.c

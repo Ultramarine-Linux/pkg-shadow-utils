@@ -1,16 +1,16 @@
-diff -up shadow-4.6/src/useradd.c.redhat shadow-4.6/src/useradd.c
---- shadow-4.6/src/useradd.c.redhat	2018-04-29 18:42:37.000000000 +0200
-+++ shadow-4.6/src/useradd.c	2018-05-28 13:37:16.695651258 +0200
-@@ -98,7 +98,7 @@ const char *Prog;
- static gid_t def_group = 100;
+diff -up shadow-4.9/src/useradd.c.redhat shadow-4.9/src/useradd.c
+--- shadow-4.9/src/useradd.c.redhat	2021-07-22 23:55:35.000000000 +0200
++++ shadow-4.9/src/useradd.c	2021-08-02 11:45:11.942867250 +0200
+@@ -104,7 +104,7 @@ FILE *shadow_logfd = NULL;
+ static gid_t def_group = 1000;
  static const char *def_gname = "other";
  static const char *def_home = "/home";
--static const char *def_shell = "";
+-static const char *def_shell = "/bin/bash";
 +static const char *def_shell = "/sbin/nologin";
  static const char *def_template = SKEL_DIR;
- static const char *def_create_mail_spool = "no";
+ static const char *def_create_mail_spool = "yes";
  
-@@ -108,7 +108,7 @@ static const char *def_expire = "";
+@@ -114,7 +114,7 @@ static const char *def_expire = "";
  #define	VALID(s)	(strcspn (s, ":\n") == strlen (s))
  
  static const char *user_name = "";
@@ -19,7 +19,7 @@ diff -up shadow-4.6/src/useradd.c.redhat shadow-4.6/src/useradd.c
  static uid_t user_id;
  static gid_t user_gid;
  static const char *user_comment = "";
-@@ -1114,9 +1114,9 @@ static void process_flags (int argc, cha
+@@ -1204,9 +1204,9 @@ static void process_flags (int argc, cha
  		};
  		while ((c = getopt_long (argc, argv,
  #ifdef WITH_SELINUX
@@ -31,7 +31,7 @@ diff -up shadow-4.6/src/useradd.c.redhat shadow-4.6/src/useradd.c
  #endif				/* !WITH_SELINUX */
  		                         long_options, NULL)) != -1) {
  			switch (c) {
-@@ -1267,6 +1267,7 @@ static void process_flags (int argc, cha
+@@ -1363,6 +1363,7 @@ static void process_flags (int argc, cha
  			case 'M':
  				Mflg = true;
  				break;
