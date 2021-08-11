@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.9
-Release: 1%{?dist}
+Release: 2%{?dist}
 Epoch: 2
 URL: https://github.com/shadow-maint/shadow
 Source0: https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz
@@ -44,10 +44,12 @@ Patch11: shadow-4.8-long-entry.patch
 Patch12: shadow-4.6-sysugid-min-limit.patch
 # Ignore LOGIN_PLAIN_PROMPT in login.defs - upstreamability unknown
 Patch13: shadow-4.8-ignore-login-prompt.patch
-# https://github.com/shadow-maint/shadow/pull/395
+# https://github.com/shadow-maint/shadow/commit/c6847011e8b656adacd9a0d2a78418cad0de34cb
 Patch14: shadow-4.9-newuidmap-libeconf-dependency.patch
-# https://github.com/shadow-maint/shadow/pull/397
+# https://github.com/shadow-maint/shadow/commit/e481437ab9ebe9a8bf8fbaabe986d42b2f765991
 Patch15: shadow-4.9-usermod-allow-all-group-types.patch
+# https://github.com/shadow-maint/shadow/pull/399
+Patch16: shadow-4.9-useradd-avoid-generating-empty-subid-range.patch
 
 License: BSD and GPLv2+
 BuildRequires: make
@@ -111,6 +113,7 @@ Development files for shadow-utils-subid.
 %patch13 -p1 -b .login-prompt
 %patch14 -p1 -b .newuidmap-libeconf-dependency
 %patch15 -p1 -b .usermod-allow-all-group-types
+%patch16 -p1 -b .useradd-avoid-generating-empty-subid-range
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -281,6 +284,9 @@ rm -f $RPM_BUILD_ROOT/%{_libdir}/libsubid.la
 %{_libdir}/libsubid.so
 
 %changelog
+* Mon Aug  9 2021 Iker Pedrosa <ipedrosa@redhat.com> - 2:4.9-2
+- useradd: avoid generating an empty subid range (#1990653)
+
 * Wed Aug  4 2021 Iker Pedrosa <ipedrosa@redhat.com> - 2:4.9-1
 - Rebase to version 4.9
 - usermod: allow all group types with -G option (#1975327)
