@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.8.1
-Release: 6%{?dist}
+Release: 7%{?dist}
 Epoch: 2
 URL: http://pkg-shadow.alioth.debian.org/
 Source0: https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz
@@ -55,7 +55,6 @@ Patch40: shadow-4.8-ignore-login-prompt.patch
 Patch42: shadow-4.8-useradd-selinux-mail.patch
 # Clarify useradd man regarding "-d" parameter - already upstreamed
 Patch43: shadow-4.8.1-useradd-man-clarification.patch
-# https://github.com/shadow-maint/shadow/commit/140510de9de4771feb3af1d859c09604043a4c9b
 # https://github.com/shadow-maint/shadow/commit/8762f465d487a52bf68f9c0b7c3c1eb3caea7bc9
 Patch44: shadow-4.8.1-check-local-groups.patch
 # https://github.com/shadow-maint/shadow/commit/599cc003daf833bffdc9cbe0d33dc8b3e7ec74c8
@@ -270,6 +269,9 @@ done
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Mon Aug 16 2021 Iker Pedrosa <ipedrosa@redhat.com> - 2:4.8.1-7
+- allow all types of groups when modifying supplementary groups (#1975327)
+
 * Mon Apr 26 2021 Iker Pedrosa <ipedrosa@redhat.com> - 2:4.8.1-6
 - man: include lastlog file caveat (#951564)
 - Upstream links to several patches
