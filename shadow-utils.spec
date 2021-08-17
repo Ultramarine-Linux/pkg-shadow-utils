@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.9
-Release: 2%{?dist}
+Release: 3%{?dist}
 Epoch: 2
 URL: https://github.com/shadow-maint/shadow
 Source0: https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz
@@ -48,8 +48,10 @@ Patch13: shadow-4.8-ignore-login-prompt.patch
 Patch14: shadow-4.9-newuidmap-libeconf-dependency.patch
 # https://github.com/shadow-maint/shadow/commit/e481437ab9ebe9a8bf8fbaabe986d42b2f765991
 Patch15: shadow-4.9-usermod-allow-all-group-types.patch
-# https://github.com/shadow-maint/shadow/pull/399
+# https://github.com/shadow-maint/shadow/commit/9dd720a28578eef5be8171697aae0906e4c53249
 Patch16: shadow-4.9-useradd-avoid-generating-empty-subid-range.patch
+# https://github.com/shadow-maint/shadow/commit/234e8fa7b134d1ebabfdad980a3ae5b63c046c62
+Patch17: shadow-4.9-libmisc-fix-default-value-in-SHA_get_salt_rounds.patch
 
 License: BSD and GPLv2+
 BuildRequires: make
@@ -114,6 +116,7 @@ Development files for shadow-utils-subid.
 %patch14 -p1 -b .newuidmap-libeconf-dependency
 %patch15 -p1 -b .usermod-allow-all-group-types
 %patch16 -p1 -b .useradd-avoid-generating-empty-subid-range
+%patch17 -p1 -b .libmisc-fix-default-value-in-SHA_get_salt_rounds
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -284,6 +287,9 @@ rm -f $RPM_BUILD_ROOT/%{_libdir}/libsubid.la
 %{_libdir}/libsubid.so
 
 %changelog
+* Tue Aug 17 2021 Iker Pedrosa <ipedrosa@redhat.com> - 2:4.9-3
+- libmisc: fix default value in SHA_get_salt_rounds()
+
 * Mon Aug  9 2021 Iker Pedrosa <ipedrosa@redhat.com> - 2:4.9-2
 - useradd: avoid generating an empty subid range (#1990653)
 
