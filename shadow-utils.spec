@@ -1,9 +1,8 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.9
-Release: 4%{?dist}
+Release: 3%{?dist}
 Epoch: 2
-License: BSD and GPLv2+
 URL: https://github.com/shadow-maint/shadow
 Source0: https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz
 Source1: https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz.asc
@@ -54,31 +53,19 @@ Patch16: shadow-4.9-useradd-avoid-generating-empty-subid-range.patch
 # https://github.com/shadow-maint/shadow/commit/234e8fa7b134d1ebabfdad980a3ae5b63c046c62
 Patch17: shadow-4.9-libmisc-fix-default-value-in-SHA_get_salt_rounds.patch
 
-### Dependencies ###
-Requires: audit-libs >= 1.6.5
-Requires: libselinux >= 1.25.2-1
-Requires: setup
-
-### Build Dependencies ###
-BuildRequires: audit-libs-devel >= 1.6.5
-BuildRequires: autoconf
-BuildRequires: automake
-BuildRequires: bison
-BuildRequires: docbook-dtds
-BuildRequires: docbook-style-xsl
-BuildRequires: flex
-BuildRequires: gcc
-BuildRequires: gettext-devel
-BuildRequires: itstool
-BuildRequires: libacl-devel
-BuildRequires: libattr-devel
-BuildRequires: libselinux-devel >= 1.25.2-1
-BuildRequires: libsemanage-devel
-BuildRequires: libtool
-BuildRequires: libxslt
+License: BSD and GPLv2+
 BuildRequires: make
-
-### Provides ###
+BuildRequires: gcc
+BuildRequires: libselinux-devel >= 1.25.2-1
+BuildRequires: audit-libs-devel >= 1.6.5
+BuildRequires: libsemanage-devel
+BuildRequires: libacl-devel, libattr-devel
+BuildRequires: bison, flex, docbook-style-xsl, docbook-dtds
+BuildRequires: autoconf, automake, libtool, gettext-devel
+BuildRequires: /usr/bin/xsltproc, /usr/bin/itstool
+Requires: libselinux >= 1.25.2-1
+Requires: audit-libs >= 1.6.5
+Requires: setup
 Provides: shadow = %{epoch}:%{version}-%{release}
 
 %description
@@ -300,10 +287,6 @@ rm -f $RPM_BUILD_ROOT/%{_libdir}/libsubid.la
 %{_libdir}/libsubid.so
 
 %changelog
-* Thu Sep 23 2021 Iker Pedrosa <ipedrosa@redhat.com> - 2:4.9-4
-- login.defs: include HMAC_CRYPTO_ALGO key
-- Clean spec file: organize dependencies and move License location
-
 * Tue Aug 17 2021 Iker Pedrosa <ipedrosa@redhat.com> - 2:4.9-3
 - libmisc: fix default value in SHA_get_salt_rounds()
 
