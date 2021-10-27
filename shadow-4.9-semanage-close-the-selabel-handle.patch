@@ -1,0 +1,61 @@
+From 234af5cf67fc1a3ba99fc246ba65869a3c416545 Mon Sep 17 00:00:00 2001
+From: Iker Pedrosa <ipedrosa@redhat.com>
+Date: Fri, 8 Oct 2021 13:13:13 +0200
+Subject: [PATCH] semanage: close the selabel handle
+
+Close the selabel handle to update the file_context. This means that the
+file_context will be remmaped and used by selabel_lookup() to return
+the appropriate context to label the home folder.
+
+Resolves: https://bugzilla.redhat.com/show_bug.cgi?id=1993081
+
+Signed-off-by: Iker Pedrosa <ipedrosa@redhat.com>
+---
+ lib/prototypes.h | 1 +
+ lib/selinux.c    | 5 +++++
+ lib/semanage.c   | 1 +
+ 3 files changed, 7 insertions(+)
+
+diff --git a/lib/prototypes.h b/lib/prototypes.h
+index 1d1586d4..b697e0ec 100644
+--- a/lib/prototypes.h
++++ b/lib/prototypes.h
+@@ -392,6 +392,7 @@ extern /*@observer@*/const char *crypt_make_salt (/*@null@*//*@observer@*/const
+ /* selinux.c */
+ #ifdef WITH_SELINUX
+ extern int set_selinux_file_context (const char *dst_name, mode_t mode);
++extern void reset_selinux_handle (void);
+ extern int reset_selinux_file_context (void);
+ extern int check_selinux_permit (const char *perm_name);
+ #endif
+diff --git a/lib/selinux.c b/lib/selinux.c
+index c83545f9..b075d4c0 100644
+--- a/lib/selinux.c
++++ b/lib/selinux.c
+@@ -50,6 +50,11 @@ static void cleanup(void)
+ 	}
+ }
+ 
++void reset_selinux_handle (void)
++{
++    cleanup();
++}
++
+ /*
+  * set_selinux_file_context - Set the security context before any file or
+  *                            directory creation.
+diff --git a/lib/semanage.c b/lib/semanage.c
+index 0d30456a..a5bf9218 100644
+--- a/lib/semanage.c
++++ b/lib/semanage.c
+@@ -293,6 +293,7 @@ int set_seuser (const char *login_name, const char *seuser_name)
+ 	}
+ 
+ 	ret = 0;
++	reset_selinux_handle();
+ 
+ done:
+ 	semanage_seuser_key_free (key);
+-- 
+2.31.1
+

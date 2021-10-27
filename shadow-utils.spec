@@ -1,8 +1,9 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.9
-Release: 3%{?dist}
+Release: 4%{?dist}
 Epoch: 2
+License: BSD and GPLv2+
 URL: https://github.com/shadow-maint/shadow
 Source0: https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz
 Source1: https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz.asc
@@ -20,7 +21,7 @@ Source6: shadow-utils.HOME_MODE.xml
 Patch0: shadow-4.9-redhat.patch
 # Be more lenient with acceptable user/group names - non upstreamable
 Patch1: shadow-4.8-goodname.patch
-# Move create home to the end of main - upstreamability unknown
+# https://github.com/shadow-maint/shadow/commit/09c752f00f9dfc610f66d68be38c9e5be8ca7f15
 Patch2: shadow-4.9-move-create-home.patch
 # SElinux related - upstreamability unknown
 Patch3: shadow-4.9-default-range.patch
@@ -52,20 +53,34 @@ Patch15: shadow-4.9-usermod-allow-all-group-types.patch
 Patch16: shadow-4.9-useradd-avoid-generating-empty-subid-range.patch
 # https://github.com/shadow-maint/shadow/commit/234e8fa7b134d1ebabfdad980a3ae5b63c046c62
 Patch17: shadow-4.9-libmisc-fix-default-value-in-SHA_get_salt_rounds.patch
+# https://github.com/shadow-maint/shadow/commit/234af5cf67fc1a3ba99fc246ba65869a3c416545
+Patch18: shadow-4.9-semanage-close-the-selabel-handle.patch
 
-License: BSD and GPLv2+
-BuildRequires: make
-BuildRequires: gcc
-BuildRequires: libselinux-devel >= 1.25.2-1
-BuildRequires: audit-libs-devel >= 1.6.5
-BuildRequires: libsemanage-devel
-BuildRequires: libacl-devel, libattr-devel
-BuildRequires: bison, flex, docbook-style-xsl, docbook-dtds
-BuildRequires: autoconf, automake, libtool, gettext-devel
-BuildRequires: /usr/bin/xsltproc, /usr/bin/itstool
-Requires: libselinux >= 1.25.2-1
+### Dependencies ###
 Requires: audit-libs >= 1.6.5
+Requires: libselinux >= 1.25.2-1
 Requires: setup
+
+### Build Dependencies ###
+BuildRequires: audit-libs-devel >= 1.6.5
+BuildRequires: autoconf
+BuildRequires: automake
+BuildRequires: bison
+BuildRequires: docbook-dtds
+BuildRequires: docbook-style-xsl
+BuildRequires: flex
+BuildRequires: gcc
+BuildRequires: gettext-devel
+BuildRequires: itstool
+BuildRequires: libacl-devel
+BuildRequires: libattr-devel
+BuildRequires: libselinux-devel >= 1.25.2-1
+BuildRequires: libsemanage-devel
+BuildRequires: libtool
+BuildRequires: libxslt
+BuildRequires: make
+
+### Provides ###
 Provides: shadow = %{epoch}:%{version}-%{release}
 
 %description
@@ -117,6 +132,7 @@ Development files for shadow-utils-subid.
 %patch15 -p1 -b .usermod-allow-all-group-types
 %patch16 -p1 -b .useradd-avoid-generating-empty-subid-range
 %patch17 -p1 -b .libmisc-fix-default-value-in-SHA_get_salt_rounds
+%patch18 -p1 -b .semanage-close-the-selabel-handle
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -287,6 +303,10 @@ rm -f $RPM_BUILD_ROOT/%{_libdir}/libsubid.la
 %{_libdir}/libsubid.so
 
 %changelog
+* Tue Nov  2 2021 Iker Pedrosa <ipedrosa@redhat.com> - 2:4.9-4
+- useradd: generate home and mail directories with selinux user attribute
+- Clean spec file: organize dependencies and move License location
+
 * Tue Aug 17 2021 Iker Pedrosa <ipedrosa@redhat.com> - 2:4.9-3
 - libmisc: fix default value in SHA_get_salt_rounds()
 
