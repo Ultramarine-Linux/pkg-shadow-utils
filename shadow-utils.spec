@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.9
-Release: 4%{?dist}
+Release: 5%{?dist}
 Epoch: 2
 License: BSD and GPLv2+
 URL: https://github.com/shadow-maint/shadow
@@ -21,7 +21,7 @@ Source6: shadow-utils.HOME_MODE.xml
 Patch0: shadow-4.9-redhat.patch
 # Be more lenient with acceptable user/group names - non upstreamable
 Patch1: shadow-4.8-goodname.patch
-# Move create home to the end of main - upstreamability unknown
+# https://github.com/shadow-maint/shadow/commit/09c752f00f9dfc610f66d68be38c9e5be8ca7f15
 Patch2: shadow-4.9-move-create-home.patch
 # SElinux related - upstreamability unknown
 Patch3: shadow-4.9-default-range.patch
@@ -53,6 +53,8 @@ Patch15: shadow-4.9-usermod-allow-all-group-types.patch
 Patch16: shadow-4.9-useradd-avoid-generating-empty-subid-range.patch
 # https://github.com/shadow-maint/shadow/commit/234e8fa7b134d1ebabfdad980a3ae5b63c046c62
 Patch17: shadow-4.9-libmisc-fix-default-value-in-SHA_get_salt_rounds.patch
+# https://github.com/shadow-maint/shadow/commit/234af5cf67fc1a3ba99fc246ba65869a3c416545
+Patch18: shadow-4.9-semanage-close-the-selabel-handle.patch
 
 ### Dependencies ###
 Requires: audit-libs >= 1.6.5
@@ -130,6 +132,7 @@ Development files for shadow-utils-subid.
 %patch15 -p1 -b .usermod-allow-all-group-types
 %patch16 -p1 -b .useradd-avoid-generating-empty-subid-range
 %patch17 -p1 -b .libmisc-fix-default-value-in-SHA_get_salt_rounds
+%patch18 -p1 -b .semanage-close-the-selabel-handle
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -300,6 +303,9 @@ rm -f $RPM_BUILD_ROOT/%{_libdir}/libsubid.la
 %{_libdir}/libsubid.so
 
 %changelog
+* Wed Oct 27 2021 Iker Pedrosa <ipedrosa@redhat.com> - 2:4.9-5
+- useradd: generate home and mail directories with selinux user attribute
+
 * Thu Sep 23 2021 Iker Pedrosa <ipedrosa@redhat.com> - 2:4.9-4
 - login.defs: include HMAC_CRYPTO_ALGO key
 - Clean spec file: organize dependencies and move License location
