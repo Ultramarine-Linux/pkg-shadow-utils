@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.9
-Release: 4%{?dist}
+Release: 5%{?dist}
 Epoch: 2
 License: BSD and GPLv2+
 URL: https://github.com/shadow-maint/shadow
@@ -303,7 +303,7 @@ rm -f $RPM_BUILD_ROOT/%{_libdir}/libsubid.la
 %{_libdir}/libsubid.so
 
 %changelog
-* Tue Nov  2 2021 Iker Pedrosa <ipedrosa@redhat.com> - 2:4.9-4
+* Tue Nov  2 2021 Iker Pedrosa <ipedrosa@redhat.com> - 2:4.9-5
 - useradd: generate home and mail directories with selinux user attribute
 - Clean spec file: organize dependencies and move License location
 
