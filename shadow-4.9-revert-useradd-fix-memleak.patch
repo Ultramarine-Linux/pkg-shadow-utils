@@ -1,0 +1,30 @@
+From 4624e9fca1b02b64e25e8b2280a0186182ab73ba Mon Sep 17 00:00:00 2001
+From: Serge Hallyn <serge@hallyn.com>
+Date: Sat, 14 Aug 2021 19:37:24 -0500
+Subject: [PATCH] Revert "useradd.c:fix memleaks of grp"
+
+In some cases, the value which was being freed is not actually
+safe to free.
+
+Closes #394
+
+This reverts commit c44b71cec25d60efc51aec9de3abce1f6efbfcf5.
+---
+ src/useradd.c | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/src/useradd.c b/src/useradd.c
+index f90127cd..0d3f390d 100644
+--- a/src/useradd.c
++++ b/src/useradd.c
+@@ -413,7 +413,6 @@ static void get_defaults (void)
+ 			} else {
+ 				def_group = grp->gr_gid;
+ 				def_gname = xstrdup (grp->gr_name);
+-				gr_free(grp);
+ 			}
+ 		}
+ 
+-- 
+2.31.1
+

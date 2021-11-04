@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.9
-Release: 5%{?dist}
+Release: 6%{?dist}
 Epoch: 2
 License: BSD and GPLv2+
 URL: https://github.com/shadow-maint/shadow
@@ -55,6 +55,8 @@ Patch16: shadow-4.9-useradd-avoid-generating-empty-subid-range.patch
 Patch17: shadow-4.9-libmisc-fix-default-value-in-SHA_get_salt_rounds.patch
 # https://github.com/shadow-maint/shadow/commit/234af5cf67fc1a3ba99fc246ba65869a3c416545
 Patch18: shadow-4.9-semanage-close-the-selabel-handle.patch
+# https://github.com/shadow-maint/shadow/commit/4624e9fca1b02b64e25e8b2280a0186182ab73ba
+Patch19: shadow-4.9-revert-useradd-fix-memleak.patch
 
 ### Dependencies ###
 Requires: audit-libs >= 1.6.5
@@ -133,6 +135,7 @@ Development files for shadow-utils-subid.
 %patch16 -p1 -b .useradd-avoid-generating-empty-subid-range
 %patch17 -p1 -b .libmisc-fix-default-value-in-SHA_get_salt_rounds
 %patch18 -p1 -b .semanage-close-the-selabel-handle
+%patch19 -p1 -b .revert-useradd-fix-memleak
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -303,6 +306,9 @@ rm -f $RPM_BUILD_ROOT/%{_libdir}/libsubid.la
 %{_libdir}/libsubid.so
 
 %changelog
+* Tue Nov  9 2021 Iker Pedrosa <ipedrosa@redhat.com> - 2:4.9-6
+- useradd: revert fix memleak of grp (#2018697)
+
 * Tue Nov  2 2021 Iker Pedrosa <ipedrosa@redhat.com> - 2:4.9-5
 - useradd: generate home and mail directories with selinux user attribute
 - Clean spec file: organize dependencies and move License location
