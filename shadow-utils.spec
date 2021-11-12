@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.9
-Release: 6%{?dist}
+Release: 7%{?dist}
 Epoch: 2
 License: BSD and GPLv2+
 URL: https://github.com/shadow-maint/shadow
@@ -57,6 +57,8 @@ Patch17: shadow-4.9-libmisc-fix-default-value-in-SHA_get_salt_rounds.patch
 Patch18: shadow-4.9-semanage-close-the-selabel-handle.patch
 # https://github.com/shadow-maint/shadow/commit/4624e9fca1b02b64e25e8b2280a0186182ab73ba
 Patch19: shadow-4.9-revert-useradd-fix-memleak.patch
+# https://github.com/shadow-maint/shadow/pull/439
+Patch20: shadow-4.9-useradd-copy-tree-argument.patch
 
 ### Dependencies ###
 Requires: audit-libs >= 1.6.5
@@ -136,6 +138,7 @@ Development files for shadow-utils-subid.
 %patch17 -p1 -b .libmisc-fix-default-value-in-SHA_get_salt_rounds
 %patch18 -p1 -b .semanage-close-the-selabel-handle
 %patch19 -p1 -b .revert-useradd-fix-memleak
+%patch20 -p1 -b .useradd-copy-tree-argument
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -306,6 +309,9 @@ rm -f $RPM_BUILD_ROOT/%{_libdir}/libsubid.la
 %{_libdir}/libsubid.so
 
 %changelog
+* Fri Nov 12 2021 Iker Pedrosa <ipedrosa@redhat.com> - 2:4.9-7
+- useradd: change SELinux labels for home files (#2022658)
+
 * Thu Nov  4 2021 Iker Pedrosa <ipedrosa@redhat.com> - 2:4.9-6
 - useradd: revert fix memleak of grp (#2018697)
 
