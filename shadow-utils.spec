@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.8.1
-Release: 9%{?dist}
+Release: 10%{?dist}
 Epoch: 2
 URL: https://github.com/shadow-maint/shadow
 Source0: https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz
@@ -61,6 +61,8 @@ Patch44: shadow-4.8.1-check-local-groups.patch
 Patch45: shadow-4.8.1-commonio-force-lock-file-sync.patch
 # https://github.com/shadow-maint/shadow/commit/df6ec1d1693c8c80c323b40d6fc82bb549363db3
 Patch46: shadow-4.8.1-man-include-lastlog-file-caveat.patch
+# https://github.com/shadow-maint/shadow/commit/a757b458ffb4fb9a40bcbb4f7869449431c67f83
+Patch47: shadow-4.9-groupdel-fix-sigsegv-when-passwd-does-not-exist.patch
 
 License: BSD and GPLv2+
 BuildRequires: make
@@ -115,6 +117,7 @@ are used for managing group accounts.
 %patch44 -p1 -b .check-local-groups
 %patch45 -p1 -b .commonio-force-lock-file-sync
 %patch46 -p1 -b .man-include-lastlog-file-caveat
+%patch47 -p1 -b .groupdel-fix-sigsegv-when-passwd-does-not-exist
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -268,6 +271,9 @@ done
 %{_mandir}/man8/vigr.8*
 
 %changelog
+* Tue Nov 30 2021 Iker Pedrosa <ipedrosa@redhat.com> - 2:4.8.1-10
+- groupdel: fix SIGSEGV when passwd does not exist (#1986111)
+
 * Mon Aug  9 2021 Iker Pedrosa <ipedrosa@redhat.com> - 2:4.8.1-9
 - allow all types of groups when modifying supplementary groups (#1975327)
 

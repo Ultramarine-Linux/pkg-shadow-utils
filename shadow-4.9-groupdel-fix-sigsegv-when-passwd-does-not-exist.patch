@@ -1,0 +1,13 @@
+diff -up shadow-4.9/libmisc/prefix_flag.c.groupdel-fix-sigsegv-when-passwd-does-not-exist shadow-4.9/libmisc/prefix_flag.c
+--- shadow-4.9/libmisc/prefix_flag.c.groupdel-fix-sigsegv-when-passwd-does-not-exist	2021-11-19 09:21:36.997091941 +0100
++++ shadow-4.9/libmisc/prefix_flag.c	2021-11-19 09:22:19.001341010 +0100
+@@ -288,6 +288,9 @@ extern struct passwd* prefix_getpwent()
+ 	if(!passwd_db_file) {
+ 		return getpwent();
+ 	}
++	if (!fp_pwent) {
++		return NULL;
++	}
+ 	return fgetpwent(fp_pwent);
+ }
+ extern void prefix_endpwent()
