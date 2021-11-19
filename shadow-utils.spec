@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.9
-Release: 7%{?dist}
+Release: 8%{?dist}
 Epoch: 2
 License: BSD and GPLv2+
 URL: https://github.com/shadow-maint/shadow
@@ -57,8 +57,16 @@ Patch17: shadow-4.9-libmisc-fix-default-value-in-SHA_get_salt_rounds.patch
 Patch18: shadow-4.9-semanage-close-the-selabel-handle.patch
 # https://github.com/shadow-maint/shadow/commit/4624e9fca1b02b64e25e8b2280a0186182ab73ba
 Patch19: shadow-4.9-revert-useradd-fix-memleak.patch
-# https://github.com/shadow-maint/shadow/pull/439
+# https://github.com/shadow-maint/shadow/commit/06eb4e4d76ac7f1ac86e68a89b2dc9be7c7323a2
 Patch20: shadow-4.9-useradd-copy-tree-argument.patch
+# https://github.com/shadow-maint/shadow/commit/d8e54618feea201987c1f3cb402ed50d1d8b604f
+Patch21: shadow-4.9-pwck-fix-segfault-when-calling-fprintf.patch
+# https://github.com/shadow-maint/shadow/commit/497e90751bc0d95cc998b0f06305040563903948
+Patch22: shadow-4.9-newgrp-fix-segmentation-fault.patch
+# https://github.com/shadow-maint/shadow/commit/3b6ccf642c6bb2b7db087f09ee563ae9318af734
+Patch23: shadow-4.9-getsubids.patch
+# https://github.com/shadow-maint/shadow/commit/a757b458ffb4fb9a40bcbb4f7869449431c67f83
+Patch24: shadow-4.9-groupdel-fix-sigsegv-when-passwd-does-not-exist.patch
 
 ### Dependencies ###
 Requires: audit-libs >= 1.6.5
@@ -139,6 +147,10 @@ Development files for shadow-utils-subid.
 %patch18 -p1 -b .semanage-close-the-selabel-handle
 %patch19 -p1 -b .revert-useradd-fix-memleak
 %patch20 -p1 -b .useradd-copy-tree-argument
+%patch21 -p1 -b .pwck-fix-segfault-when-calling-fprintf
+%patch22 -p1 -b .newgrp-fix-segmentation-fault
+%patch23 -p1 -b .getsubids
+%patch24 -p1 -b .groupdel-fix-sigsegv-when-passwd-does-not-exist
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -303,12 +315,20 @@ rm -f $RPM_BUILD_ROOT/%{_libdir}/libsubid.la
 
 %files subid
 %{_libdir}/libsubid.so.*
+%{_bindir}/getsubids
+%{_mandir}/man1/getsubids.1*
 
 %files subid-devel
 %{includesubiddir}/subid.h
 %{_libdir}/libsubid.so
 
 %changelog
+* Fri Nov 19 2021 Iker Pedrosa <ipedrosa@redhat.com> - 2:4.9-8
+- getsubids: provide system binary and man page (#1980780)
+- pwck: fix segfault when calling fprintf() (#2021339)
+- newgrp: fix segmentation fault (#2019553)
+- groupdel: fix SIGSEGV when passwd does not exist (#1986111)
+
 * Fri Nov 12 2021 Iker Pedrosa <ipedrosa@redhat.com> - 2:4.9-7
 - useradd: change SELinux labels for home files (#2022658)
 
