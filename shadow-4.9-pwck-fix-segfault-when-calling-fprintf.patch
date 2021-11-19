@@ -1,0 +1,30 @@
+From d8e54618feea201987c1f3cb402ed50d1d8b604f Mon Sep 17 00:00:00 2001
+From: Iker Pedrosa <ipedrosa@redhat.com>
+Date: Mon, 15 Nov 2021 12:40:15 +0100
+Subject: [PATCH] pwck: fix segfault when calling fprintf()
+
+As shadow_logfd variable is not set at the beginning of the program if
+something fails and fprintf() is called a segmentation fault happens.
+
+Resolves: https://bugzilla.redhat.com/show_bug.cgi?id=2021339
+
+Signed-off-by: Iker Pedrosa <ipedrosa@redhat.com>
+---
+ src/pwck.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/src/pwck.c b/src/pwck.c
+index 4248944a..4ce86af2 100644
+--- a/src/pwck.c
++++ b/src/pwck.c
+@@ -857,6 +857,7 @@ int main (int argc, char **argv)
+ 	 * Get my name so that I can use it to report errors.
+ 	 */
+ 	Prog = Basename (argv[0]);
++	shadow_logfd = stderr;
+ 
+ 	(void) setlocale (LC_ALL, "");
+ 	(void) bindtextdomain (PACKAGE, LOCALEDIR);
+-- 
+2.31.1
+

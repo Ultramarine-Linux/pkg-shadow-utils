@@ -1,0 +1,35 @@
+From 497e90751bc0d95cc998b0f06305040563903948 Mon Sep 17 00:00:00 2001
+From: Iker Pedrosa <ipedrosa@redhat.com>
+Date: Wed, 10 Nov 2021 12:02:04 +0100
+Subject: [PATCH] newgrp: fix segmentation fault
+
+Fix segmentation fault in newgrp when xgetspnam() returns a NULL value
+that is immediately freed.
+
+The error was committed in
+https://github.com/shadow-maint/shadow/commit/e65cc6aebcb4132fa413f00a905216a5b35b3d57
+
+Resolves: https://bugzilla.redhat.com/show_bug.cgi?id=2019553
+
+Signed-off-by: Iker Pedrosa <ipedrosa@redhat.com>
+---
+ src/newgrp.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/newgrp.c b/src/newgrp.c
+index 730f47e8..566f1c89 100644
+--- a/src/newgrp.c
++++ b/src/newgrp.c
+@@ -163,8 +163,8 @@ static void check_perms (const struct group *grp,
+ 	spwd = xgetspnam (pwd->pw_name);
+ 	if (NULL != spwd) {
+ 		pwd->pw_passwd = xstrdup (spwd->sp_pwdp);
++		spw_free (spwd);
+ 	}
+-	spw_free (spwd);
+ 
+ 	if ((pwd->pw_passwd[0] == '\0') && (grp->gr_passwd[0] != '\0')) {
+ 		needspasswd = true;
+-- 
+2.31.1
+

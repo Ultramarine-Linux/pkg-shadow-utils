@@ -1,0 +1,245 @@
+diff -up shadow-4.9/man/getsubids.1.xml.getsubids shadow-4.9/man/getsubids.1.xml
+--- shadow-4.9/man/getsubids.1.xml.getsubids	2021-11-18 16:27:33.951053120 +0100
++++ shadow-4.9/man/getsubids.1.xml	2021-11-18 16:27:33.951053120 +0100
+@@ -0,0 +1,141 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<!--
++   Copyright (c) 2021 Iker Pedrosa
++   All rights reserved.
++
++   Redistribution and use in source and binary forms, with or without
++   modification, are permitted provided that the following conditions
++   are met:
++   1. Redistributions of source code must retain the above copyright
++      notice, this list of conditions and the following disclaimer.
++   2. Redistributions in binary form must reproduce the above copyright
++      notice, this list of conditions and the following disclaimer in the
++      documentation and/or other materials provided with the distribution.
++   3. The name of the copyright holders or contributors may not be used to
++      endorse or promote products derived from this software without
++      specific prior written permission.
++
++   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
++   ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
++   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
++   PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT
++   HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
++   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
++   LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
++   DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
++   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
++   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
++   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++-->
++<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.5//EN"
++  "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd" [
++<!-- SHADOW-CONFIG-HERE -->
++]>
++
++<refentry id='getsubids.1'>
++  <refentryinfo>
++    <author>
++      <firstname>Iker</firstname>
++      <surname>Pedrosa</surname>
++      <contrib>Creation, 2021</contrib>
++    </author>
++  </refentryinfo>
++  <refmeta>
++    <refentrytitle>getsubids</refentrytitle>
++    <manvolnum>1</manvolnum>
++    <refmiscinfo class="sectdesc">User Commands</refmiscinfo>
++    <refmiscinfo class="source">shadow-utils</refmiscinfo>
++    <refmiscinfo class="version">&SHADOW_UTILS_VERSION;</refmiscinfo>
++  </refmeta>
++  <refnamediv id='name'>
++    <refname>getsubids</refname>
++    <refpurpose>get the subordinate id ranges for a user</refpurpose>
++  </refnamediv>
++
++  <refsynopsisdiv id='synopsis'>
++    <cmdsynopsis>
++      <command>getsubids</command>
++      <arg choice='opt'>
++        <replaceable>options</replaceable>
++      </arg>
++      <arg choice='plain'>
++        <replaceable>USER</replaceable>
++      </arg>
++    </cmdsynopsis>
++  </refsynopsisdiv>
++
++  <refsect1 id='description'>
++    <title>DESCRIPTION</title>
++    <para>
++      The <command>getsubids</command> command lists the subordinate user ID
++      ranges for a given user. The subordinate group IDs can be listed using
++      the <option>-g</option> option.
++    </para>
++  </refsect1>
++
++  <refsect1 id='options'>
++    <title>OPTIONS</title>
++    <para>
++      The options which apply to the <command>getsubids</command> command are:
++    </para>
++    <variablelist remap='IP'>
++      <varlistentry>
++        <term>
++          <option>-g</option>
++        </term>
++        <listitem>
++          <para>
++            List the subordinate group ID ranges.
++          </para>
++        </listitem>
++      </varlistentry>
++    </variablelist>
++  </refsect1>
++
++  <refsect1 id='example'>
++    <title>EXAMPLE</title>
++    <para>
++      For example, to obtain the subordinate UIDs of the testuser:
++    </para>
++    <para>
++<programlisting>
++$ getsubids testuser
++0: testuser 100000 65536
++</programlisting>
++    </para>
++    <para>
++      This command output provides (in order from left to right) the list
++      index, username, UID range start, and number of UIDs in range.
++    </para>
++  </refsect1>
++
++  <refsect1 id='see_also'>
++    <title>SEE ALSO</title>
++    <para>
++      <citerefentry>
++        <refentrytitle>login.defs</refentrytitle><manvolnum>5</manvolnum>
++      </citerefentry>,
++      <citerefentry>
++        <refentrytitle>newgidmap</refentrytitle><manvolnum>1</manvolnum>
++      </citerefentry>,
++      <citerefentry>
++        <refentrytitle>newuidmap</refentrytitle><manvolnum>1</manvolnum>
++      </citerefentry>,
++      <citerefentry>
++        <refentrytitle>subgid</refentrytitle><manvolnum>5</manvolnum>
++      </citerefentry>,
++      <citerefentry>
++        <refentrytitle>subuid</refentrytitle><manvolnum>5</manvolnum>
++      </citerefentry>,
++      <citerefentry>
++        <refentrytitle>useradd</refentrytitle><manvolnum>8</manvolnum>
++      </citerefentry>,
++      <citerefentry>
++        <refentrytitle>userdel</refentrytitle><manvolnum>8</manvolnum>
++      </citerefentry>.
++      <citerefentry>
++        <refentrytitle>usermod</refentrytitle><manvolnum>8</manvolnum>
++      </citerefentry>,
++    </para>
++  </refsect1>
++</refentry>
+diff -up shadow-4.9/man/Makefile.am.getsubids shadow-4.9/man/Makefile.am
+--- shadow-4.9/man/Makefile.am.getsubids	2021-07-22 23:55:35.000000000 +0200
++++ shadow-4.9/man/Makefile.am	2021-11-18 16:27:33.951053120 +0100
+@@ -62,6 +62,7 @@ man_MANS += $(man_nopam)
+ endif
+ 
+ man_subids = \
++	man1/getsubids.1 \
+ 	man1/newgidmap.1 \
+ 	man1/newuidmap.1 \
+ 	man5/subgid.5 \
+@@ -80,6 +81,7 @@ man_XMANS = \
+ 	expiry.1.xml \
+ 	faillog.5.xml \
+ 	faillog.8.xml \
++	getsubids.1.xml \
+ 	gpasswd.1.xml \
+ 	groupadd.8.xml \
+ 	groupdel.8.xml \
+diff -up shadow-4.9/src/getsubids.c.getsubids shadow-4.9/src/getsubids.c
+--- shadow-4.9/src/getsubids.c.getsubids	2021-11-18 16:27:33.951053120 +0100
++++ shadow-4.9/src/getsubids.c	2021-11-18 16:27:33.951053120 +0100
+@@ -0,0 +1,46 @@
++#include <stdio.h>
++#include <string.h>
++#include <stdlib.h>
++#include "subid.h"
++#include "prototypes.h"
++
++const char *Prog;
++FILE *shadow_logfd = NULL;
++
++void usage(void)
++{
++	fprintf(stderr, "Usage: %s [-g] user\n", Prog);
++	fprintf(stderr, "    list subuid ranges for user\n");
++	fprintf(stderr, "    pass -g to list subgid ranges\n");
++	exit(EXIT_FAILURE);
++}
++
++int main(int argc, char *argv[])
++{
++	int i, count=0;
++	struct subid_range *ranges;
++	const char *owner;
++
++	Prog = Basename (argv[0]);
++	shadow_logfd = stderr;
++	if (argc < 2)
++		usage();
++	owner = argv[1];
++	if (argc == 3 && strcmp(argv[1], "-g") == 0) {
++		owner = argv[2];
++		count = get_subgid_ranges(owner, &ranges);
++	} else if (argc == 2 && strcmp(argv[1], "-h") == 0) {
++		usage();
++	} else {
++		count = get_subuid_ranges(owner, &ranges);
++	}
++	if (!ranges) {
++		fprintf(stderr, "Error fetching ranges\n");
++		exit(1);
++	}
++	for (i = 0; i < count; i++) {
++		printf("%d: %s %lu %lu\n", i, owner,
++			ranges[i].start, ranges[i].count);
++	}
++	return 0;
++}
+diff -up shadow-4.9/src/list_subid_ranges.c.getsubids shadow-4.9/src/list_subid_ranges.c
+diff -up shadow-4.9/src/Makefile.am.getsubids shadow-4.9/src/Makefile.am
+--- shadow-4.9/src/Makefile.am.getsubids	2021-11-18 16:27:33.943053061 +0100
++++ shadow-4.9/src/Makefile.am	2021-11-18 16:28:03.647272392 +0100
+@@ -157,8 +157,8 @@ if FCAPS
+ 	setcap cap_setgid+ep $(DESTDIR)$(ubindir)/newgidmap
+ endif
+ 
+-noinst_PROGRAMS += list_subid_ranges  \
+-					get_subid_owners \
++bin_PROGRAMS    +=  getsubids
++noinst_PROGRAMS +=  get_subid_owners \
+ 					new_subid_range \
+ 					free_subid_range \
+ 					check_subid_range
+@@ -174,13 +174,13 @@ MISCLIBS = \
+ 	$(LIBCRYPT) \
+ 	$(LIBTCB)
+ 
+-list_subid_ranges_LDADD = \
++getsubids_LDADD = \
+ 	$(top_builddir)/lib/libshadow.la \
+ 	$(top_builddir)/libmisc/libmisc.la \
+ 	$(top_builddir)/libsubid/libsubid.la \
+ 	$(MISCLIBS) -ldl
+ 
+-list_subid_ranges_CPPFLAGS = \
++getsubids_CPPFLAGS = \
+ 	-I$(top_srcdir)/lib \
+ 	-I$(top_srcdir)/libmisc \
+ 	-I$(top_srcdir)/libsubid
