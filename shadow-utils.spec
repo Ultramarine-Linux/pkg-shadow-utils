@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.9
-Release: 8%{?dist}
+Release: 9%{?dist}
 Epoch: 2
 License: BSD and GPLv2+
 URL: https://github.com/shadow-maint/shadow
@@ -67,6 +67,15 @@ Patch22: shadow-4.9-newgrp-fix-segmentation-fault.patch
 Patch23: shadow-4.9-getsubids.patch
 # https://github.com/shadow-maint/shadow/commit/a757b458ffb4fb9a40bcbb4f7869449431c67f83
 Patch24: shadow-4.9-groupdel-fix-sigsegv-when-passwd-does-not-exist.patch
+# https://github.com/shadow-maint/shadow/commit/79157cbad87f42cdc2068d72e798488572c68bb2
+Patch25: shadow-4.9-make-shadow-logfd-and-prog-not-extern.patch
+# https://github.com/shadow-maint/shadow/commit/0e6fe5e728a45baff3977d73e81a27adb6ae30c6
+Patch26: shadow-4.9-rename-prog-to-shadow-progname.patch
+# https://github.com/shadow-maint/shadow/commit/2b0bdef6f9a18382e92b0fb6d893c4339123ffac
+# https://github.com/shadow-maint/shadow/commit/9750fd681919ed558a9b044248a284d567cddf1a
+Patch27: shadow-4.9-shadow-progname-default-init.patch
+# https://github.com/shadow-maint/shadow/commit/e101219ad71de11da3fdd1b3ec2620fd1a97b92c
+Patch28: shadow-4.9-nss-get-shadow-logfd-with-log-get-logfd.patch
 
 ### Dependencies ###
 Requires: audit-libs >= 1.6.5
@@ -151,6 +160,10 @@ Development files for shadow-utils-subid.
 %patch22 -p1 -b .newgrp-fix-segmentation-fault
 %patch23 -p1 -b .getsubids
 %patch24 -p1 -b .groupdel-fix-sigsegv-when-passwd-does-not-exist
+%patch25 -p1 -b .make-shadow-logfd-and-prog-not-extern
+%patch26 -p1 -b .rename-prog-to-shadow-progname
+%patch27 -p1 -b .shadow-progname-default-init
+%patch28 -p1 -b .nss-get-shadow-logfd-with-log-get-logfd
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -323,6 +336,13 @@ rm -f $RPM_BUILD_ROOT/%{_libdir}/libsubid.la
 %{_libdir}/libsubid.so
 
 %changelog
+* Mon Jan 17 2022 Iker Pedrosa <ipedrosa@redhat.com> - 2:4.9-9
+- nss: get shadow_logfd with log_get_logfd() (#2038811)
+- lib: make shadow_logfd and Prog not extern
+- lib: rename Prog to shadow_progname
+- lib: provide default values for shadow_progname
+- libsubid: use log_set_progname in subid_init
+
 * Fri Nov 19 2021 Iker Pedrosa <ipedrosa@redhat.com> - 2:4.9-8
 - getsubids: provide system binary and man page (#1980780)
 - pwck: fix segfault when calling fprintf() (#2021339)
