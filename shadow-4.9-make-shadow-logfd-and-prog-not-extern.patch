@@ -1,0 +1,2497 @@
+diff -up shadow-4.9/lib/commonio.c.debug1 shadow-4.9/lib/commonio.c
+--- shadow-4.9/lib/commonio.c.debug1	2021-07-22 23:55:35.000000000 +0200
++++ shadow-4.9/lib/commonio.c	2022-01-10 10:45:52.202132937 +0100
+@@ -51,6 +51,7 @@
+ #endif				/* WITH_TCB */
+ #include "prototypes.h"
+ #include "commonio.h"
++#include "shadowlog_internal.h"
+ 
+ /* local function prototypes */
+ static int lrename (const char *, const char *);
+diff -up shadow-4.9/lib/encrypt.c.debug1 shadow-4.9/lib/encrypt.c
+--- shadow-4.9/lib/encrypt.c.debug1	2021-07-22 23:55:35.000000000 +0200
++++ shadow-4.9/lib/encrypt.c	2022-01-10 10:45:52.202132937 +0100
+@@ -39,6 +39,7 @@
+ 
+ #include "prototypes.h"
+ #include "defines.h"
++#include "shadowlog_internal.h"
+ 
+ /*@exposed@*//*@null@*/char *pw_encrypt (const char *clear, const char *salt)
+ {
+diff -up shadow-4.9/lib/getdef.c.debug1 shadow-4.9/lib/getdef.c
+--- shadow-4.9/lib/getdef.c.debug1	2022-01-10 10:45:52.191132858 +0100
++++ shadow-4.9/lib/getdef.c	2022-01-10 10:45:52.202132937 +0100
+@@ -44,6 +44,7 @@
+ #include <libeconf.h>
+ #endif
+ #include "getdef.h"
++#include "shadowlog_internal.h"
+ /*
+  * A configuration item definition.
+  */
+diff -up shadow-4.9/lib/Makefile.am.debug1 shadow-4.9/lib/Makefile.am
+--- shadow-4.9/lib/Makefile.am.debug1	2021-07-22 23:55:35.000000000 +0200
++++ shadow-4.9/lib/Makefile.am	2022-01-10 10:45:52.202132937 +0100
+@@ -34,6 +34,8 @@ libshadow_la_SOURCES = \
+ 	nss.c \
+ 	nscd.c \
+ 	nscd.h \
++	shadowlog.c \
++	shadowlog.h \
+ 	sssd.c \
+ 	sssd.h \
+ 	pam_defs.h \
+diff -up shadow-4.9/libmisc/addgrps.c.debug1 shadow-4.9/libmisc/addgrps.c
+--- shadow-4.9/libmisc/addgrps.c.debug1	2021-07-22 23:55:35.000000000 +0200
++++ shadow-4.9/libmisc/addgrps.c	2022-01-10 10:45:52.203132944 +0100
+@@ -40,6 +40,7 @@
+ #include <stdio.h>
+ #include <grp.h>
+ #include <errno.h>
++#include "shadowlog.h"
+ 
+ #ident "$Id$"
+ 
+@@ -58,6 +59,7 @@ int add_groups (const char *list)
+ 	char *token;
+ 	char buf[1024];
+ 	int ret;
++	FILE *shadow_logfd = log_get_logfd();
+ 
+ 	if (strlen (list) >= sizeof (buf)) {
+ 		errno = EINVAL;
+diff -up shadow-4.9/libmisc/audit_help.c.debug1 shadow-4.9/libmisc/audit_help.c
+--- shadow-4.9/libmisc/audit_help.c.debug1	2022-01-10 10:45:52.184132808 +0100
++++ shadow-4.9/libmisc/audit_help.c	2022-01-10 10:45:52.203132944 +0100
+@@ -45,6 +45,7 @@
+ #include <errno.h>
+ #include <stdio.h>
+ #include "prototypes.h"
++#include "shadowlog.h"
+ int audit_fd;
+ 
+ void audit_help_open (void)
+@@ -59,7 +60,7 @@ void audit_help_open (void)
+ 			return;
+ 		}
+ 		(void) fputs (_("Cannot open audit interface - aborting.\n"),
+-		              shadow_logfd);
++		              log_get_logfd());
+ 		exit (EXIT_FAILURE);
+ 	}
+ }
+diff -up shadow-4.9/libmisc/chowntty.c.debug1 shadow-4.9/libmisc/chowntty.c
+--- shadow-4.9/libmisc/chowntty.c.debug1	2021-07-22 23:55:35.000000000 +0200
++++ shadow-4.9/libmisc/chowntty.c	2022-01-10 10:45:52.203132944 +0100
+@@ -43,6 +43,7 @@
+ #include "defines.h"
+ #include <pwd.h>
+ #include "getdef.h"
++#include "shadowlog.h"
+ 
+ /*
+  *	chown_tty() sets the login tty to be owned by the new user ID
+@@ -75,6 +76,7 @@ void chown_tty (const struct passwd *inf
+ 	if (   (fchown (STDIN_FILENO, info->pw_uid, gid) != 0)
+ 	    || (fchmod (STDIN_FILENO, (mode_t)getdef_num ("TTYPERM", 0600)) != 0)) {
+ 		int err = errno;
++		FILE *shadow_logfd = log_get_logfd();
+ 
+ 		fprintf (shadow_logfd,
+ 		         _("Unable to change owner or mode of tty stdin: %s"),
+diff -up shadow-4.9/libmisc/cleanup_group.c.debug1 shadow-4.9/libmisc/cleanup_group.c
+--- shadow-4.9/libmisc/cleanup_group.c.debug1	2022-01-10 10:45:52.184132808 +0100
++++ shadow-4.9/libmisc/cleanup_group.c	2022-01-10 10:47:02.241632844 +0100
+@@ -36,6 +36,7 @@
+ #include "groupio.h"
+ #include "sgroupio.h"
+ #include "prototypes.h"
++#include "shadowlog.h"
+ 
+ /*
+  * cleanup_report_add_group - Report failure to add a group to the system
+@@ -48,7 +49,7 @@ void cleanup_report_add_group (void *gro
+ 
+ 	SYSLOG ((LOG_ERR, "failed to add group %s", name));
+ #ifdef WITH_AUDIT
+-	audit_logger (AUDIT_ADD_GROUP, Prog,
++	audit_logger (AUDIT_ADD_GROUP, log_get_progname(),
+ 	              "",
+ 	              name, AUDIT_NO_ID,
+ 	              SHADOW_AUDIT_FAILURE);
+@@ -66,7 +67,7 @@ void cleanup_report_del_group (void *gro
+ 
+ 	SYSLOG ((LOG_ERR, "failed to remove group %s", name));
+ #ifdef WITH_AUDIT
+-	audit_logger (AUDIT_DEL_GROUP, Prog,
++	audit_logger (AUDIT_DEL_GROUP, log_get_progname(),
+ 	              "",
+ 	              name, AUDIT_NO_ID,
+ 	              SHADOW_AUDIT_FAILURE);
+@@ -83,7 +84,7 @@ void cleanup_report_mod_group (void *cle
+ 	         gr_dbname (),
+ 	         info->action));
+ #ifdef WITH_AUDIT
+-	audit_logger (AUDIT_GRP_MGMT, Prog,
++	audit_logger (AUDIT_GRP_MGMT, log_get_progname(),
+ 	              info->audit_msg,
+ 	              info->name, AUDIT_NO_ID,
+ 	              SHADOW_AUDIT_FAILURE);
+@@ -101,7 +102,7 @@ void cleanup_report_mod_gshadow (void *c
+ 	         sgr_dbname (),
+ 	         info->action));
+ #ifdef WITH_AUDIT
+-	audit_logger (AUDIT_GRP_MGMT, Prog,
++	audit_logger (AUDIT_GRP_MGMT, log_get_progname(),
+ 	              info->audit_msg,
+ 	              info->name, AUDIT_NO_ID,
+ 	              SHADOW_AUDIT_FAILURE);
+@@ -121,7 +122,7 @@ void cleanup_report_add_group_group (voi
+ 
+ 	SYSLOG ((LOG_ERR, "failed to add group %s to %s", name, gr_dbname ()));
+ #ifdef WITH_AUDIT
+-	audit_logger (AUDIT_ADD_GROUP, Prog,
++	audit_logger (AUDIT_ADD_GROUP, log_get_progname(),
+ 	              "adding-group",
+ 	              name, AUDIT_NO_ID,
+ 	              SHADOW_AUDIT_FAILURE);
+@@ -141,7 +142,7 @@ void cleanup_report_add_group_gshadow (v
+ 
+ 	SYSLOG ((LOG_ERR, "failed to add group %s to %s", name, sgr_dbname ()));
+ #ifdef WITH_AUDIT
+-	audit_logger (AUDIT_GRP_MGMT, Prog,
++	audit_logger (AUDIT_GRP_MGMT, log_get_progname(),
+ 	              "adding-shadow-group",
+ 	              name, AUDIT_NO_ID,
+ 	              SHADOW_AUDIT_FAILURE);
+@@ -164,7 +165,7 @@ void cleanup_report_del_group_group (voi
+ 	         "failed to remove group %s from %s",
+ 	         name, gr_dbname ()));
+ #ifdef WITH_AUDIT
+-	audit_logger (AUDIT_DEL_GROUP, Prog,
++	audit_logger (AUDIT_DEL_GROUP, log_get_progname(),
+ 	              "removing-group",
+ 	              name, AUDIT_NO_ID,
+ 	              SHADOW_AUDIT_FAILURE);
+@@ -187,7 +188,7 @@ void cleanup_report_del_group_gshadow (v
+ 	         "failed to remove group %s from %s",
+ 	         name, sgr_dbname ()));
+ #ifdef WITH_AUDIT
+-	audit_logger (AUDIT_GRP_MGMT, Prog,
++	audit_logger (AUDIT_GRP_MGMT, log_get_progname(),
+ 	              "removing-shadow-group",
+ 	              name, AUDIT_NO_ID,
+ 	              SHADOW_AUDIT_FAILURE);
+@@ -203,9 +204,9 @@ void cleanup_report_del_group_gshadow (v
+ void cleanup_unlock_group (unused void *arg)
+ {
+ 	if (gr_unlock () == 0) {
+-		fprintf (shadow_logfd,
++		fprintf (log_get_logfd(),
+ 		         _("%s: failed to unlock %s\n"),
+-		         Prog, gr_dbname ());
++		         log_get_progname(), gr_dbname ());
+ 		SYSLOG ((LOG_ERR, "failed to unlock %s", gr_dbname ()));
+ #ifdef WITH_AUDIT
+ 		audit_logger_message ("unlocking-group",
+@@ -223,9 +224,9 @@ void cleanup_unlock_group (unused void *
+ void cleanup_unlock_gshadow (unused void *arg)
+ {
+ 	if (sgr_unlock () == 0) {
+-		fprintf (shadow_logfd,
++		fprintf (log_get_logfd(),
+ 		         _("%s: failed to unlock %s\n"),
+-		         Prog, sgr_dbname ());
++		         log_get_progname(), sgr_dbname ());
+ 		SYSLOG ((LOG_ERR, "failed to unlock %s", sgr_dbname ()));
+ #ifdef WITH_AUDIT
+ 		audit_logger_message ("unlocking-gshadow",
+diff -up shadow-4.9/libmisc/cleanup_user.c.debug1 shadow-4.9/libmisc/cleanup_user.c
+--- shadow-4.9/libmisc/cleanup_user.c.debug1	2022-01-10 10:45:52.184132808 +0100
++++ shadow-4.9/libmisc/cleanup_user.c	2022-01-10 10:47:49.539970421 +0100
+@@ -36,6 +36,7 @@
+ #include "pwio.h"
+ #include "shadowio.h"
+ #include "prototypes.h"
++#include "shadowlog.h"
+ 
+ /*
+  * cleanup_report_add_user - Report failure to add an user to the system
+@@ -48,7 +49,7 @@ void cleanup_report_add_user (void *user
+ 
+ 	SYSLOG ((LOG_ERR, "failed to add user %s", name));
+ #ifdef WITH_AUDIT
+-	audit_logger (AUDIT_ADD_USER, Prog,
++	audit_logger (AUDIT_ADD_USER, log_get_progname(),
+ 	              "",
+ 	              name, AUDIT_NO_ID,
+ 	              SHADOW_AUDIT_FAILURE);
+@@ -65,7 +66,7 @@ void cleanup_report_mod_passwd (void *cl
+ 	         pw_dbname (),
+ 	         info->action));
+ #ifdef WITH_AUDIT
+-	audit_logger (AUDIT_USER_MGMT, Prog,
++	audit_logger (AUDIT_USER_MGMT, log_get_progname(),
+ 	              info->audit_msg,
+ 	              info->name, AUDIT_NO_ID,
+ 	              SHADOW_AUDIT_FAILURE);
+@@ -85,7 +86,7 @@ void cleanup_report_add_user_passwd (voi
+ 
+ 	SYSLOG ((LOG_ERR, "failed to add user %s to %s", name, pw_dbname ()));
+ #ifdef WITH_AUDIT
+-	audit_logger (AUDIT_ADD_USER, Prog,
++	audit_logger (AUDIT_ADD_USER, log_get_progname(),
+ 	              "adding-user",
+ 	              name, AUDIT_NO_ID,
+ 	              SHADOW_AUDIT_FAILURE);
+@@ -105,7 +106,7 @@ void cleanup_report_add_user_shadow (voi
+ 
+ 	SYSLOG ((LOG_ERR, "failed to add user %s to %s", name, spw_dbname ()));
+ #ifdef WITH_AUDIT
+-	audit_logger (AUDIT_USER_MGMT, Prog,
++	audit_logger (AUDIT_USER_MGMT, log_get_progname(),
+ 	              "adding-shadow-user",
+ 	              name, AUDIT_NO_ID,
+ 	              SHADOW_AUDIT_FAILURE);
+@@ -120,9 +121,9 @@ void cleanup_report_add_user_shadow (voi
+ void cleanup_unlock_passwd (unused void *arg)
+ {
+ 	if (pw_unlock () == 0) {
+-		fprintf (shadow_logfd,
++		fprintf (log_get_logfd(),
+ 		         _("%s: failed to unlock %s\n"),
+-		         Prog, pw_dbname ());
++		         log_get_progname(), pw_dbname ());
+ 		SYSLOG ((LOG_ERR, "failed to unlock %s", pw_dbname ()));
+ #ifdef WITH_AUDIT
+ 		audit_logger_message ("unlocking-passwd",
+@@ -139,9 +140,9 @@ void cleanup_unlock_passwd (unused void
+ void cleanup_unlock_shadow (unused void *arg)
+ {
+ 	if (spw_unlock () == 0) {
+-		fprintf (shadow_logfd,
++		fprintf (log_get_logfd(),
+ 		         _("%s: failed to unlock %s\n"),
+-		         Prog, spw_dbname ());
++		         log_get_progname(), spw_dbname ());
+ 		SYSLOG ((LOG_ERR, "failed to unlock %s", spw_dbname ()));
+ #ifdef WITH_AUDIT
+ 		audit_logger_message ("unlocking-shadow",
+diff -up shadow-4.9/libmisc/copydir.c.debug1 shadow-4.9/libmisc/copydir.c
+--- shadow-4.9/libmisc/copydir.c.debug1	2021-07-22 23:55:35.000000000 +0200
++++ shadow-4.9/libmisc/copydir.c	2022-01-10 10:48:02.158060482 +0100
+@@ -55,6 +55,7 @@
+ #ifdef WITH_ATTR
+ #include <attr/libattr.h>
+ #endif				/* WITH_ATTR */
++#include "shadowlog.h"
+ 
+ 
+ static /*@null@*/const char *src_orig;
+@@ -116,6 +117,7 @@ static int fchown_if_needed (int fdst, c
+ static void error_acl (struct error_context *ctx, const char *fmt, ...)
+ {
+ 	va_list ap;
++	FILE *shadow_logfd = log_get_logfd();
+ 
+ 	/* ignore the case when destination does not support ACLs 
+ 	 * or extended attributes */
+@@ -125,7 +127,7 @@ static void error_acl (struct error_cont
+ 	}
+ 
+ 	va_start (ap, fmt);
+-	(void) fprintf (shadow_logfd, _("%s: "), Prog);
++	(void) fprintf (shadow_logfd, _("%s: "), log_get_progname());
+ 	if (vfprintf (shadow_logfd, fmt, ap) != 0) {
+ 		(void) fputs (_(": "), shadow_logfd);
+ 	}
+@@ -248,9 +250,9 @@ int copy_tree (const char *src_root, con
+ 		}
+ 
+ 		if (!S_ISDIR (sb.st_mode)) {
+-			fprintf (shadow_logfd,
++			fprintf (log_get_logfd(),
+ 			         "%s: %s is not a directory",
+-			         Prog, src_root);
++			         log_get_progname(), src_root);
+ 			return -1;
+ 		}
+ 
+diff -up shadow-4.9/libmisc/env.c.debug1 shadow-4.9/libmisc/env.c
+--- shadow-4.9/libmisc/env.c.debug1	2021-07-22 23:55:35.000000000 +0200
++++ shadow-4.9/libmisc/env.c	2022-01-10 10:45:52.203132944 +0100
+@@ -40,6 +40,7 @@
+ #include <string.h>
+ #include "prototypes.h"
+ #include "defines.h"
++#include "shadowlog.h"
+ /*
+  * NEWENVP_STEP must be a power of two.  This is the number
+  * of (char *) pointers to allocate at a time, to avoid using
+@@ -171,7 +172,7 @@ void addenv (const char *string, /*@null
+ 			}
+ 			newenvp = __newenvp;
+ 		} else {
+-			(void) fputs (_("Environment overflow\n"), shadow_logfd);
++			(void) fputs (_("Environment overflow\n"), log_get_logfd());
+ 			newenvc--;
+ 			free (newenvp[newenvc]);
+ 		}
+diff -up shadow-4.9/libmisc/find_new_gid.c.debug1 shadow-4.9/libmisc/find_new_gid.c
+--- shadow-4.9/libmisc/find_new_gid.c.debug1	2022-01-10 10:45:52.191132858 +0100
++++ shadow-4.9/libmisc/find_new_gid.c	2022-01-10 10:45:52.203132944 +0100
+@@ -38,6 +38,7 @@
+ #include "prototypes.h"
+ #include "groupio.h"
+ #include "getdef.h"
++#include "shadowlog.h"
+ 
+ /*
+  * get_ranges - Get the minimum and maximum ID ranges for the search
+@@ -74,10 +75,10 @@ static int get_ranges (bool sys_group, g
+ 
+ 		/* Check that the ranges make sense */
+ 		if (*max_id < *min_id) {
+-			(void) fprintf (shadow_logfd,
++			(void) fprintf (log_get_logfd(),
+                             _("%s: Invalid configuration: SYS_GID_MIN (%lu), "
+                               "GID_MIN (%lu), SYS_GID_MAX (%lu)\n"),
+-                            Prog, (unsigned long) *min_id,
++                            log_get_progname(), (unsigned long) *min_id,
+                             getdef_ulong ("GID_MIN", 1000UL),
+                             (unsigned long) *max_id);
+ 			return EINVAL;
+@@ -104,10 +105,10 @@ static int get_ranges (bool sys_group, g
+ 
+ 		/* Check that the ranges make sense */
+ 		if (*max_id < *min_id) {
+-			(void) fprintf (shadow_logfd,
++			(void) fprintf (log_get_logfd(),
+ 					_("%s: Invalid configuration: GID_MIN (%lu), "
+ 					  "GID_MAX (%lu)\n"),
+-					Prog, (unsigned long) *min_id,
++					log_get_progname(), (unsigned long) *min_id,
+ 					(unsigned long) *max_id);
+ 			return EINVAL;
+ 		}
+@@ -220,10 +221,10 @@ int find_new_gid (bool sys_group,
+ 			 * more likely to want to stop and address the
+ 			 * issue.
+ 			 */
+-			fprintf (shadow_logfd,
++			fprintf (log_get_logfd(),
+ 				_("%s: Encountered error attempting to use "
+ 				  "preferred GID: %s\n"),
+-				Prog, strerror (result));
++				log_get_progname(), strerror (result));
+ 			return -1;
+ 		}
+ 	}
+@@ -250,9 +251,9 @@ int find_new_gid (bool sys_group,
+ 	/* Create an array to hold all of the discovered GIDs */
+ 	used_gids = malloc (sizeof (bool) * (gid_max +1));
+ 	if (NULL == used_gids) {
+-		fprintf (shadow_logfd,
++		fprintf (log_get_logfd(),
+ 			 _("%s: failed to allocate memory: %s\n"),
+-			 Prog, strerror (errno));
++			 log_get_progname(), strerror (errno));
+ 		return -1;
+ 	}
+ 	memset (used_gids, false, sizeof (bool) * (gid_max + 1));
+@@ -330,10 +331,10 @@ int find_new_gid (bool sys_group,
+ 				 *
+ 				 */
+ 				if (!nospam) {
+-					fprintf (shadow_logfd,
++					fprintf (log_get_logfd(),
+ 						_("%s: Can't get unique system GID (%s). "
+ 						  "Suppressing additional messages.\n"),
+-						Prog, strerror (result));
++						log_get_progname(), strerror (result));
+ 					SYSLOG ((LOG_ERR,
+ 						"Error checking available GIDs: %s",
+ 						strerror (result)));
+@@ -373,10 +374,10 @@ int find_new_gid (bool sys_group,
+ 					 *
+ 					 */
+ 					if (!nospam) {
+-						fprintf (shadow_logfd,
++						fprintf (log_get_logfd(),
+ 							_("%s: Can't get unique system GID (%s). "
+ 							  "Suppressing additional messages.\n"),
+-							Prog, strerror (result));
++							log_get_progname(), strerror (result));
+ 						SYSLOG ((LOG_ERR,
+ 							"Error checking available GIDs: %s",
+ 							strerror (result)));
+@@ -433,10 +434,10 @@ int find_new_gid (bool sys_group,
+ 				 *
+ 				 */
+ 				if (!nospam) {
+-					fprintf (shadow_logfd,
++					fprintf (log_get_logfd(),
+ 						_("%s: Can't get unique GID (%s). "
+ 						  "Suppressing additional messages.\n"),
+-						Prog, strerror (result));
++						log_get_progname(), strerror (result));
+ 					SYSLOG ((LOG_ERR,
+ 						"Error checking available GIDs: %s",
+ 						strerror (result)));
+@@ -476,10 +477,10 @@ int find_new_gid (bool sys_group,
+ 					 *
+ 					 */
+ 					if (!nospam) {
+-						fprintf (shadow_logfd,
++						fprintf (log_get_logfd(),
+ 							_("%s: Can't get unique GID (%s). "
+ 							  "Suppressing additional messages.\n"),
+-							Prog, strerror (result));
++							log_get_progname(), strerror (result));
+ 						SYSLOG ((LOG_ERR,
+ 							"Error checking available GIDs: %s",
+ 							strerror (result)));
+@@ -495,9 +496,9 @@ int find_new_gid (bool sys_group,
+ 	}
+ 
+ 	/* The code reached here and found no available IDs in the range */
+-	fprintf (shadow_logfd,
++	fprintf (log_get_logfd(),
+ 		_("%s: Can't get unique GID (no more available GIDs)\n"),
+-		Prog);
++		log_get_progname());
+ 	SYSLOG ((LOG_WARN, "no more available GIDs on the system"));
+ 	free (used_gids);
+ 	return -1;
+diff -up shadow-4.9/libmisc/find_new_sub_gids.c.debug1 shadow-4.9/libmisc/find_new_sub_gids.c
+--- shadow-4.9/libmisc/find_new_sub_gids.c.debug1	2021-07-22 23:55:35.000000000 +0200
++++ shadow-4.9/libmisc/find_new_sub_gids.c	2022-01-10 10:45:52.203132944 +0100
+@@ -37,6 +37,7 @@
+ #include "prototypes.h"
+ #include "subordinateio.h"
+ #include "getdef.h"
++#include "shadowlog.h"
+ 
+ /*
+  * find_new_sub_gids - Find a new unused range of GIDs.
+@@ -60,18 +61,18 @@ int find_new_sub_gids (gid_t *range_star
+ 	count = getdef_ulong ("SUB_GID_COUNT", 65536);
+ 
+ 	if (min > max || count >= max || (min + count - 1) > max) {
+-		(void) fprintf (shadow_logfd,
++		(void) fprintf (log_get_logfd(),
+ 				_("%s: Invalid configuration: SUB_GID_MIN (%lu),"
+ 				  " SUB_GID_MAX (%lu), SUB_GID_COUNT (%lu)\n"),
+-			Prog, min, max, count);
++			log_get_progname(), min, max, count);
+ 		return -1;
+ 	}
+ 
+ 	start = sub_gid_find_free_range(min, max, count);
+ 	if (start == (gid_t)-1) {
+-		fprintf (shadow_logfd,
++		fprintf (log_get_logfd(),
+ 		         _("%s: Can't get unique subordinate GID range\n"),
+-		         Prog);
++		         log_get_progname());
+ 		SYSLOG ((LOG_WARN, "no more available subordinate GIDs on the system"));
+ 		return -1;
+ 	}
+diff -up shadow-4.9/libmisc/find_new_sub_uids.c.debug1 shadow-4.9/libmisc/find_new_sub_uids.c
+--- shadow-4.9/libmisc/find_new_sub_uids.c.debug1	2021-07-22 23:55:35.000000000 +0200
++++ shadow-4.9/libmisc/find_new_sub_uids.c	2022-01-10 10:45:52.203132944 +0100
+@@ -37,6 +37,7 @@
+ #include "prototypes.h"
+ #include "subordinateio.h"
+ #include "getdef.h"
++#include "shadowlog.h"
+ 
+ /*
+  * find_new_sub_uids - Find a new unused range of UIDs.
+@@ -60,18 +61,18 @@ int find_new_sub_uids (uid_t *range_star
+ 	count = getdef_ulong ("SUB_UID_COUNT", 65536);
+ 
+ 	if (min > max || count >= max || (min + count - 1) > max) {
+-		(void) fprintf (shadow_logfd,
++		(void) fprintf (log_get_logfd(),
+ 				_("%s: Invalid configuration: SUB_UID_MIN (%lu),"
+ 				  " SUB_UID_MAX (%lu), SUB_UID_COUNT (%lu)\n"),
+-			Prog, min, max, count);
++			log_get_progname(), min, max, count);
+ 		return -1;
+ 	}
+ 
+ 	start = sub_uid_find_free_range(min, max, count);
+ 	if (start == (uid_t)-1) {
+-		fprintf (shadow_logfd,
++		fprintf (log_get_logfd(),
+ 		         _("%s: Can't get unique subordinate UID range\n"),
+-		         Prog);
++		         log_get_progname());
+ 		SYSLOG ((LOG_WARN, "no more available subordinate UIDs on the system"));
+ 		return -1;
+ 	}
+diff -up shadow-4.9/libmisc/find_new_uid.c.debug1 shadow-4.9/libmisc/find_new_uid.c
+--- shadow-4.9/libmisc/find_new_uid.c.debug1	2022-01-10 10:45:52.191132858 +0100
++++ shadow-4.9/libmisc/find_new_uid.c	2022-01-10 10:45:52.204132951 +0100
+@@ -38,6 +38,7 @@
+ #include "prototypes.h"
+ #include "pwio.h"
+ #include "getdef.h"
++#include "shadowlog.h"
+ 
+ /*
+  * get_ranges - Get the minimum and maximum ID ranges for the search
+@@ -74,10 +75,10 @@ static int get_ranges (bool sys_user, ui
+ 
+ 		/* Check that the ranges make sense */
+ 		if (*max_id < *min_id) {
+-			(void) fprintf (shadow_logfd,
++			(void) fprintf (log_get_logfd(),
+                             _("%s: Invalid configuration: SYS_UID_MIN (%lu), "
+                               "UID_MIN (%lu), SYS_UID_MAX (%lu)\n"),
+-                            Prog, (unsigned long) *min_id,
++                            log_get_progname(), (unsigned long) *min_id,
+                             getdef_ulong ("UID_MIN", 1000UL),
+                             (unsigned long) *max_id);
+ 			return EINVAL;
+@@ -104,10 +105,10 @@ static int get_ranges (bool sys_user, ui
+ 
+ 		/* Check that the ranges make sense */
+ 		if (*max_id < *min_id) {
+-			(void) fprintf (shadow_logfd,
++			(void) fprintf (log_get_logfd(),
+ 					_("%s: Invalid configuration: UID_MIN (%lu), "
+ 					  "UID_MAX (%lu)\n"),
+-					Prog, (unsigned long) *min_id,
++					log_get_progname(), (unsigned long) *min_id,
+ 					(unsigned long) *max_id);
+ 			return EINVAL;
+ 		}
+@@ -220,10 +221,10 @@ int find_new_uid(bool sys_user,
+ 			 * more likely to want to stop and address the
+ 			 * issue.
+ 			 */
+-			fprintf (shadow_logfd,
++			fprintf (log_get_logfd(),
+ 				_("%s: Encountered error attempting to use "
+ 				  "preferred UID: %s\n"),
+-				Prog, strerror (result));
++				log_get_progname(), strerror (result));
+ 			return -1;
+ 		}
+ 	}
+@@ -250,9 +251,9 @@ int find_new_uid(bool sys_user,
+ 	/* Create an array to hold all of the discovered UIDs */
+ 	used_uids = malloc (sizeof (bool) * (uid_max +1));
+ 	if (NULL == used_uids) {
+-		fprintf (shadow_logfd,
++		fprintf (log_get_logfd(),
+ 			 _("%s: failed to allocate memory: %s\n"),
+-			 Prog, strerror (errno));
++			 log_get_progname(), strerror (errno));
+ 		return -1;
+ 	}
+ 	memset (used_uids, false, sizeof (bool) * (uid_max + 1));
+@@ -330,10 +331,10 @@ int find_new_uid(bool sys_user,
+ 				 *
+ 				 */
+ 				if (!nospam) {
+-					fprintf (shadow_logfd,
++					fprintf (log_get_logfd(),
+ 						_("%s: Can't get unique system UID (%s). "
+ 						  "Suppressing additional messages.\n"),
+-						Prog, strerror (result));
++						log_get_progname(), strerror (result));
+ 					SYSLOG ((LOG_ERR,
+ 						"Error checking available UIDs: %s",
+ 						strerror (result)));
+@@ -373,10 +374,10 @@ int find_new_uid(bool sys_user,
+ 					 *
+ 					 */
+ 					if (!nospam) {
+-						fprintf (shadow_logfd,
++						fprintf (log_get_logfd(),
+ 							_("%s: Can't get unique system UID (%s). "
+ 							  "Suppressing additional messages.\n"),
+-							Prog, strerror (result));
++							log_get_progname(), strerror (result));
+ 						SYSLOG((LOG_ERR,
+ 							"Error checking available UIDs: %s",
+ 							strerror (result)));
+@@ -433,10 +434,10 @@ int find_new_uid(bool sys_user,
+ 				 *
+ 				 */
+ 				if (!nospam) {
+-					fprintf (shadow_logfd,
++					fprintf (log_get_logfd(),
+ 						_("%s: Can't get unique UID (%s). "
+ 						  "Suppressing additional messages.\n"),
+-						Prog, strerror (result));
++						log_get_progname(), strerror (result));
+ 					SYSLOG ((LOG_ERR,
+ 						"Error checking available UIDs: %s",
+ 						strerror (result)));
+@@ -476,10 +477,10 @@ int find_new_uid(bool sys_user,
+ 					 *
+ 					 */
+ 					if (!nospam) {
+-						fprintf (shadow_logfd,
++						fprintf (log_get_logfd(),
+ 							_("%s: Can't get unique UID (%s). "
+ 							  "Suppressing additional messages.\n"),
+-							Prog, strerror (result));
++							log_get_progname(), strerror (result));
+ 						SYSLOG ((LOG_ERR,
+ 							"Error checking available UIDs: %s",
+ 							strerror (result)));
+@@ -495,9 +496,9 @@ int find_new_uid(bool sys_user,
+ 	}
+ 
+ 	/* The code reached here and found no available IDs in the range */
+-	fprintf (shadow_logfd,
++	fprintf (log_get_logfd(),
+ 		_("%s: Can't get unique UID (no more available UIDs)\n"),
+-		Prog);
++		log_get_progname());
+ 	SYSLOG ((LOG_WARN, "no more available UIDs on the system"));
+ 	free (used_uids);
+ 	return -1;
+diff -up shadow-4.9/libmisc/gettime.c.debug1 shadow-4.9/libmisc/gettime.c
+--- shadow-4.9/libmisc/gettime.c.debug1	2021-07-22 23:55:35.000000000 +0200
++++ shadow-4.9/libmisc/gettime.c	2022-01-10 10:45:52.204132951 +0100
+@@ -36,6 +36,7 @@
+ #include <stdio.h>
+ #include "defines.h"
+ #include "prototypes.h"
++#include "shadowlog.h"
+ 
+ /*
+  * gettime() returns the time as the number of seconds since the Epoch
+@@ -50,6 +51,7 @@
+ 	char *source_date_epoch;
+ 	time_t fallback;
+ 	unsigned long long epoch;
++	FILE *shadow_logfd = log_get_logfd();
+ 
+ 	fallback = time (NULL);
+ 	source_date_epoch = shadow_getenv ("SOURCE_DATE_EPOCH");
+diff -up shadow-4.9/libmisc/idmapping.c.debug1 shadow-4.9/libmisc/idmapping.c
+--- shadow-4.9/libmisc/idmapping.c.debug1	2021-07-22 23:55:35.000000000 +0200
++++ shadow-4.9/libmisc/idmapping.c	2022-01-10 10:45:52.204132951 +0100
+@@ -40,6 +40,7 @@
+ #include <sys/prctl.h>
+ #include <sys/capability.h>
+ #endif
++#include "shadowlog.h"
+ 
+ struct map_range *get_map_ranges(int ranges, int argc, char **argv)
+ {
+@@ -47,28 +48,28 @@ struct map_range *get_map_ranges(int ran
+ 	int idx, argidx;
+ 
+ 	if (ranges < 0 || argc < 0) {
+-		fprintf(shadow_logfd, "%s: error calculating number of arguments\n", Prog);
++		fprintf(log_get_logfd(), "%s: error calculating number of arguments\n", log_get_progname());
+ 		return NULL;
+ 	}
+ 
+ 	if (ranges != ((argc + 2) / 3)) {
+-		fprintf(shadow_logfd, "%s: ranges: %u is wrong for argc: %d\n", Prog, ranges, argc);
++		fprintf(log_get_logfd(), "%s: ranges: %u is wrong for argc: %d\n", log_get_progname(), ranges, argc);
+ 		return NULL;
+ 	}
+ 
+ 	if ((ranges * 3) > argc) {
+-		fprintf(shadow_logfd, "ranges: %u argc: %d\n",
++		fprintf(log_get_logfd(), "ranges: %u argc: %d\n",
+ 			ranges, argc);
+-		fprintf(shadow_logfd,
++		fprintf(log_get_logfd(),
+ 			_( "%s: Not enough arguments to form %u mappings\n"),
+-			Prog, ranges);
++			log_get_progname(), ranges);
+ 		return NULL;
+ 	}
+ 
+ 	mappings = calloc(ranges, sizeof(*mappings));
+ 	if (!mappings) {
+-		fprintf(shadow_logfd, _( "%s: Memory allocation failure\n"),
+-			Prog);
++		fprintf(log_get_logfd(), _( "%s: Memory allocation failure\n"),
++			log_get_progname());
+ 		exit(EXIT_FAILURE);
+ 	}
+ 
+@@ -88,24 +89,24 @@ struct map_range *get_map_ranges(int ran
+ 			return NULL;
+ 		}
+ 		if (ULONG_MAX - mapping->upper <= mapping->count || ULONG_MAX - mapping->lower <= mapping->count) {
+-			fprintf(shadow_logfd, _( "%s: subuid overflow detected.\n"), Prog);
++			fprintf(log_get_logfd(), _( "%s: subuid overflow detected.\n"), log_get_progname());
+ 			exit(EXIT_FAILURE);
+ 		}
+ 		if (mapping->upper > UINT_MAX ||
+ 			mapping->lower > UINT_MAX ||
+ 			mapping->count > UINT_MAX)  {
+-			fprintf(shadow_logfd, _( "%s: subuid overflow detected.\n"), Prog);
++			fprintf(log_get_logfd(), _( "%s: subuid overflow detected.\n"), log_get_progname());
+ 			exit(EXIT_FAILURE);
+ 		}
+ 		if (mapping->lower + mapping->count > UINT_MAX ||
+ 				mapping->upper + mapping->count > UINT_MAX) {
+-			fprintf(shadow_logfd, _( "%s: subuid overflow detected.\n"), Prog);
++			fprintf(log_get_logfd(), _( "%s: subuid overflow detected.\n"), log_get_progname());
+ 			exit(EXIT_FAILURE);
+ 		}
+ 		if (mapping->lower + mapping->count < mapping->lower ||
+ 				mapping->upper + mapping->count < mapping->upper) {
+ 			/* this one really shouldn't be possible given previous checks */
+-			fprintf(shadow_logfd, _( "%s: subuid overflow detected.\n"), Prog);
++			fprintf(log_get_logfd(), _( "%s: subuid overflow detected.\n"), log_get_progname());
+ 			exit(EXIT_FAILURE);
+ 		}
+ 	}
+@@ -176,19 +177,19 @@ void write_mapping(int proc_dir_fd, int
+ 	} else if (strcmp(map_file, "gid_map") == 0) {
+ 		cap = CAP_SETGID;
+ 	} else {
+-		fprintf(shadow_logfd, _("%s: Invalid map file %s specified\n"), Prog, map_file);
++		fprintf(log_get_logfd(), _("%s: Invalid map file %s specified\n"), log_get_progname(), map_file);
+ 		exit(EXIT_FAILURE);
+ 	}
+ 
+ 	/* Align setuid- and fscaps-based new{g,u}idmap behavior. */
+ 	if (geteuid() == 0 && geteuid() != ruid) {
+ 		if (prctl(PR_SET_KEEPCAPS, 1, 0, 0, 0) < 0) {
+-			fprintf(shadow_logfd, _("%s: Could not prctl(PR_SET_KEEPCAPS)\n"), Prog);
++			fprintf(log_get_logfd(), _("%s: Could not prctl(PR_SET_KEEPCAPS)\n"), log_get_progname());
+ 			exit(EXIT_FAILURE);
+ 		}
+ 
+ 		if (seteuid(ruid) < 0) {
+-			fprintf(shadow_logfd, _("%s: Could not seteuid to %d\n"), Prog, ruid);
++			fprintf(log_get_logfd(), _("%s: Could not seteuid to %d\n"), log_get_progname(), ruid);
+ 			exit(EXIT_FAILURE);
+ 		}
+ 	}
+@@ -204,7 +205,7 @@ void write_mapping(int proc_dir_fd, int
+ 		data[0].effective |= CAP_TO_MASK(CAP_SETFCAP);
+ 	data[0].permitted = data[0].effective;
+ 	if (capset(&hdr, data) < 0) {
+-		fprintf(shadow_logfd, _("%s: Could not set caps\n"), Prog);
++		fprintf(log_get_logfd(), _("%s: Could not set caps\n"), log_get_progname());
+ 		exit(EXIT_FAILURE);
+ 	}
+ #endif
+@@ -222,7 +223,7 @@ void write_mapping(int proc_dir_fd, int
+ 			mapping->lower,
+ 			mapping->count);
+ 		if ((written <= 0) || (written >= (bufsize - (pos - buf)))) {
+-			fprintf(shadow_logfd, _("%s: snprintf failed!\n"), Prog);
++			fprintf(log_get_logfd(), _("%s: snprintf failed!\n"), log_get_progname());
+ 			exit(EXIT_FAILURE);
+ 		}
+ 		pos += written;
+@@ -231,13 +232,13 @@ void write_mapping(int proc_dir_fd, int
+ 	/* Write the mapping to the mapping file */
+ 	fd = openat(proc_dir_fd, map_file, O_WRONLY);
+ 	if (fd < 0) {
+-		fprintf(shadow_logfd, _("%s: open of %s failed: %s\n"),
+-			Prog, map_file, strerror(errno));
++		fprintf(log_get_logfd(), _("%s: open of %s failed: %s\n"),
++			log_get_progname(), map_file, strerror(errno));
+ 		exit(EXIT_FAILURE);
+ 	}
+ 	if (write(fd, buf, pos - buf) != (pos - buf)) {
+-		fprintf(shadow_logfd, _("%s: write to %s failed: %s\n"),
+-			Prog, map_file, strerror(errno));
++		fprintf(log_get_logfd(), _("%s: write to %s failed: %s\n"),
++			log_get_progname(), map_file, strerror(errno));
+ 		exit(EXIT_FAILURE);
+ 	}
+ 	close(fd);
+diff -up shadow-4.9/libmisc/limits.c.debug1 shadow-4.9/libmisc/limits.c
+--- shadow-4.9/libmisc/limits.c.debug1	2021-07-22 23:55:35.000000000 +0200
++++ shadow-4.9/libmisc/limits.c	2022-01-10 10:45:52.204132951 +0100
+@@ -50,6 +50,7 @@
+ #include "defines.h"
+ #include <pwd.h>
+ #include "getdef.h"
++#include "shadowlog.h"
+ #ifdef HAVE_SYS_RESOURCE_H
+ #include <sys/resource.h>
+ #define LIMITS
+@@ -548,7 +549,7 @@ void setup_limits (const struct passwd *
+ #ifdef LIMITS
+ 		if (info->pw_uid != 0) {
+ 			if ((setup_user_limits (info->pw_name) & LOGIN_ERROR_LOGIN) != 0) {
+-				(void) fputs (_("Too many logins.\n"), shadow_logfd);
++				(void) fputs (_("Too many logins.\n"), log_get_logfd());
+ 				(void) sleep (2); /* XXX: Should be FAIL_DELAY */
+ 				exit (EXIT_FAILURE);
+ 			}
+diff -up shadow-4.9/libmisc/pam_pass.c.debug1 shadow-4.9/libmisc/pam_pass.c
+--- shadow-4.9/libmisc/pam_pass.c.debug1	2021-07-22 23:55:35.000000000 +0200
++++ shadow-4.9/libmisc/pam_pass.c	2022-01-10 10:45:52.204132951 +0100
+@@ -46,11 +46,13 @@
+ #include "defines.h"
+ #include "pam_defs.h"
+ #include "prototypes.h"
++#include "shadowlog.h"
+ 
+ void do_pam_passwd (const char *user, bool silent, bool change_expired)
+ {
+ 	pam_handle_t *pamh = NULL;
+ 	int flags = 0, ret;
++	FILE *shadow_logfd = log_get_logfd();
+ 
+ 	if (silent)
+ 		flags |= PAM_SILENT;
+diff -up shadow-4.9/libmisc/pam_pass_non_interactive.c.debug1 shadow-4.9/libmisc/pam_pass_non_interactive.c
+--- shadow-4.9/libmisc/pam_pass_non_interactive.c.debug1	2021-07-22 23:55:35.000000000 +0200
++++ shadow-4.9/libmisc/pam_pass_non_interactive.c	2022-01-10 10:45:52.204132951 +0100
+@@ -38,6 +38,7 @@
+ #include <stdlib.h>
+ #include <security/pam_appl.h>
+ #include "prototypes.h"
++#include "shadowlog.h"
+ 
+ /*@null@*/ /*@only@*/static const char *non_interactive_password = NULL;
+ static int ni_conv (int num_msg,
+@@ -76,9 +77,9 @@ static int ni_conv (int num_msg,
+ 
+ 		switch (msg[count]->msg_style) {
+ 		case PAM_PROMPT_ECHO_ON:
+-			fprintf (shadow_logfd,
++			fprintf (log_get_logfd(),
+ 			         _("%s: PAM modules requesting echoing are not supported.\n"),
+-			         Prog);
++			         log_get_progname());
+ 			goto failed_conversation;
+ 		case PAM_PROMPT_ECHO_OFF:
+ 			responses[count].resp = strdup (non_interactive_password);
+@@ -88,7 +89,7 @@ static int ni_conv (int num_msg,
+ 			break;
+ 		case PAM_ERROR_MSG:
+ 			if (   (NULL == msg[count]->msg)
+-			    || (fprintf (shadow_logfd, "%s\n", msg[count]->msg) <0)) {
++			    || (fprintf (log_get_logfd(), "%s\n", msg[count]->msg) <0)) {
+ 				goto failed_conversation;
+ 			}
+ 			responses[count].resp = NULL;
+@@ -101,9 +102,9 @@ static int ni_conv (int num_msg,
+ 			responses[count].resp = NULL;
+ 			break;
+ 		default:
+-			(void) fprintf (shadow_logfd,
++			(void) fprintf (log_get_logfd(),
+ 			                _("%s: conversation type %d not supported.\n"),
+-			                Prog, msg[count]->msg_style);
++			                log_get_progname(), msg[count]->msg_style);
+ 			goto failed_conversation;
+ 		}
+ 	}
+@@ -143,19 +144,19 @@ int do_pam_passwd_non_interactive (const
+ 
+ 	ret = pam_start (pam_service, username, &non_interactive_pam_conv, &pamh);
+ 	if (ret != PAM_SUCCESS) {
+-		fprintf (shadow_logfd,
++		fprintf (log_get_logfd(),
+ 		         _("%s: (user %s) pam_start failure %d\n"),
+-		         Prog, username, ret);
++		         log_get_progname(), username, ret);
+ 		return 1;
+ 	}
+ 
+ 	non_interactive_password = password;
+ 	ret = pam_chauthtok (pamh, 0);
+ 	if (ret != PAM_SUCCESS) {
+-		fprintf (shadow_logfd,
++		fprintf (log_get_logfd(),
+ 		         _("%s: (user %s) pam_chauthtok() failed, error:\n"
+ 		           "%s\n"),
+-		         Prog, username, pam_strerror (pamh, ret));
++		         log_get_progname(), username, pam_strerror (pamh, ret));
+ 	}
+ 
+ 	(void) pam_end (pamh, PAM_SUCCESS);
+diff -up shadow-4.9/libmisc/prefix_flag.c.debug1 shadow-4.9/libmisc/prefix_flag.c
+--- shadow-4.9/libmisc/prefix_flag.c.debug1	2022-01-10 10:45:52.201132929 +0100
++++ shadow-4.9/libmisc/prefix_flag.c	2022-01-10 10:45:52.204132951 +0100
+@@ -48,6 +48,7 @@
+ #include "subordinateio.h"
+ #endif				/* ENABLE_SUBIDS */
+ #include "getdef.h"
++#include "shadowlog.h"
+ 
+ static char *passwd_db_file = NULL;
+ static char *spw_db_file = NULL;
+@@ -83,18 +84,18 @@ extern const char* process_prefix_flag (
+ 			&& (val = argv[i] + 9))
+ 		    || (strcmp (argv[i], short_opt) == 0)) {
+ 			if (NULL != prefix) {
+-				fprintf (shadow_logfd,
++				fprintf (log_get_logfd(),
+ 				         _("%s: multiple --prefix options\n"),
+-				         Prog);
++				         log_get_progname());
+ 				exit (E_BAD_ARG);
+ 			}
+ 
+ 			if (val) {
+ 				prefix = val;
+ 			} else if (i + 1 == argc) {
+-				fprintf (shadow_logfd,
++				fprintf (log_get_logfd(),
+ 				         _("%s: option '%s' requires an argument\n"),
+-				         Prog, argv[i]);
++				         log_get_progname(), argv[i]);
+ 				exit (E_BAD_ARG);
+ 			} else {
+ 				prefix = argv[++ i];
+@@ -110,9 +111,9 @@ extern const char* process_prefix_flag (
+ 		/* should we prevent symbolic link from being used as a prefix? */
+ 
+ 		if ( prefix[0] != '/') {
+-			fprintf (shadow_logfd,
++			fprintf (log_get_logfd(),
+ 				 _("%s: prefix must be an absolute path\n"),
+-				 Prog);
++				 log_get_progname());
+ 			exit (E_BAD_ARG);
+ 		}
+ 		size_t len;
+diff -up shadow-4.9/libmisc/pwdcheck.c.debug1 shadow-4.9/libmisc/pwdcheck.c
+--- shadow-4.9/libmisc/pwdcheck.c.debug1	2021-07-22 23:55:35.000000000 +0200
++++ shadow-4.9/libmisc/pwdcheck.c	2022-01-10 10:45:52.204132951 +0100
+@@ -39,6 +39,7 @@
+ #include "prototypes.h"
+ #include "defines.h"
+ #include "pwauth.h"
++#include "shadowlog.h"
+ 
+ void passwd_check (const char *user, const char *passwd, unused const char *progname)
+ {
+@@ -51,7 +52,7 @@ void passwd_check (const char *user, con
+ 	if (pw_auth (passwd, user, PW_LOGIN, (char *) 0) != 0) {
+ 		SYSLOG ((LOG_WARN, "incorrect password for `%s'", user));
+ 		(void) sleep (1);
+-		fprintf (shadow_logfd, _("Incorrect password for %s.\n"), user);
++		fprintf (log_get_logfd(), _("Incorrect password for %s.\n"), user);
+ 		exit (EXIT_FAILURE);
+ 	}
+ }
+diff -up shadow-4.9/libmisc/root_flag.c.debug1 shadow-4.9/libmisc/root_flag.c
+--- shadow-4.9/libmisc/root_flag.c.debug1	2021-07-22 23:55:35.000000000 +0200
++++ shadow-4.9/libmisc/root_flag.c	2022-01-10 10:45:52.204132951 +0100
+@@ -38,6 +38,7 @@
+ #include "prototypes.h"
+ /*@-exitarg@*/
+ #include "exitcodes.h"
++#include "shadowlog.h"
+ 
+ static void change_root (const char* newroot);
+ 
+@@ -65,18 +66,18 @@ extern void process_root_flag (const cha
+ 			&& (val = argv[i] + 7))
+ 		    || (strcmp (argv[i], short_opt) == 0)) {
+ 			if (NULL != newroot) {
+-				fprintf (shadow_logfd,
++				fprintf (log_get_logfd(),
+ 				         _("%s: multiple --root options\n"),
+-				         Prog);
++				         log_get_progname());
+ 				exit (E_BAD_ARG);
+ 			}
+ 
+ 			if (val) {
+ 				newroot = val;
+ 			} else if (i + 1 == argc) {
+-				fprintf (shadow_logfd,
++				fprintf (log_get_logfd(),
+ 				         _("%s: option '%s' requires an argument\n"),
+-				         Prog, argv[i]);
++				         log_get_progname(), argv[i]);
+ 				exit (E_BAD_ARG);
+ 			} else {
+ 				newroot = argv[++ i];
+@@ -94,36 +95,36 @@ static void change_root (const char* new
+ 	/* Drop privileges */
+ 	if (   (setregid (getgid (), getgid ()) != 0)
+ 	    || (setreuid (getuid (), getuid ()) != 0)) {
+-		fprintf (shadow_logfd, _("%s: failed to drop privileges (%s)\n"),
+-		         Prog, strerror (errno));
++		fprintf (log_get_logfd(), _("%s: failed to drop privileges (%s)\n"),
++		         log_get_progname(), strerror (errno));
+ 		exit (EXIT_FAILURE);
+ 	}
+ 
+ 	if ('/' != newroot[0]) {
+-		fprintf (shadow_logfd,
++		fprintf (log_get_logfd(),
+ 		         _("%s: invalid chroot path '%s'\n"),
+-		         Prog, newroot);
++		         log_get_progname(), newroot);
+ 		exit (E_BAD_ARG);
+ 	}
+ 
+ 	if (access (newroot, F_OK) != 0) {
+-		fprintf(shadow_logfd,
++		fprintf(log_get_logfd(),
+ 		        _("%s: cannot access chroot directory %s: %s\n"),
+-		        Prog, newroot, strerror (errno));
++		        log_get_progname(), newroot, strerror (errno));
+ 		exit (E_BAD_ARG);
+ 	}
+ 
+ 	if (chdir (newroot) != 0) {
+-		fprintf(shadow_logfd,
++		fprintf(log_get_logfd(),
+ 				_("%s: cannot chdir to chroot directory %s: %s\n"),
+-				Prog, newroot, strerror (errno));
++				log_get_progname(), newroot, strerror (errno));
+ 		exit (E_BAD_ARG);
+ 	}
+ 
+ 	if (chroot (newroot) != 0) {
+-		fprintf(shadow_logfd,
++		fprintf(log_get_logfd(),
+ 		        _("%s: unable to chroot to directory %s: %s\n"),
+-		        Prog, newroot, strerror (errno));
++		        log_get_progname(), newroot, strerror (errno));
+ 		exit (E_BAD_ARG);
+ 	}
+ }
+diff -up shadow-4.9/libmisc/salt.c.debug1 shadow-4.9/libmisc/salt.c
+--- shadow-4.9/libmisc/salt.c.debug1	2022-01-10 10:45:52.195132887 +0100
++++ shadow-4.9/libmisc/salt.c	2022-01-10 10:45:52.204132951 +0100
+@@ -21,6 +21,7 @@
+ #include "prototypes.h"
+ #include "defines.h"
+ #include "getdef.h"
++#include "shadowlog.h"
+ 
+ #if (defined CRYPT_GENSALT_IMPLEMENTS_AUTO_ENTROPY && \
+      CRYPT_GENSALT_IMPLEMENTS_AUTO_ENTROPY)
+@@ -178,7 +179,7 @@ static long read_random_bytes (void)
+ #endif
+ 
+ fail:
+-	fprintf (shadow_logfd,
++	fprintf (log_get_logfd(),
+ 		 _("Unable to obtain random bytes.\n"));
+ 	exit (1);
+ 
+@@ -506,7 +507,7 @@ static /*@observer@*/const char *gensalt
+ 		SHA_salt_rounds_to_buf (result, rounds);
+ #endif /* USE_SHA_CRYPT */
+ 	} else if (0 != strcmp (method, "DES")) {
+-		fprintf (shadow_logfd,
++		fprintf (log_get_logfd(),
+ 			 _("Invalid ENCRYPT_METHOD value: '%s'.\n"
+ 			   "Defaulting to DES.\n"),
+ 			 method);
+@@ -532,7 +533,7 @@ static /*@observer@*/const char *gensalt
+ 
+ 	/* Should not happen, but... */
+ 	if (NULL == retval) {
+-		fprintf (shadow_logfd,
++		fprintf (log_get_logfd(),
+ 			 _("Unable to generate a salt from setting "
+ 			   "\"%s\", check your settings in "
+ 			   "ENCRYPT_METHOD and the corresponding "
+diff -up shadow-4.9/libmisc/setupenv.c.debug1 shadow-4.9/libmisc/setupenv.c
+--- shadow-4.9/libmisc/setupenv.c.debug1	2021-07-22 23:55:35.000000000 +0200
++++ shadow-4.9/libmisc/setupenv.c	2022-01-10 10:45:52.204132951 +0100
+@@ -47,6 +47,7 @@
+ #include "defines.h"
+ #include <pwd.h>
+ #include "getdef.h"
++#include "shadowlog.h"
+ 
+ #ifndef USE_PAM
+ static void
+@@ -219,7 +220,7 @@ void setup_env (struct passwd *info)
+ 		static char temp_pw_dir[] = "/";
+ 
+ 		if (!getdef_bool ("DEFAULT_HOME") || chdir ("/") == -1) {
+-			fprintf (shadow_logfd, _("Unable to cd to '%s'\n"),
++			fprintf (log_get_logfd(), _("Unable to cd to '%s'\n"),
+ 				 info->pw_dir);
+ 			SYSLOG ((LOG_WARN,
+ 				 "unable to cd to `%s' for user `%s'\n",
+diff -up shadow-4.9/libmisc/user_busy.c.debug1 shadow-4.9/libmisc/user_busy.c
+--- shadow-4.9/libmisc/user_busy.c.debug1	2021-07-22 23:55:35.000000000 +0200
++++ shadow-4.9/libmisc/user_busy.c	2022-01-10 10:45:52.204132951 +0100
+@@ -45,6 +45,7 @@
+ #ifdef ENABLE_SUBIDS
+ #include "subordinateio.h"
+ #endif				/* ENABLE_SUBIDS */
++#include "shadowlog.h"
+ 
+ #ifdef __linux__
+ static int check_status (const char *name, const char *sname, uid_t uid);
+@@ -96,9 +97,9 @@ static int user_busy_utmp (const char *n
+ 			continue;
+ 		}
+ 
+-		fprintf (shadow_logfd,
++		fprintf (log_get_logfd(),
+ 		         _("%s: user %s is currently logged in\n"),
+-		         Prog, name);
++		         log_get_progname(), name);
+ 		return 1;
+ 	}
+ 
+@@ -249,9 +250,9 @@ static int user_busy_processes (const ch
+ #ifdef ENABLE_SUBIDS
+ 			sub_uid_close();
+ #endif
+-			fprintf (shadow_logfd,
++			fprintf (log_get_logfd(),
+ 			         _("%s: user %s is currently used by process %d\n"),
+-			         Prog, name, pid);
++			         log_get_progname(), name, pid);
+ 			return 1;
+ 		}
+ 
+@@ -273,9 +274,9 @@ static int user_busy_processes (const ch
+ #ifdef ENABLE_SUBIDS
+ 					sub_uid_close();
+ #endif
+-					fprintf (shadow_logfd,
++					fprintf (log_get_logfd(),
+ 					         _("%s: user %s is currently used by process %d\n"),
+-					         Prog, name, pid);
++					         log_get_progname(), name, pid);
+ 					return 1;
+ 				}
+ 			}
+diff -up shadow-4.9/libmisc/xgetXXbyYY.c.debug1 shadow-4.9/libmisc/xgetXXbyYY.c
+--- shadow-4.9/libmisc/xgetXXbyYY.c.debug1	2021-07-22 23:55:35.000000000 +0200
++++ shadow-4.9/libmisc/xgetXXbyYY.c	2022-01-10 10:45:52.204132951 +0100
+@@ -54,6 +54,7 @@
+ #include <stdio.h>
+ #include <errno.h>
+ #include "prototypes.h"
++#include "shadowlog.h"
+ 
+ #define XFUNCTION_NAME XPREFIX (FUNCTION_NAME)
+ #define XPREFIX(name) XPREFIX1 (name)
+@@ -74,7 +75,7 @@
+ 
+ 	result = malloc(sizeof(LOOKUP_TYPE));
+ 	if (NULL == result) {
+-		fprintf (shadow_logfd, _("%s: out of memory\n"),
++		fprintf (log_get_logfd(), _("%s: out of memory\n"),
+ 		         "x" STRINGIZE(FUNCTION_NAME));
+ 		exit (13);
+ 	}
+@@ -84,7 +85,7 @@
+ 		LOOKUP_TYPE *resbuf = NULL;
+ 		buffer = (char *)realloc (buffer, length);
+ 		if (NULL == buffer) {
+-			fprintf (shadow_logfd, _("%s: out of memory\n"),
++			fprintf (log_get_logfd(), _("%s: out of memory\n"),
+ 			         "x" STRINGIZE(FUNCTION_NAME));
+ 			exit (13);
+ 		}
+@@ -132,7 +133,7 @@
+ 	if (result) {
+ 		result = DUP_FUNCTION(result);
+ 		if (NULL == result) {
+-			fprintf (shadow_logfd, _("%s: out of memory\n"),
++			fprintf (log_get_logfd(), _("%s: out of memory\n"),
+ 			         "x" STRINGIZE(FUNCTION_NAME));
+ 			exit (13);
+ 		}
+diff -up shadow-4.9/libmisc/xmalloc.c.debug1 shadow-4.9/libmisc/xmalloc.c
+--- shadow-4.9/libmisc/xmalloc.c.debug1	2021-07-22 23:55:35.000000000 +0200
++++ shadow-4.9/libmisc/xmalloc.c	2022-01-10 10:45:52.204132951 +0100
+@@ -47,6 +47,7 @@
+ #include <errno.h>
+ #include "defines.h"
+ #include "prototypes.h"
++#include "shadowlog.h"
+ 
+ /*@maynotreturn@*/ /*@only@*//*@out@*//*@notnull@*/char *xmalloc (size_t size)
+ {
+@@ -54,9 +55,9 @@
+ 
+ 	ptr = (char *) malloc (size);
+ 	if (NULL == ptr) {
+-		(void) fprintf (shadow_logfd,
++		(void) fprintf (log_get_logfd(),
+ 		                _("%s: failed to allocate memory: %s\n"),
+-		                Prog, strerror (errno));
++		                log_get_progname(), strerror (errno));
+ 		exit (13);
+ 	}
+ 	return ptr;
+diff -up shadow-4.9/lib/nscd.c.debug1 shadow-4.9/lib/nscd.c
+--- shadow-4.9/lib/nscd.c.debug1	2021-07-22 23:55:35.000000000 +0200
++++ shadow-4.9/lib/nscd.c	2022-01-10 10:45:52.202132937 +0100
+@@ -10,6 +10,7 @@
+ #include "defines.h"
+ #include "prototypes.h"
+ #include "nscd.h"
++#include "shadowlog_internal.h"
+ 
+ #define MSG_NSCD_FLUSH_CACHE_FAILED "%s: Failed to flush the nscd cache.\n"
+ 
+diff -up shadow-4.9/lib/nss.c.debug1 shadow-4.9/lib/nss.c
+--- shadow-4.9/lib/nss.c.debug1	2021-07-22 23:55:35.000000000 +0200
++++ shadow-4.9/lib/nss.c	2022-01-10 10:45:52.202132937 +0100
+@@ -8,6 +8,7 @@
+ #include <stdatomic.h>
+ #include "prototypes.h"
+ #include "../libsubid/subid.h"
++#include "shadowlog_internal.h"
+ 
+ #define NSSWITCH "/etc/nsswitch.conf"
+ 
+diff -up shadow-4.9/lib/prototypes.h.debug1 shadow-4.9/lib/prototypes.h
+--- shadow-4.9/lib/prototypes.h.debug1	2022-01-10 10:45:52.195132887 +0100
++++ shadow-4.9/lib/prototypes.h	2022-01-10 10:45:52.202132937 +0100
+@@ -59,9 +59,6 @@
+ #include "defines.h"
+ #include "commonio.h"
+ 
+-extern /*@observer@*/ const char *Prog; /* Program name showed in error messages */
+-extern FILE *shadow_logfd;  /* file descripter to which error messages are printed */
+-
+ /* addgrps.c */
+ #if defined (HAVE_SETGROUPS) && ! defined (USE_PAM)
+ extern int add_groups (const char *);
+diff -up shadow-4.9/lib/run_part.c.debug1 shadow-4.9/lib/run_part.c
+--- shadow-4.9/lib/run_part.c.debug1	2021-07-22 23:55:35.000000000 +0200
++++ shadow-4.9/lib/run_part.c	2022-01-10 10:45:52.202132937 +0100
+@@ -8,6 +8,7 @@
+ #include <sys/wait.h>
+ #include <unistd.h>
+ #include <lib/prototypes.h>
++#include "shadowlog_internal.h"
+ 
+ int run_part (char *script_path, char *name, char *action)
+ {
+diff -up shadow-4.9/lib/selinux.c.debug1 shadow-4.9/lib/selinux.c
+--- shadow-4.9/lib/selinux.c.debug1	2022-01-10 10:45:52.196132894 +0100
++++ shadow-4.9/lib/selinux.c	2022-01-10 10:45:52.202132937 +0100
+@@ -38,6 +38,8 @@
+ #include <selinux/label.h>
+ #include "prototypes.h"
+ 
++#include "shadowlog_internal.h"
++
+ static bool selinux_checked = false;
+ static bool selinux_enabled;
+ static /*@null@*/struct selabel_handle *selabel_hnd = NULL;
+diff -up shadow-4.9/lib/semanage.c.debug1 shadow-4.9/lib/semanage.c
+--- shadow-4.9/lib/semanage.c.debug1	2022-01-10 10:45:52.196132894 +0100
++++ shadow-4.9/lib/semanage.c	2022-01-10 10:45:52.202132937 +0100
+@@ -43,6 +43,7 @@
+ #include <semanage/semanage.h>
+ #include "prototypes.h"
+ 
++#include "shadowlog_internal.h"
+ 
+ #ifndef DEFAULT_SERANGE
+ #define DEFAULT_SERANGE "s0"
+diff -up shadow-4.9/lib/shadowlog.c.debug1 shadow-4.9/lib/shadowlog.c
+--- shadow-4.9/lib/shadowlog.c.debug1	2022-01-10 10:45:52.202132937 +0100
++++ shadow-4.9/lib/shadowlog.c	2022-01-10 10:45:52.202132937 +0100
+@@ -0,0 +1,28 @@
++#include "shadowlog.h"
++
++#include "lib/shadowlog_internal.h"
++
++void log_set_progname(const char *progname)
++{
++	Prog = progname;
++}
++
++const char *log_get_progname(void)
++{
++	return Prog;
++}
++
++void log_set_logfd(FILE *fd)
++{
++	if (NULL != fd)
++		shadow_logfd = fd;
++	else
++		shadow_logfd = stderr;
++}
++
++FILE *log_get_logfd(void)
++{
++	if (shadow_logfd != NULL)
++		return shadow_logfd;
++	return stderr;
++}
+diff -up shadow-4.9/lib/shadowlog.h.debug1 shadow-4.9/lib/shadowlog.h
+--- shadow-4.9/lib/shadowlog.h.debug1	2022-01-10 10:45:52.202132937 +0100
++++ shadow-4.9/lib/shadowlog.h	2022-01-10 10:45:52.202132937 +0100
+@@ -0,0 +1,41 @@
++/*
++ * Copyright (c) 2021       , Serge Hallyn
++ * All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions
++ * are met:
++ * 1. Redistributions of source code must retain the above copyright
++ *    notice, this list of conditions and the following disclaimer.
++ * 2. Redistributions in binary form must reproduce the above copyright
++ *    notice, this list of conditions and the following disclaimer in the
++ *    documentation and/or other materials provided with the distribution.
++ * 3. The name of the copyright holders or contributors may not be used to
++ *    endorse or promote products derived from this software without
++ *    specific prior written permission.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
++ * ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
++ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
++ * PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT
++ * HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
++ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
++ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
++ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
++ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
++ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
++ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++ */
++
++/* $Id$ */
++#ifndef _LOG_H
++#define _LOG_H
++#include <stdio.h>
++
++extern void log_set_progname(const char *);
++extern const char *log_get_progname(void);
++extern void log_set_logfd(FILE *fd);
++extern FILE *log_get_logfd(void);
++extern void log_dolog(char *, ...);
++
++#endif
+diff -up shadow-4.9/lib/shadowlog_internal.h.debug1 shadow-4.9/lib/shadowlog_internal.h
+--- shadow-4.9/lib/shadowlog_internal.h.debug1	2022-01-10 10:45:52.202132937 +0100
++++ shadow-4.9/lib/shadowlog_internal.h	2022-01-10 10:45:52.202132937 +0100
+@@ -0,0 +1,2 @@
++const char *Prog; /* Program name showed in error messages */
++FILE *shadow_logfd;  /* file descripter to which error messages are printed */
+diff -up shadow-4.9/lib/spawn.c.debug1 shadow-4.9/lib/spawn.c
+--- shadow-4.9/lib/spawn.c.debug1	2021-07-22 23:55:35.000000000 +0200
++++ shadow-4.9/lib/spawn.c	2022-01-10 10:45:52.202132937 +0100
+@@ -38,6 +38,8 @@
+ #include "exitcodes.h"
+ #include "prototypes.h"
+ 
++#include "shadowlog_internal.h"
++
+ int run_command (const char *cmd, const char *argv[],
+                  /*@null@*/const char *envp[], /*@out@*/int *status)
+ {
+diff -up shadow-4.9/lib/sssd.c.debug1 shadow-4.9/lib/sssd.c
+--- shadow-4.9/lib/sssd.c.debug1	2021-07-22 23:55:35.000000000 +0200
++++ shadow-4.9/lib/sssd.c	2022-01-10 10:45:52.203132944 +0100
+@@ -11,6 +11,8 @@
+ #include "prototypes.h"
+ #include "sssd.h"
+ 
++#include "shadowlog_internal.h"
++
+ #define MSG_SSSD_FLUSH_CACHE_FAILED "%s: Failed to flush the sssd cache."
+ 
+ int sssd_flush_cache (int dbflags)
+diff -up shadow-4.9/libsubid/api.c.debug1 shadow-4.9/libsubid/api.c
+--- shadow-4.9/libsubid/api.c.debug1	2021-07-22 23:55:35.000000000 +0200
++++ shadow-4.9/libsubid/api.c	2022-01-10 10:48:14.913151522 +0100
+@@ -38,12 +38,13 @@
+ #include "subordinateio.h"
+ #include "idmapping.h"
+ #include "subid.h"
++#include "shadowlog.h"
+ 
+ const char *Prog = "(libsubid)";
+-FILE *shadow_logfd;
+ 
+ bool libsubid_init(const char *progname, FILE * logfd)
+ {
++	FILE *shadow_logfd;
+ 	if (progname) {
+ 		progname = strdup(progname);
+ 		if (progname)
+@@ -53,14 +54,15 @@ bool libsubid_init(const char *progname,
+ 	}
+ 
+ 	if (logfd) {
+-		shadow_logfd = logfd;
++		log_set_logfd(logfd);
+ 		return true;
+ 	}
+ 	shadow_logfd = fopen("/dev/null", "w");
+ 	if (!shadow_logfd) {
+-		shadow_logfd = stderr;
++		log_set_logfd(stderr);
+ 		return false;
+ 	}
++	log_set_logfd(shadow_logfd);
+ 	return true;
+ }
+ 
+diff -up shadow-4.9/lib/tcbfuncs.c.debug1 shadow-4.9/lib/tcbfuncs.c
+--- shadow-4.9/lib/tcbfuncs.c.debug1	2021-07-22 23:55:35.000000000 +0200
++++ shadow-4.9/lib/tcbfuncs.c	2022-01-10 10:45:52.203132944 +0100
+@@ -38,6 +38,8 @@
+ #include "shadowio.h"
+ #include "tcbfuncs.h"
+ 
++#include "shadowlog_internal.h"
++
+ #define SHADOWTCB_HASH_BY 1000
+ #define SHADOWTCB_LOCK_SUFFIX ".lock"
+ 
+diff -up shadow-4.9/src/chage.c.debug1 shadow-4.9/src/chage.c
+--- shadow-4.9/src/chage.c.debug1	2022-01-10 10:45:52.188132837 +0100
++++ shadow-4.9/src/chage.c	2022-01-10 10:45:52.205132958 +0100
+@@ -52,6 +52,7 @@
+ #include "defines.h"
+ #include "pwio.h"
+ #include "shadowio.h"
++#include "shadowlog.h"
+ #ifdef WITH_TCB
+ #include "tcbfuncs.h"
+ #endif
+@@ -62,7 +63,6 @@
+  * Global variables
+  */
+ const char *Prog;
+-FILE *shadow_logfd = NULL;
+ 
+ static bool
+     dflg = false,		/* set last password change date */
+@@ -820,7 +820,8 @@ int main (int argc, char **argv)
+ 	 * Get the program name so that error messages can use it.
+ 	 */
+ 	Prog = Basename (argv[0]);
+-	shadow_logfd = stderr;
++	log_set_progname(Prog);
++	log_set_logfd(stderr);
+ 
+ 	sanitize_env ();
+ 	(void) setlocale (LC_ALL, "");
+diff -up shadow-4.9/src/check_subid_range.c.debug1 shadow-4.9/src/check_subid_range.c
+--- shadow-4.9/src/check_subid_range.c.debug1	2021-07-22 23:55:35.000000000 +0200
++++ shadow-4.9/src/check_subid_range.c	2022-01-10 10:45:52.205132958 +0100
+@@ -16,9 +16,9 @@
+ #include "prototypes.h"
+ #include "subordinateio.h"
+ #include "idmapping.h"
++#include "shadowlog.h"
+ 
+ const char *Prog;
+-FILE *shadow_logfd = NULL;
+ 
+ int main(int argc, char **argv)
+ {
+@@ -26,7 +26,8 @@ int main(int argc, char **argv)
+ 	unsigned long start, count;
+ 	bool check_uids;
+ 	Prog = Basename (argv[0]);
+-	shadow_logfd = stderr;
++	log_set_progname(Prog);
++	log_set_logfd(stderr);
+ 
+ 	if (argc != 5)
+ 		exit(1);
+diff -up shadow-4.9/src/chfn.c.debug1 shadow-4.9/src/chfn.c
+--- shadow-4.9/src/chfn.c.debug1	2021-07-22 23:55:35.000000000 +0200
++++ shadow-4.9/src/chfn.c	2022-01-10 10:45:52.205132958 +0100
+@@ -52,12 +52,12 @@
+ #include "pwio.h"
+ /*@-exitarg@*/
+ #include "exitcodes.h"
++#include "shadowlog.h"
+ 
+ /*
+  * Global variables.
+  */
+ const char *Prog;
+-FILE *shadow_logfd = NULL;
+ static char fullnm[BUFSIZ];
+ static char roomno[BUFSIZ];
+ static char workph[BUFSIZ];
+@@ -640,7 +640,8 @@ int main (int argc, char **argv)
+ 	 * prefix to most error messages.
+ 	 */
+ 	Prog = Basename (argv[0]);
+-	shadow_logfd = stderr;
++	log_set_progname(Prog);
++	log_set_logfd(stderr);
+ 
+ 	sanitize_env ();
+ 	(void) setlocale (LC_ALL, "");
+diff -up shadow-4.9/src/chgpasswd.c.debug1 shadow-4.9/src/chgpasswd.c
+--- shadow-4.9/src/chgpasswd.c.debug1	2022-01-10 10:45:52.188132837 +0100
++++ shadow-4.9/src/chgpasswd.c	2022-01-10 10:45:52.205132958 +0100
+@@ -61,12 +61,12 @@
+ #endif
+ /*@-exitarg@*/
+ #include "exitcodes.h"
++#include "shadowlog.h"
+ 
+ /*
+  * Global variables
+  */
+ const char *Prog;
+-FILE *shadow_logfd = NULL;
+ static bool eflg   = false;
+ static bool md5flg = false;
+ #if defined(USE_SHA_CRYPT) || defined(USE_BCRYPT) || defined(USE_YESCRYPT)
+@@ -506,7 +506,8 @@ int main (int argc, char **argv)
+ 	int line = 0;
+ 
+ 	Prog = Basename (argv[0]);
+-	shadow_logfd = stderr;
++	log_set_progname(Prog);
++	log_set_logfd(stderr);
+ 
+ 	(void) setlocale (LC_ALL, "");
+ 	(void) bindtextdomain (PACKAGE, LOCALEDIR);
+diff -up shadow-4.9/src/chpasswd.c.debug1 shadow-4.9/src/chpasswd.c
+--- shadow-4.9/src/chpasswd.c.debug1	2022-01-10 10:45:52.188132837 +0100
++++ shadow-4.9/src/chpasswd.c	2022-01-10 10:45:52.205132958 +0100
+@@ -58,12 +58,12 @@
+ #include "shadowio.h"
+ /*@-exitarg@*/
+ #include "exitcodes.h"
++#include "shadowlog.h"
+ 
+ /*
+  * Global variables
+  */
+ const char *Prog;
+-FILE *shadow_logfd = NULL;
+ static bool eflg   = false;
+ static bool md5flg = false;
+ #if defined(USE_SHA_CRYPT) || defined(USE_BCRYPT) || defined(USE_YESCRYPT)
+@@ -494,7 +494,8 @@ int main (int argc, char **argv)
+ 	int line = 0;
+ 
+ 	Prog = Basename (argv[0]);
+-	shadow_logfd = stderr;
++	log_set_progname(Prog);
++	log_set_logfd(stderr);
+ 
+ 	(void) setlocale (LC_ALL, "");
+ 	(void) bindtextdomain (PACKAGE, LOCALEDIR);
+diff -up shadow-4.9/src/chsh.c.debug1 shadow-4.9/src/chsh.c
+--- shadow-4.9/src/chsh.c.debug1	2021-07-22 23:55:35.000000000 +0200
++++ shadow-4.9/src/chsh.c	2022-01-10 10:45:52.205132958 +0100
+@@ -51,6 +51,7 @@
+ #endif
+ /*@-exitarg@*/
+ #include "exitcodes.h"
++#include "shadowlog.h"
+ 
+ #ifndef SHELLS_FILE
+ #define SHELLS_FILE "/etc/shells"
+@@ -59,7 +60,6 @@
+  * Global variables
+  */
+ const char *Prog;		/* Program name */
+-FILE *shadow_logfd = NULL;
+ static bool amroot;		/* Real UID is root */
+ static char loginsh[BUFSIZ];	/* Name of new login shell */
+ /* command line options */
+@@ -442,7 +442,8 @@ int main (int argc, char **argv)
+ 	 * most error messages.
+ 	 */
+ 	Prog = Basename (argv[0]);
+-	shadow_logfd = stderr;
++	log_set_progname(Prog);
++	log_set_logfd(stderr);
+ 
+ 	(void) setlocale (LC_ALL, "");
+ 	(void) bindtextdomain (PACKAGE, LOCALEDIR);
+diff -up shadow-4.9/src/expiry.c.debug1 shadow-4.9/src/expiry.c
+--- shadow-4.9/src/expiry.c.debug1	2021-07-22 23:55:35.000000000 +0200
++++ shadow-4.9/src/expiry.c	2022-01-10 10:45:52.205132958 +0100
+@@ -43,10 +43,10 @@
+ #include "prototypes.h"
+ /*@-exitarg@*/
+ #include "exitcodes.h"
++#include "shadowlog.h"
+ 
+ /* Global variables */
+ const char *Prog;
+-FILE *shadow_logfd = NULL;
+ static bool cflg = false;
+ 
+ /* local function prototypes */
+@@ -145,7 +145,8 @@ int main (int argc, char **argv)
+ 	struct spwd *spwd;
+ 
+ 	Prog = Basename (argv[0]);
+-	shadow_logfd = stderr;
++	log_set_progname(Prog);
++	log_set_logfd(stderr);
+ 
+ 	sanitize_env ();
+ 
+diff -up shadow-4.9/src/faillog.c.debug1 shadow-4.9/src/faillog.c
+--- shadow-4.9/src/faillog.c.debug1	2021-07-22 23:55:35.000000000 +0200
++++ shadow-4.9/src/faillog.c	2022-01-10 10:45:52.205132958 +0100
+@@ -46,6 +46,7 @@
+ #include "prototypes.h"
+ /*@-exitarg@*/
+ #include "exitcodes.h"
++#include "shadowlog.h"
+ 
+ /* local function prototypes */
+ static /*@noreturn@*/void usage (int status);
+@@ -62,7 +63,6 @@ static void reset (void);
+  * Global variables
+  */
+ const char *Prog;		/* Program name */
+-FILE *shadow_logfd = NULL;
+ static FILE *fail;		/* failure file stream */
+ static time_t seconds;		/* that number of days in seconds */
+ static unsigned long umin;	/* if uflg and has_umin, only display users with uid >= umin */
+@@ -574,7 +574,8 @@ int main (int argc, char **argv)
+ 	 * most error messages.
+ 	 */
+ 	Prog = Basename (argv[0]);
+-	shadow_logfd = stderr;
++	log_set_progname(Prog);
++	log_set_logfd(stderr);
+ 
+ 	(void) setlocale (LC_ALL, "");
+ 	(void) bindtextdomain (PACKAGE, LOCALEDIR);
+diff -up shadow-4.9/src/free_subid_range.c.debug1 shadow-4.9/src/free_subid_range.c
+--- shadow-4.9/src/free_subid_range.c.debug1	2021-07-22 23:55:35.000000000 +0200
++++ shadow-4.9/src/free_subid_range.c	2022-01-10 10:45:52.205132958 +0100
+@@ -3,11 +3,11 @@
+ #include "subid.h"
+ #include "stdlib.h"
+ #include "prototypes.h"
++#include "shadowlog.h"
+ 
+ /* Test program for the subid freeing routine */
+ 
+ const char *Prog;
+-FILE *shadow_logfd = NULL;
+ 
+ void usage(void)
+ {
+@@ -24,7 +24,8 @@ int main(int argc, char *argv[])
+ 	bool group = false;   // get subuids by default
+ 
+ 	Prog = Basename (argv[0]);
+-	shadow_logfd = stderr;
++	log_set_progname(Prog);
++	log_set_logfd(stderr);
+ 	while ((c = getopt(argc, argv, "g")) != EOF) {
+ 		switch(c) {
+ 		case 'g': group = true; break;
+diff -up shadow-4.9/src/get_subid_owners.c.debug1 shadow-4.9/src/get_subid_owners.c
+--- shadow-4.9/src/get_subid_owners.c.debug1	2021-07-22 23:55:35.000000000 +0200
++++ shadow-4.9/src/get_subid_owners.c	2022-01-10 10:45:52.205132958 +0100
+@@ -2,9 +2,9 @@
+ #include "subid.h"
+ #include "stdlib.h"
+ #include "prototypes.h"
++#include "shadowlog.h"
+ 
+ const char *Prog;
+-FILE *shadow_logfd = NULL;
+ 
+ void usage(void)
+ {
+@@ -20,7 +20,8 @@ int main(int argc, char *argv[])
+ 	uid_t *uids;
+ 
+ 	Prog = Basename (argv[0]);
+-	shadow_logfd = stderr;
++	log_set_progname(Prog);
++	log_set_logfd(stderr);
+ 	if (argc < 2) {
+ 		usage();
+ 	}
+diff -up shadow-4.9/src/getsubids.c.debug1 shadow-4.9/src/getsubids.c
+--- shadow-4.9/src/getsubids.c.debug1	2022-01-10 10:45:52.200132922 +0100
++++ shadow-4.9/src/getsubids.c	2022-01-10 10:45:52.205132958 +0100
+@@ -3,9 +3,9 @@
+ #include <stdlib.h>
+ #include "subid.h"
+ #include "prototypes.h"
++#include "shadowlog.h"
+ 
+ const char *Prog;
+-FILE *shadow_logfd = NULL;
+ 
+ void usage(void)
+ {
+@@ -22,7 +22,8 @@ int main(int argc, char *argv[])
+ 	const char *owner;
+ 
+ 	Prog = Basename (argv[0]);
+-	shadow_logfd = stderr;
++	log_set_progname(Prog);
++	log_set_logfd(stderr);
+ 	if (argc < 2)
+ 		usage();
+ 	owner = argv[1];
+diff -up shadow-4.9/src/gpasswd.c.debug1 shadow-4.9/src/gpasswd.c
+--- shadow-4.9/src/gpasswd.c.debug1	2022-01-10 10:45:52.184132808 +0100
++++ shadow-4.9/src/gpasswd.c	2022-01-10 10:45:52.205132958 +0100
+@@ -53,12 +53,12 @@
+ /*@-exitarg@*/
+ #include "exitcodes.h"
+ 
++#include "shadowlog.h"
+ /*
+  * Global variables
+  */
+ /* The name of this command, as it is invoked */
+ const char *Prog;
+-FILE *shadow_logfd = NULL;
+ 
+ #ifdef SHADOWGRP
+ /* Indicate if shadow groups are enabled on the system
+@@ -927,7 +927,8 @@ int main (int argc, char **argv)
+ 	 */
+ 	bywho = getuid ();
+ 	Prog = Basename (argv[0]);
+-	shadow_logfd = stderr;
++	log_set_progname(Prog);
++	log_set_logfd(stderr);
+ 
+ 	OPENLOG ("gpasswd");
+ 	setbuf (stdout, NULL);
+diff -up shadow-4.9/src/groupadd.c.debug1 shadow-4.9/src/groupadd.c
+--- shadow-4.9/src/groupadd.c.debug1	2022-01-10 10:45:52.184132808 +0100
++++ shadow-4.9/src/groupadd.c	2022-01-10 10:45:52.205132958 +0100
+@@ -56,6 +56,7 @@
+ #ifdef	SHADOWGRP
+ #include "sgroupio.h"
+ #endif
++#include "shadowlog.h"
+ 
+ /*
+  * exit status values
+@@ -72,7 +73,6 @@
+  * Global variables
+  */
+ const char *Prog;
+-FILE *shadow_logfd = NULL;
+ 
+ static /*@null@*/char *group_name;
+ static gid_t group_id;
+@@ -602,7 +602,8 @@ int main (int argc, char **argv)
+ 	 * Get my name so that I can use it to report errors.
+ 	 */
+ 	Prog = Basename (argv[0]);
+-	shadow_logfd = stderr;
++	log_set_progname(Prog);
++	log_set_logfd(stderr);
+ 
+ 	(void) setlocale (LC_ALL, "");
+ 	(void) bindtextdomain (PACKAGE, LOCALEDIR);
+diff -up shadow-4.9/src/groupdel.c.debug1 shadow-4.9/src/groupdel.c
+--- shadow-4.9/src/groupdel.c.debug1	2022-01-10 10:45:52.185132815 +0100
++++ shadow-4.9/src/groupdel.c	2022-01-10 10:45:52.205132958 +0100
+@@ -54,11 +54,11 @@
+ #ifdef	SHADOWGRP
+ #include "sgroupio.h"
+ #endif
++#include "shadowlog.h"
+ /*
+  * Global variables
+  */
+ const char *Prog;
+-FILE *shadow_logfd = NULL;
+ 
+ static char *group_name;
+ static gid_t group_id = -1;
+@@ -379,7 +379,8 @@ int main (int argc, char **argv)
+ 	 * Get my name so that I can use it to report errors.
+ 	 */
+ 	Prog = Basename (argv[0]);
+-	shadow_logfd = stderr;
++	log_set_progname(Prog);
++	log_set_logfd(stderr);
+ 
+ 	(void) setlocale (LC_ALL, "");
+ 	(void) bindtextdomain (PACKAGE, LOCALEDIR);
+diff -up shadow-4.9/src/groupmems.c.debug1 shadow-4.9/src/groupmems.c
+--- shadow-4.9/src/groupmems.c.debug1	2021-07-22 23:55:35.000000000 +0200
++++ shadow-4.9/src/groupmems.c	2022-01-10 10:45:52.206132965 +0100
+@@ -47,6 +47,7 @@
+ #ifdef SHADOWGRP
+ #include "sgroupio.h"
+ #endif
++#include "shadowlog.h"
+ 
+ /* Exit Status Values */
+ /*@-exitarg@*/
+@@ -65,7 +66,6 @@
+  * Global variables
+  */
+ const char *Prog;
+-FILE *shadow_logfd = NULL;
+ 
+ static char *adduser = NULL;
+ static char *deluser = NULL;
+@@ -596,7 +596,8 @@ int main (int argc, char **argv)
+ 	 * Get my name so that I can use it to report errors.
+ 	 */
+ 	Prog = Basename (argv[0]);
+-	shadow_logfd = stderr;
++	log_set_progname(Prog);
++	log_set_logfd(stderr);
+ 
+ 	(void) setlocale (LC_ALL, "");
+ 	(void) bindtextdomain (PACKAGE, LOCALEDIR);
+diff -up shadow-4.9/src/groupmod.c.debug1 shadow-4.9/src/groupmod.c
+--- shadow-4.9/src/groupmod.c.debug1	2022-01-10 10:45:52.185132815 +0100
++++ shadow-4.9/src/groupmod.c	2022-01-10 10:45:52.206132965 +0100
+@@ -56,6 +56,7 @@
+ #ifdef	SHADOWGRP
+ #include "sgroupio.h"
+ #endif
++#include "shadowlog.h"
+ /*
+  * exit status values
+  */
+@@ -76,7 +77,6 @@
+  * Global variables
+  */
+ const char *Prog;
+-FILE *shadow_logfd = NULL;
+ 
+ #ifdef	SHADOWGRP
+ static bool is_shadow_grp;
+@@ -840,7 +840,8 @@ int main (int argc, char **argv)
+ 	 * Get my name so that I can use it to report errors.
+ 	 */
+ 	Prog = Basename (argv[0]);
+-	shadow_logfd = stderr;
++	log_set_progname(Prog);
++	log_set_logfd(stderr);
+ 
+ 	(void) setlocale (LC_ALL, "");
+ 	(void) bindtextdomain (PACKAGE, LOCALEDIR);
+diff -up shadow-4.9/src/groups.c.debug1 shadow-4.9/src/groups.c
+--- shadow-4.9/src/groups.c.debug1	2021-07-22 23:55:35.000000000 +0200
++++ shadow-4.9/src/groups.c	2022-01-10 10:45:52.206132965 +0100
+@@ -39,11 +39,11 @@
+ #include <stdio.h>
+ #include "defines.h"
+ #include "prototypes.h"
++#include "shadowlog.h"
+ /*
+  * Global variables
+  */
+ const char *Prog;
+-FILE *shadow_logfd = NULL;
+ 
+ /* local function prototypes */
+ static void print_groups (const char *member);
+@@ -127,7 +127,8 @@ int main (int argc, char **argv)
+ 	 * Get the program name so that error messages can use it.
+ 	 */
+ 	Prog = Basename (argv[0]);
+-	shadow_logfd = stderr;
++	log_set_progname(Prog);
++	log_set_logfd(stderr);
+ 
+ 	if (argc == 1) {
+ 
+diff -up shadow-4.9/src/grpck.c.debug1 shadow-4.9/src/grpck.c
+--- shadow-4.9/src/grpck.c.debug1	2021-07-22 23:55:35.000000000 +0200
++++ shadow-4.9/src/grpck.c	2022-01-10 10:45:52.206132965 +0100
+@@ -45,6 +45,7 @@
+ #include "nscd.h"
+ #include "sssd.h"
+ #include "prototypes.h"
++#include "shadowlog.h"
+ 
+ #ifdef SHADOWGRP
+ #include "sgroupio.h"
+@@ -66,7 +67,6 @@
+  * Global variables
+  */
+ const char *Prog;
+-FILE *shadow_logfd = NULL;
+ 
+ static const char *grp_file = GROUP_FILE;
+ static bool use_system_grp_file = true;
+@@ -841,7 +841,8 @@ int main (int argc, char **argv)
+ 	 * Get my name so that I can use it to report errors.
+ 	 */
+ 	Prog = Basename (argv[0]);
+-	shadow_logfd = stderr;
++	log_set_progname(Prog);
++	log_set_logfd(stderr);
+ 
+ 	(void) setlocale (LC_ALL, "");
+ 	(void) bindtextdomain (PACKAGE, LOCALEDIR);
+diff -up shadow-4.9/src/grpconv.c.debug1 shadow-4.9/src/grpconv.c
+--- shadow-4.9/src/grpconv.c.debug1	2021-07-22 23:55:35.000000000 +0200
++++ shadow-4.9/src/grpconv.c	2022-01-10 10:45:52.206132965 +0100
+@@ -55,11 +55,11 @@
+ #ifdef SHADOWGRP
+ #include "groupio.h"
+ #include "sgroupio.h"
++#include "shadowlog.h"
+ /*
+  * Global variables
+  */
+ const char *Prog;
+-FILE *shadow_logfd = NULL;
+ 
+ static bool gr_locked  = false;
+ static bool sgr_locked = false;
+@@ -147,7 +147,8 @@ int main (int argc, char **argv)
+ 	struct sgrp sgent;
+ 
+ 	Prog = Basename (argv[0]);
+-	shadow_logfd = stderr;
++	log_set_progname(Prog);
++	log_set_logfd(stderr);
+ 
+ 	(void) setlocale (LC_ALL, "");
+ 	(void) bindtextdomain (PACKAGE, LOCALEDIR);
+diff -up shadow-4.9/src/grpunconv.c.debug1 shadow-4.9/src/grpunconv.c
+--- shadow-4.9/src/grpunconv.c.debug1	2021-07-22 23:55:35.000000000 +0200
++++ shadow-4.9/src/grpunconv.c	2022-01-10 10:45:52.206132965 +0100
+@@ -55,11 +55,11 @@
+ #ifdef SHADOWGRP
+ #include "groupio.h"
+ #include "sgroupio.h"
++#include "shadowlog.h"
+ /*
+  * Global variables
+  */
+ const char *Prog;
+-FILE *shadow_logfd = NULL;
+ 
+ static bool gr_locked  = false;
+ static bool sgr_locked = false;
+@@ -146,7 +146,8 @@ int main (int argc, char **argv)
+ 	const struct sgrp *sg;
+ 
+ 	Prog = Basename (argv[0]);
+-	shadow_logfd = stderr;
++	log_set_progname(Prog);
++	log_set_logfd(stderr);
+ 
+ 	(void) setlocale (LC_ALL, "");
+ 	(void) bindtextdomain (PACKAGE, LOCALEDIR);
+diff -up shadow-4.9/src/lastlog.c.debug1 shadow-4.9/src/lastlog.c
+--- shadow-4.9/src/lastlog.c.debug1	2022-01-10 10:45:52.189132844 +0100
++++ shadow-4.9/src/lastlog.c	2022-01-10 10:45:52.206132965 +0100
+@@ -50,6 +50,7 @@
+ #include "getdef.h"
+ /*@-exitarg@*/
+ #include "exitcodes.h"
++#include "shadowlog.h"
+ 
+ /*
+  * Needed for MkLinux DR1/2/2.1 - J.
+@@ -62,7 +63,6 @@
+  * Global variables
+  */
+ const char *Prog;		/* Program name */
+-FILE *shadow_logfd = NULL;
+ static FILE *lastlogfile;	/* lastlog file stream */
+ static unsigned long umin;	/* if uflg and has_umin, only display users with uid >= umin */
+ static bool has_umin = false;
+@@ -322,7 +322,8 @@ int main (int argc, char **argv)
+ 	 * most error messages.
+ 	 */
+ 	Prog = Basename (argv[0]);
+-	shadow_logfd = stderr;
++	log_set_progname(Prog);
++	log_set_logfd(stderr);
+ 
+ 	(void) setlocale (LC_ALL, "");
+ 	(void) bindtextdomain (PACKAGE, LOCALEDIR);
+diff -up shadow-4.9/src/login.c.debug1 shadow-4.9/src/login.c
+--- shadow-4.9/src/login.c.debug1	2021-07-22 23:55:35.000000000 +0200
++++ shadow-4.9/src/login.c	2022-01-10 10:45:52.206132965 +0100
+@@ -53,6 +53,7 @@
+ #include "pwauth.h"
+ /*@-exitarg@*/
+ #include "exitcodes.h"
++#include "shadowlog.h"
+ 
+ #ifdef USE_PAM
+ #include "pam_defs.h"
+@@ -83,7 +84,6 @@ static pam_handle_t *pamh = NULL;
+  * Global variables
+  */
+ const char *Prog;
+-FILE *shadow_logfd = NULL;
+ 
+ static const char *hostname = "";
+ static /*@null@*/ /*@only@*/char *username = NULL;
+@@ -578,7 +578,8 @@ int main (int argc, char **argv)
+ 
+ 	amroot = (getuid () == 0);
+ 	Prog = Basename (argv[0]);
+-	shadow_logfd = stderr;
++	log_set_progname(Prog);
++	log_set_logfd(stderr);
+ 
+ 	if (geteuid() != 0) {
+ 		fprintf (stderr, _("%s: Cannot possibly work without effective root\n"), Prog);
+diff -up shadow-4.9/src/logoutd.c.debug1 shadow-4.9/src/logoutd.c
+--- shadow-4.9/src/logoutd.c.debug1	2021-07-22 23:55:35.000000000 +0200
++++ shadow-4.9/src/logoutd.c	2022-01-10 10:45:52.206132965 +0100
+@@ -40,11 +40,11 @@
+ #include <sys/types.h>
+ #include "defines.h"
+ #include "prototypes.h"
++#include "shadowlog.h"
+ /*
+  * Global variables
+  */
+ const char *Prog;
+-FILE *shadow_logfd = NULL;
+ 
+ #ifndef DEFAULT_HUP_MESG
+ #define DEFAULT_HUP_MESG _("login time exceeded\n\n")
+@@ -188,7 +188,8 @@ int main (int argc, char **argv)
+ 	 * Start syslogging everything
+ 	 */
+ 	Prog = Basename (argv[0]);
+-	shadow_logfd = stderr;
++	log_set_progname(Prog);
++	log_set_logfd(stderr);
+ 
+ 	OPENLOG ("logoutd");
+ 
+diff -up shadow-4.9/src/newgidmap.c.debug1 shadow-4.9/src/newgidmap.c
+--- shadow-4.9/src/newgidmap.c.debug1	2021-07-22 23:55:35.000000000 +0200
++++ shadow-4.9/src/newgidmap.c	2022-01-10 10:45:52.206132965 +0100
+@@ -41,12 +41,12 @@
+ #include "subordinateio.h"
+ #include "getdef.h"
+ #include "idmapping.h"
++#include "shadowlog.h"
+ 
+ /*
+  * Global variables
+  */
+ const char *Prog;
+-FILE *shadow_logfd = NULL;
+ 
+ 
+ static bool verify_range(struct passwd *pw, struct map_range *range, bool *allow_setgroups)
+@@ -177,7 +177,8 @@ int main(int argc, char **argv)
+ 	bool allow_setgroups = false;
+ 
+ 	Prog = Basename (argv[0]);
+-	shadow_logfd = stderr;
++	log_set_progname(Prog);
++	log_set_logfd(stderr);
+ 
+ 	/*
+ 	 * The valid syntax are
+diff -up shadow-4.9/src/newgrp.c.debug1 shadow-4.9/src/newgrp.c
+--- shadow-4.9/src/newgrp.c.debug1	2022-01-10 10:45:52.199132915 +0100
++++ shadow-4.9/src/newgrp.c	2022-01-10 10:45:52.206132965 +0100
+@@ -44,12 +44,12 @@
+ #include "prototypes.h"
+ /*@-exitarg@*/
+ #include "exitcodes.h"
++#include "shadowlog.h"
+ 
+ /*
+  * Global variables
+  */
+ const char *Prog;
+-FILE *shadow_logfd = NULL;
+ 
+ extern char **newenvp;
+ extern char **environ;
+@@ -446,7 +446,8 @@ int main (int argc, char **argv)
+ 	 * don't need to re-exec anything.  -- JWP
+ 	 */
+ 	Prog = Basename (argv[0]);
+-	shadow_logfd = stderr;
++	log_set_progname(Prog);
++	log_set_logfd(stderr);
+ 	is_newgrp = (strcmp (Prog, "newgrp") == 0);
+ 	OPENLOG (is_newgrp ? "newgrp" : "sg");
+ 	argc--;
+diff -up shadow-4.9/src/new_subid_range.c.debug1 shadow-4.9/src/new_subid_range.c
+--- shadow-4.9/src/new_subid_range.c.debug1	2021-07-22 23:55:35.000000000 +0200
++++ shadow-4.9/src/new_subid_range.c	2022-01-10 10:45:52.206132965 +0100
+@@ -3,11 +3,11 @@
+ #include "subid.h"
+ #include "stdlib.h"
+ #include "prototypes.h"
++#include "shadowlog.h"
+ 
+ /* Test program for the subid creation routine */
+ 
+ const char *Prog;
+-FILE *shadow_logfd = NULL;
+ 
+ void usage(void)
+ {
+@@ -27,7 +27,8 @@ int main(int argc, char *argv[])
+ 	bool ok;
+ 
+ 	Prog = Basename (argv[0]);
+-	shadow_logfd = stderr;
++	log_set_progname(Prog);
++	log_set_logfd(stderr);
+ 	while ((c = getopt(argc, argv, "gn")) != EOF) {
+ 		switch(c) {
+ 		case 'n': makenew = true; break;
+diff -up shadow-4.9/src/newuidmap.c.debug1 shadow-4.9/src/newuidmap.c
+--- shadow-4.9/src/newuidmap.c.debug1	2021-07-22 23:55:35.000000000 +0200
++++ shadow-4.9/src/newuidmap.c	2022-01-10 10:45:52.206132965 +0100
+@@ -41,12 +41,12 @@
+ #include "subordinateio.h"
+ #include "getdef.h"
+ #include "idmapping.h"
++#include "shadowlog.h"
+ 
+ /*
+  * Global variables
+  */
+ const char *Prog;
+-FILE *shadow_logfd = NULL;
+ 
+ static bool verify_range(struct passwd *pw, struct map_range *range)
+ {
+@@ -107,7 +107,8 @@ int main(int argc, char **argv)
+ 	int written;
+ 
+ 	Prog = Basename (argv[0]);
+-	shadow_logfd = stderr;
++	log_set_progname(Prog);
++	log_set_logfd(stderr);
+ 
+ 	/*
+ 	 * The valid syntax are
+diff -up shadow-4.9/src/newusers.c.debug1 shadow-4.9/src/newusers.c
+--- shadow-4.9/src/newusers.c.debug1	2021-07-22 23:55:35.000000000 +0200
++++ shadow-4.9/src/newusers.c	2022-01-10 10:45:52.207132972 +0100
+@@ -70,12 +70,12 @@
+ #include "subordinateio.h"
+ #endif				/* ENABLE_SUBIDS */
+ #include "chkname.h"
++#include "shadowlog.h"
+ 
+ /*
+  * Global variables
+  */
+ const char *Prog;
+-FILE *shadow_logfd = NULL;
+ 
+ static bool rflg = false;	/* create a system account */
+ #ifndef USE_PAM
+@@ -1071,7 +1071,8 @@ int main (int argc, char **argv)
+ #endif				/* USE_PAM */
+ 
+ 	Prog = Basename (argv[0]);
+-	shadow_logfd = stderr;
++	log_set_progname(Prog);
++	log_set_logfd(stderr);
+ 
+ 	(void) setlocale (LC_ALL, "");
+ 	(void) bindtextdomain (PACKAGE, LOCALEDIR);
+diff -up shadow-4.9/src/passwd.c.debug1 shadow-4.9/src/passwd.c
+--- shadow-4.9/src/passwd.c.debug1	2022-01-10 10:45:52.189132844 +0100
++++ shadow-4.9/src/passwd.c	2022-01-10 10:45:52.207132972 +0100
+@@ -50,6 +50,7 @@
+ #include "pwauth.h"
+ #include "pwio.h"
+ #include "shadowio.h"
++#include "shadowlog.h"
+ 
+ /*
+  * exit status values
+@@ -66,7 +67,6 @@
+  * Global variables
+  */
+ const char *Prog;		/* Program name */
+-FILE *shadow_logfd = NULL;
+ 
+ static char *name;		/* The name of user whose password is being changed */
+ static char *myname;		/* The current user's name */
+@@ -761,7 +761,8 @@ int main (int argc, char **argv)
+ 	 * most error messages.
+ 	 */
+ 	Prog = Basename (argv[0]);
+-	shadow_logfd = stderr;
++	log_set_progname(Prog);
++	log_set_logfd(stderr);
+ 
+ 	(void) setlocale (LC_ALL, "");
+ 	(void) bindtextdomain (PACKAGE, LOCALEDIR);
+diff -up shadow-4.9/src/pwck.c.debug1 shadow-4.9/src/pwck.c
+--- shadow-4.9/src/pwck.c.debug1	2022-01-10 10:45:52.198132908 +0100
++++ shadow-4.9/src/pwck.c	2022-01-10 10:45:52.207132972 +0100
+@@ -52,6 +52,7 @@
+ #ifdef WITH_TCB
+ #include "tcbfuncs.h"
+ #endif				/* WITH_TCB */
++#include "shadowlog.h"
+ 
+ /*
+  * Exit codes
+@@ -70,7 +71,6 @@
+  * Global variables
+  */
+ const char *Prog;
+-FILE *shadow_logfd = NULL;
+ 
+ static bool use_system_pw_file = true;
+ static bool use_system_spw_file = true;
+@@ -857,7 +857,8 @@ int main (int argc, char **argv)
+ 	 * Get my name so that I can use it to report errors.
+ 	 */
+ 	Prog = Basename (argv[0]);
+-	shadow_logfd = stderr;
++	log_set_progname(Prog);
++	log_set_logfd(stderr);
+ 
+ 	(void) setlocale (LC_ALL, "");
+ 	(void) bindtextdomain (PACKAGE, LOCALEDIR);
+diff -up shadow-4.9/src/pwconv.c.debug1 shadow-4.9/src/pwconv.c
+--- shadow-4.9/src/pwconv.c.debug1	2021-07-22 23:55:35.000000000 +0200
++++ shadow-4.9/src/pwconv.c	2022-01-10 10:45:52.207132972 +0100
+@@ -73,6 +73,7 @@
+ #include "shadowio.h"
+ #include "nscd.h"
+ #include "sssd.h"
++#include "shadowlog.h"
+ 
+ /*
+  * exit status values
+@@ -89,7 +90,6 @@
+  * Global variables
+  */
+ const char *Prog;
+-FILE *shadow_logfd = NULL;
+ 
+ static bool spw_locked = false;
+ static bool pw_locked = false;
+@@ -177,7 +177,8 @@ int main (int argc, char **argv)
+ 	struct spwd spent;
+ 
+ 	Prog = Basename (argv[0]);
+-	shadow_logfd = stderr;
++	log_set_progname(Prog);
++	log_set_logfd(stderr);
+ 
+ 	(void) setlocale (LC_ALL, "");
+ 	(void) bindtextdomain (PACKAGE, LOCALEDIR);
+diff -up shadow-4.9/src/pwunconv.c.debug1 shadow-4.9/src/pwunconv.c
+--- shadow-4.9/src/pwunconv.c.debug1	2021-07-22 23:55:35.000000000 +0200
++++ shadow-4.9/src/pwunconv.c	2022-01-10 10:45:52.207132972 +0100
+@@ -48,12 +48,12 @@
+ #include "shadowio.h"
+ /*@-exitarg@*/
+ #include "exitcodes.h"
++#include "shadowlog.h"
+ 
+ /*
+  * Global variables
+  */
+ const char *Prog;
+-FILE *shadow_logfd = NULL;
+ 
+ static bool spw_locked = false;
+ static bool pw_locked = false;
+@@ -138,7 +138,8 @@ int main (int argc, char **argv)
+ 	const struct spwd *spwd;
+ 
+ 	Prog = Basename (argv[0]);
+-	shadow_logfd = stderr;
++	log_set_progname(Prog);
++	log_set_logfd(stderr);
+ 
+ 	(void) setlocale (LC_ALL, "");
+ 	(void) bindtextdomain (PACKAGE, LOCALEDIR);
+diff -up shadow-4.9/src/su.c.debug1 shadow-4.9/src/su.c
+--- shadow-4.9/src/su.c.debug1	2021-07-22 23:55:35.000000000 +0200
++++ shadow-4.9/src/su.c	2022-01-10 10:45:52.207132972 +0100
+@@ -77,12 +77,12 @@
+ #endif				/* USE_PAM */
+ /*@-exitarg@*/
+ #include "exitcodes.h"
++#include "shadowlog.h"
+ 
+ /*
+  * Global variables
+  */
+ const char *Prog;
+-FILE *shadow_logfd = NULL;
+ static /*@observer@*/const char *caller_tty = NULL;	/* Name of tty SU is run from */
+ static bool caller_is_root = false;
+ static uid_t caller_uid;
+@@ -717,7 +717,8 @@ static void save_caller_context (char **
+ 	 * most error messages.
+ 	 */
+ 	Prog = Basename (argv[0]);
+-	shadow_logfd = stderr;
++	log_set_progname(Prog);
++	log_set_logfd(stderr);
+ 
+ 	caller_uid = getuid ();
+ 	caller_is_root = (caller_uid == 0);
+diff -up shadow-4.9/src/sulogin.c.debug1 shadow-4.9/src/sulogin.c
+--- shadow-4.9/src/sulogin.c.debug1	2021-07-22 23:55:35.000000000 +0200
++++ shadow-4.9/src/sulogin.c	2022-01-10 10:45:52.207132972 +0100
+@@ -45,12 +45,12 @@
+ #include "pwauth.h"
+ /*@-exitarg@*/
+ #include "exitcodes.h"
++#include "shadowlog.h"
+ 
+ /*
+  * Global variables
+  */
+ const char *Prog;
+-FILE *shadow_logfd = NULL;
+ 
+ static char name[BUFSIZ];
+ static char pass[BUFSIZ];
+@@ -107,7 +107,8 @@ static RETSIGTYPE catch_signals (unused
+ #endif
+ 
+ 	Prog = Basename (argv[0]);
+-	shadow_logfd = stderr;
++	log_set_progname(Prog);
++	log_set_logfd(stderr);
+ 	(void) setlocale (LC_ALL, "");
+ 	(void) bindtextdomain (PACKAGE, LOCALEDIR);
+ 	(void) textdomain (PACKAGE);
+diff -up shadow-4.9/src/useradd.c.debug1 shadow-4.9/src/useradd.c
+--- shadow-4.9/src/useradd.c.debug1	2022-01-10 10:45:52.197132901 +0100
++++ shadow-4.9/src/useradd.c	2022-01-10 10:45:52.207132972 +0100
+@@ -78,6 +78,7 @@
+ #ifdef WITH_TCB
+ #include "tcbfuncs.h"
+ #endif
++#include "shadowlog.h"
+ 
+ #ifndef SKEL_DIR
+ #define SKEL_DIR "/etc/skel"
+@@ -96,7 +97,6 @@
+  * Global variables
+  */
+ const char *Prog;
+-FILE *shadow_logfd = NULL;
+ 
+ /*
+  * These defaults are used if there is no defaults file.
+@@ -2359,7 +2359,8 @@ int main (int argc, char **argv)
+ 	 * Get my name so that I can use it to report errors.
+ 	 */
+ 	Prog = Basename (argv[0]);
+-	shadow_logfd = stderr;
++	log_set_progname(Prog);
++	log_set_logfd(stderr);
+ 
+ 	(void) setlocale (LC_ALL, "");
+ 	(void) bindtextdomain (PACKAGE, LOCALEDIR);
+diff -up shadow-4.9/src/userdel.c.debug1 shadow-4.9/src/userdel.c
+--- shadow-4.9/src/userdel.c.debug1	2022-01-10 10:45:52.186132823 +0100
++++ shadow-4.9/src/userdel.c	2022-01-10 10:45:52.208132979 +0100
+@@ -72,6 +72,7 @@
+ #ifdef ENABLE_SUBIDS
+ #include "subordinateio.h"
+ #endif				/* ENABLE_SUBIDS */
++#include "shadowlog.h"
+ 
+ /*
+  * exit status values
+@@ -91,7 +92,6 @@
+  * Global variables
+  */
+ const char *Prog;
+-FILE *shadow_logfd = NULL;
+ 
+ static char *user_name;
+ static uid_t user_id;
+@@ -944,7 +944,8 @@ int main (int argc, char **argv)
+ 	 * Get my name so that I can use it to report errors.
+ 	 */
+ 	Prog = Basename (argv[0]);
+-	shadow_logfd = stderr;
++	log_set_progname(Prog);
++	log_set_logfd(stderr);
+ 	(void) setlocale (LC_ALL, "");
+ 	(void) bindtextdomain (PACKAGE, LOCALEDIR);
+ 	(void) textdomain (PACKAGE);
+diff -up shadow-4.9/src/usermod.c.debug1 shadow-4.9/src/usermod.c
+--- shadow-4.9/src/usermod.c.debug1	2022-01-10 10:45:52.193132872 +0100
++++ shadow-4.9/src/usermod.c	2022-01-10 10:45:52.208132979 +0100
+@@ -74,6 +74,7 @@
+ #ifdef WITH_TCB
+ #include "tcbfuncs.h"
+ #endif
++#include "shadowlog.h"
+ 
+ /*
+  * exit status values
+@@ -105,7 +106,6 @@
+  * Global variables
+  */
+ const char *Prog;
+-FILE *shadow_logfd = NULL;
+ 
+ static char *user_name;
+ static char *user_newname;
+@@ -2172,7 +2172,8 @@ int main (int argc, char **argv)
+ 	 * Get my name so that I can use it to report errors.
+ 	 */
+ 	Prog = Basename (argv[0]);
+-	shadow_logfd = stderr;
++	log_set_progname(Prog);
++	log_set_logfd(stderr);
+ 
+ 	(void) setlocale (LC_ALL, "");
+ 	(void) bindtextdomain (PACKAGE, LOCALEDIR);
+diff -up shadow-4.9/src/vipw.c.debug1 shadow-4.9/src/vipw.c
+--- shadow-4.9/src/vipw.c.debug1	2021-07-22 23:55:35.000000000 +0200
++++ shadow-4.9/src/vipw.c	2022-01-10 10:45:52.208132979 +0100
+@@ -53,6 +53,7 @@
+ #include <tcb.h>
+ #include "tcbfuncs.h"
+ #endif				/* WITH_TCB */
++#include "shadowlog.h"
+ 
+ #define MSG_WARN_EDIT_OTHER_FILE _( \
+ 	"You have modified %s.\n"\
+@@ -63,7 +64,6 @@
+  * Global variables
+  */
+ const char *Prog;
+-FILE *shadow_logfd = NULL;
+ 
+ static const char *filename, *fileeditname;
+ static bool filelocked = false;
+@@ -482,7 +482,8 @@ int main (int argc, char **argv)
+ 	bool do_vipw;
+ 
+ 	Prog = Basename (argv[0]);
+-	shadow_logfd = stderr;
++	log_set_progname(Prog);
++	log_set_logfd(stderr);
+ 
+ 	(void) setlocale (LC_ALL, "");
+ 	(void) bindtextdomain (PACKAGE, LOCALEDIR);
