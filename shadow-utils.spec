@@ -1,12 +1,12 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
-Version: 4.9
-Release: 10%{?dist}
+Version: 4.11.1
+Release: 1%{?dist}
 Epoch: 2
 License: BSD and GPLv2+
 URL: https://github.com/shadow-maint/shadow
-Source0: https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz
-Source1: https://github.com/shadow-maint/shadow/releases/download/%{version}/shadow-%{version}.tar.xz.asc
+Source0: https://github.com/shadow-maint/shadow/releases/download/v%{version}/shadow-%{version}.tar.xz
+Source1: https://github.com/shadow-maint/shadow/releases/download/v%{version}/shadow-%{version}.tar.xz.asc
 Source2: shadow-utils.useradd
 Source3: shadow-utils.login.defs
 Source4: shadow-bsd.txt
@@ -18,11 +18,9 @@ Source6: shadow-utils.HOME_MODE.xml
 
 ### Patches ###
 # Misc small changes - most probably non-upstreamable
-Patch0: shadow-4.9-redhat.patch
+Patch0: shadow-4.11.1-redhat.patch
 # Be more lenient with acceptable user/group names - non upstreamable
 Patch1: shadow-4.8-goodname.patch
-# https://github.com/shadow-maint/shadow/commit/09c752f00f9dfc610f66d68be38c9e5be8ca7f15
-Patch2: shadow-4.9-move-create-home.patch
 # SElinux related - upstreamability unknown
 Patch3: shadow-4.9-default-range.patch
 # Misc manual page changes - non-upstreamable
@@ -32,50 +30,21 @@ Patch5: shadow-4.2.1-date-parsing.patch
 # Additional error message - could be upstreamed
 Patch6: shadow-4.6-move-home.patch
 # Audit message changes - upstreamability unknown
-Patch7: shadow-4.9-audit-update.patch
+Patch7: shadow-4.11.1-audit-update.patch
 # Changes related to password unlocking - could be upstreamed
 Patch8: shadow-4.5-usermod-unlock.patch
 # Additional SElinux related changes - upstreamability unknown
 Patch9: shadow-4.8-selinux-perms.patch
-# Handle NULL return from *time funcs - could be upstreamed
-Patch10: shadow-4.9-null-tm.patch
+# Handle NULL return from *time funcs - upstreamable
+Patch10: shadow-4.11.1-null-tm.patch
 # Handle /etc/passwd corruption - could be upstreamed
 Patch11: shadow-4.8-long-entry.patch
 # Limit uid/gid allocation to non-zero - could be upstreamed
 Patch12: shadow-4.6-sysugid-min-limit.patch
 # Ignore LOGIN_PLAIN_PROMPT in login.defs - upstreamability unknown
 Patch13: shadow-4.8-ignore-login-prompt.patch
-# https://github.com/shadow-maint/shadow/commit/c6847011e8b656adacd9a0d2a78418cad0de34cb
-Patch14: shadow-4.9-newuidmap-libeconf-dependency.patch
-# https://github.com/shadow-maint/shadow/commit/e481437ab9ebe9a8bf8fbaabe986d42b2f765991
-Patch15: shadow-4.9-usermod-allow-all-group-types.patch
-# https://github.com/shadow-maint/shadow/commit/9dd720a28578eef5be8171697aae0906e4c53249
-Patch16: shadow-4.9-useradd-avoid-generating-empty-subid-range.patch
-# https://github.com/shadow-maint/shadow/commit/234e8fa7b134d1ebabfdad980a3ae5b63c046c62
-Patch17: shadow-4.9-libmisc-fix-default-value-in-SHA_get_salt_rounds.patch
-# https://github.com/shadow-maint/shadow/commit/234af5cf67fc1a3ba99fc246ba65869a3c416545
-Patch18: shadow-4.9-semanage-close-the-selabel-handle.patch
-# https://github.com/shadow-maint/shadow/commit/4624e9fca1b02b64e25e8b2280a0186182ab73ba
-Patch19: shadow-4.9-revert-useradd-fix-memleak.patch
-# https://github.com/shadow-maint/shadow/commit/06eb4e4d76ac7f1ac86e68a89b2dc9be7c7323a2
-Patch20: shadow-4.9-useradd-copy-tree-argument.patch
-# https://github.com/shadow-maint/shadow/commit/d8e54618feea201987c1f3cb402ed50d1d8b604f
-Patch21: shadow-4.9-pwck-fix-segfault-when-calling-fprintf.patch
-# https://github.com/shadow-maint/shadow/commit/497e90751bc0d95cc998b0f06305040563903948
-Patch22: shadow-4.9-newgrp-fix-segmentation-fault.patch
-# https://github.com/shadow-maint/shadow/commit/3b6ccf642c6bb2b7db087f09ee563ae9318af734
-Patch23: shadow-4.9-getsubids.patch
-# https://github.com/shadow-maint/shadow/commit/a757b458ffb4fb9a40bcbb4f7869449431c67f83
-Patch24: shadow-4.9-groupdel-fix-sigsegv-when-passwd-does-not-exist.patch
-# https://github.com/shadow-maint/shadow/commit/79157cbad87f42cdc2068d72e798488572c68bb2
-Patch25: shadow-4.9-make-shadow-logfd-and-prog-not-extern.patch
-# https://github.com/shadow-maint/shadow/commit/0e6fe5e728a45baff3977d73e81a27adb6ae30c6
-Patch26: shadow-4.9-rename-prog-to-shadow-progname.patch
-# https://github.com/shadow-maint/shadow/commit/2b0bdef6f9a18382e92b0fb6d893c4339123ffac
-# https://github.com/shadow-maint/shadow/commit/9750fd681919ed558a9b044248a284d567cddf1a
-Patch27: shadow-4.9-shadow-progname-default-init.patch
 # https://github.com/shadow-maint/shadow/commit/e101219ad71de11da3fdd1b3ec2620fd1a97b92c
-Patch28: shadow-4.9-nss-get-shadow-logfd-with-log-get-logfd.patch
+Patch14: shadow-4.9-nss-get-shadow-logfd-with-log-get-logfd.patch
 
 ### Dependencies ###
 Requires: audit-libs >= 1.6.5
@@ -129,6 +98,7 @@ Utility library that provides a way to manage subid ranges.
 %package subid-devel
 Summary: Development package for shadow-utils-subid
 License: BSD and GPLv2+
+Requires: shadow-utils-subid = %{version}-%{release}
 
 %description subid-devel
 Development files for shadow-utils-subid.
@@ -137,7 +107,6 @@ Development files for shadow-utils-subid.
 %setup -q -n shadow-%{version}
 %patch0 -p1 -b .redhat
 %patch1 -p1 -b .goodname
-%patch2 -p1 -b .move-create-home
 %patch3 -p1 -b .default-range
 %patch4 -p1 -b .manfix
 %patch5 -p1 -b .date-parsing
@@ -149,21 +118,7 @@ Development files for shadow-utils-subid.
 %patch11 -p1 -b .long-entry
 %patch12 -p1 -b .sysugid-min-limit
 %patch13 -p1 -b .login-prompt
-%patch14 -p1 -b .newuidmap-libeconf-dependency
-%patch15 -p1 -b .usermod-allow-all-group-types
-%patch16 -p1 -b .useradd-avoid-generating-empty-subid-range
-%patch17 -p1 -b .libmisc-fix-default-value-in-SHA_get_salt_rounds
-%patch18 -p1 -b .semanage-close-the-selabel-handle
-%patch19 -p1 -b .revert-useradd-fix-memleak
-%patch20 -p1 -b .useradd-copy-tree-argument
-%patch21 -p1 -b .pwck-fix-segfault-when-calling-fprintf
-%patch22 -p1 -b .newgrp-fix-segmentation-fault
-%patch23 -p1 -b .getsubids
-%patch24 -p1 -b .groupdel-fix-sigsegv-when-passwd-does-not-exist
-%patch25 -p1 -b .make-shadow-logfd-and-prog-not-extern
-%patch26 -p1 -b .rename-prog-to-shadow-progname
-%patch27 -p1 -b .shadow-progname-default-init
-%patch28 -p1 -b .nss-get-shadow-logfd-with-log-get-logfd
+%patch14 -p1 -b .nss-get-shadow-logfd-with-log-get-logfd
 
 iconv -f ISO88591 -t utf-8  doc/HOWTO > doc/HOWTO.utf8
 cp -f doc/HOWTO.utf8 doc/HOWTO
@@ -275,8 +230,9 @@ echo $(ls)
 mkdir -p $RPM_BUILD_ROOT/%{includesubiddir}
 install -m 644 libsubid/subid.h $RPM_BUILD_ROOT/%{includesubiddir}/
 
-# Remove .la files created by libsubid
+# Remove .la and .a files created by libsubid
 rm -f $RPM_BUILD_ROOT/%{_libdir}/libsubid.la
+rm -f $RPM_BUILD_ROOT/%{_libdir}/libsubid.a
 
 %files -f shadow.lang
 %doc NEWS doc/HOWTO README
@@ -336,6 +292,11 @@ rm -f $RPM_BUILD_ROOT/%{_libdir}/libsubid.la
 %{_libdir}/libsubid.so
 
 %changelog
+* Tue Jan 25 2022 Iker Pedrosa <ipedrosa@redhat.com> - 2:4.11.1-1
+- Rebase to version 4.11.1 (#2034038)
+- Fix release sources
+- Add explicit subid requirement for subid-devel
+
 * Sat Jan 22 2022 Fedora Release Engineering <releng@fedoraproject.org> - 2:4.9-10
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
 
