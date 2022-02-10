@@ -1,7 +1,7 @@
 Summary: Utilities for managing accounts and shadow password files
 Name: shadow-utils
 Version: 4.11.1
-Release: 1%{?dist}
+Release: 2%{?dist}
 Epoch: 2
 License: BSD and GPLv2+
 URL: https://github.com/shadow-maint/shadow
@@ -98,7 +98,7 @@ Utility library that provides a way to manage subid ranges.
 %package subid-devel
 Summary: Development package for shadow-utils-subid
 License: BSD and GPLv2+
-Requires: shadow-utils-subid = %{version}-%{release}
+Requires: shadow-utils-subid = %{epoch}:%{version}-%{release}
 
 %description subid-devel
 Development files for shadow-utils-subid.
@@ -292,6 +292,9 @@ rm -f $RPM_BUILD_ROOT/%{_libdir}/libsubid.a
 %{_libdir}/libsubid.so
 
 %changelog
+* Thu Feb 10 2022 Iker Pedrosa <ipedrosa@redhat.com> - 2:4.11.1-2
+- Fix explicit subid requirement for subid-devel
+
 * Tue Jan 25 2022 Iker Pedrosa <ipedrosa@redhat.com> - 2:4.11.1-1
 - Rebase to version 4.11.1 (#2034038)
 - Fix release sources
